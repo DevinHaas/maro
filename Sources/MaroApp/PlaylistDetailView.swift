@@ -130,7 +130,12 @@ private struct PlaylistCoverHeader: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             color
-            if let artwork { Image(nsImage: artwork).resizable().scaledToFill() }
+            if let artwork {
+                GeometryReader { bounds in
+                    Image(nsImage: artwork).resizable().scaledToFill()
+                        .frame(width: bounds.size.width, height: bounds.size.height).clipped()
+                }
+            }
             else { Image(systemName: "music.note.list").font(.system(size: 100)).foregroundStyle(.white.opacity(0.10)).frame(maxWidth: .infinity) }
             LinearGradient(colors: [.black.opacity(0.05), .black.opacity(0.75)], startPoint: .top, endPoint: .bottom)
             LinearGradient(colors: [.black.opacity(0.40), .clear], startPoint: .leading, endPoint: .trailing)
