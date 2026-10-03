@@ -34,7 +34,6 @@ public final class MaroController {
     private let engine: PlaybackEngine
     private let store: StateStore
     private let sourceBuild: String
-    private let searchSource: @Sendable (String) async throws -> [VideoSummary]
     private var sourceLifetime: YouTubeClient?
     private var sourceWarmup: Task<Void, Never>?
     private let prepareVideo: @MainActor (VideoSummary, Double) async throws -> PreparedPlayback
@@ -68,15 +67,14 @@ public final class MaroController {
     private var selectionVideoID: String?
     private var selectionPosition: Double = 0
     private var searchTask: Task<Void, Never>?
-    // Metadata only: eight 20-result batches, fresh for one minute. Never cache signed audio URLs.
-    private var searchCache: [String: (session: SearchSession, expires: ContinuousClock.Instant, used: ContinuousClock.Instant)] = [:]
-    private let searchNow: () -> ContinuousClock.Instant
+    private let metadataRequests: MetadataSearchRequests
     private var pendingSave: Task<Void, Never>?
     private var saveRevision = 0
     private var lastCheckpoint = ProcessInfo.processInfo.systemUptime
     private let artworkCache: ArtworkCache?
     private var artworkTask: Task<Void, Never>?
     private var artworkVideos: [VideoSummary] = []
+    private var metadataArtworkVideos: [VideoSummary] = []
     private var artworkPaths: [String: String] = [:]
     public var onChange: (@MainActor () -> Void)?
 
@@ -120,7 +118,7 @@ public final class MaroController {
         guard !sourceBuild.isEmpty, sourceBuild.utf8.count <= 128 else { throw StateError.invalidSourceBuild }
         self.sourceBuild = sourceBuild
         self.artworkCache = artworkCache
-        self.searchNow = searchNow
+        metadataRequests = MetadataSearchRequests(source: search, now: searchNow)
         state = loaded.document
         needsUpdate = state.sourceDisabledBuild == sourceBuild
         if !needsUpdate { state.sourceDisabledBuild = nil }
@@ -132,9 +130,9 @@ public final class MaroController {
         persistenceError = loaded.warning
         self.store = store
         self.engine = engine
-        searchSource = search
         prepareVideo = prepare
         engine.onEvent = { [weak self] event in self?.handle(event) }
+        metadataRequests.onChange = { [weak self] in self?.publish() }
         refreshArtwork()
     }
 
@@ -149,6 +147,7 @@ public final class MaroController {
     public func search(_ query: String) async {
         guard !isShutDown else { return }
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return }
         if searching, self.query == query, let searchTask {
             await searchTask.value
             return
@@ -160,34 +159,18 @@ public final class MaroController {
         session = nil
         searchError = nil
         guard !needsUpdate else { searchError = ExtractorFailure.sourceNeedsUpdate.message; publish(); return }
-        let now = searchNow()
-        searchCache = searchCache.filter { $0.value.expires > now }
-        if var cached = searchCache[query] {
-            cached.used = now
-            searchCache[query] = cached
-            session = cached.session
-            searching = false
-            searchTask = nil
-            publish()
-            return
-        }
         searching = true
         publish()
         let task = Task { @MainActor in
             do {
-                let results = try await searchSource(query)
+                let results = try await metadataSearch(query, intent: .foreground)
                 try Task.checkCancellation()
                 guard searchID == id else { return }
                 let fresh = try SearchSession(query: query, results: results)
                 session = fresh
-                let fetched = searchNow()
-                if searchCache.count >= 8, let oldest = searchCache.min(by: { $0.value.used < $1.value.used })?.key {
-                    searchCache.removeValue(forKey: oldest)
-                }
-                searchCache[query] = (fresh, fetched.advanced(by: .seconds(60)), fetched)
             } catch {
                 guard searchID == id else { return }
-                searchError = message(error)
+                searchError = error is CancellationError ? "Search was interrupted. Try again." : message(error)
                 if error as? ExtractorFailure == .sourceNeedsUpdate { disableSource() }
             }
             guard searchID == id else { return }
@@ -197,6 +180,25 @@ public final class MaroController {
         }
         searchTask = task
         await withTaskCancellationHandler { await task.value } onCancel: { task.cancel() }
+    }
+
+    public var hasForegroundMetadataRequest: Bool { metadataRequests.foregroundActive }
+    public var metadataProviderVersion: String { sourceBuild }
+    public func cancelForegroundMetadataSearch() { metadataRequests.cancelForeground() }
+    public func metadataSearch(_ query: String, intent: MetadataSearchIntent = .foreground) async throws -> [VideoSummary] {
+        guard !isShutDown else { throw ControllerFailure.shutDown }
+        guard !needsUpdate else { throw ExtractorFailure.sourceNeedsUpdate }
+        if intent == .discovery, selecting || metadataRequests.foregroundActive { throw CancellationError() }
+        do {
+            let videos = try await metadataRequests.request(query, intent: intent)
+            metadataArtworkVideos = videos
+            refreshArtwork()
+            return videos
+        }
+        catch {
+            if error as? ExtractorFailure == .sourceNeedsUpdate { disableSource() }
+            throw error
+        }
     }
 
     public func revealMoreResults() {
@@ -211,6 +213,7 @@ public final class MaroController {
     }
 
     public func select(_ video: VideoSummary) async throws {
+        metadataRequests.cancelActive()
         queueID = UUID()
         if queueTask != nil {
             selectionTask?.cancel(); selectionID = UUID(); selecting = false
@@ -300,6 +303,7 @@ public final class MaroController {
     }
 
     private func load(_ video: VideoSummary, position: Double, recovering: Bool = false, autoplay: Bool = true) async throws {
+        metadataRequests.cancelActive()
         cancelTimelineSeek()
         endedPlaybackID = nil
         guard !isShutDown else { throw ControllerFailure.shutDown }
@@ -573,7 +577,7 @@ public final class MaroController {
         queueTask?.cancel(); queueTask = nil
         sourceWarmup?.cancel()
         await sourceLifetime?.shutdown()
-        searchCache.removeAll()
+        metadataRequests.clear()
         artworkTask?.cancel()
         transportIntent += 1
         selectionID = UUID()
@@ -681,7 +685,7 @@ public final class MaroController {
 
     private func disableSource() {
         cancelTimelineSeek()
-        searchCache.removeAll()
+        metadataRequests.clear()
         needsUpdate = true
         state.sourceDisabledBuild = sourceBuild
         searchID = UUID()
@@ -755,6 +759,7 @@ public final class MaroController {
         guard !isShutDown, let artworkCache else { return }
         var videos = state.loadedVideo.map { [$0.video] } ?? []
         videos += state.favorites.filter { favorite in !videos.contains { $0.id == favorite.id } }
+        videos += metadataArtworkVideos.filter { candidate in !videos.contains { $0.id == candidate.id } }
         let lostFile = artworkPaths.values.contains { !FileManager.default.fileExists(atPath: $0) }
         guard videos != artworkVideos || lostFile else { return }
         artworkVideos = videos

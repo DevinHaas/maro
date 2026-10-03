@@ -8,7 +8,7 @@ struct AppShellView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 8) {
-                topBar.frame(height: 64)
+                topBar.frame(height: 64).zIndex(10)
                 HStack(spacing: 8) {
                     if !app.libraryCollapsed {
                         LibrarySidebar(app: app, library: library).frame(width: geometry.size.width < 1200 ? 280 : 320)

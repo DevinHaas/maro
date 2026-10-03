@@ -1,16 +1,147 @@
+import AppKit
 import SwiftUI
 
-/// Ticket #4 owns focus suggestions and previews, independently of the library filter.
 struct GlobalSearchView: View {
     @ObservedObject var app: ApplicationModel
+    @FocusState private var focusedRow: Int?
+    @StateObject private var geometry = SearchPreviewGeometry()
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass").font(.system(size: 19)).foregroundStyle(AppDesign.muted)
-            TextField("What do you want to play?", text: $app.globalQuery).textFieldStyle(.plain).font(.system(size: 14))
-                .onSubmit { app.submitSearch() }.accessibilityLabel("Search YouTube")
+            GlobalSearchField(app: app, geometry: geometry).frame(height: 28)
             if !app.globalQuery.isEmpty {
-                Button { app.globalQuery = "" } label: { Image(systemName: "xmark") }.buttonStyle(.plain).accessibilityLabel("Clear global search")
+                Button { app.globalQuery = ""; app.focusSearch() } label: { Image(systemName: "xmark") }
+                    .buttonStyle(.plain).accessibilityLabel("Clear global search")
             }
         }.padding(.horizontal, 18).frame(height: 44).background(AppDesign.raised).clipShape(Capsule())
+            .overlay(alignment: .top) { if app.previewOpen { preview.padding(.top, 52) } }
+            .onChange(of: app.previewFocusedIndex) { focusedRow = $0 }
     }
+    private var preview: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(Array(app.previewQueries.enumerated()), id: \.offset) { index, query in
+                Button { app.submitSearch(query) } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "magnifyingglass").frame(width: 40)
+                        Text(query).lineLimit(1)
+                        Spacer(minLength: 0)
+                        Image(systemName: "arrow.up.left").foregroundStyle(AppDesign.muted)
+                    }.padding(10).contentShape(Rectangle())
+                }.buttonStyle(.plain).focused($focusedRow, equals: index)
+                    .background(focusedRow == index ? AppDesign.raised : Color.clear).clipShape(RoundedRectangle(cornerRadius: 5))
+                    .accessibilityLabel("Search for \(query)")
+            }
+            if !app.previewVideos.isEmpty {
+                Text(app.globalQuery.isEmpty ? "PICK UP WHERE YOU LEFT OFF" : "VIDEOS")
+                    .font(.system(size: 10, weight: .bold)).foregroundStyle(AppDesign.muted).padding(.horizontal, 10).padding(.top, 8)
+                ForEach(Array(app.previewVideos.enumerated()), id: \.element.id) { index, video in
+                    HStack(spacing: 2) {
+                        Button { app.play(video); app.closeSearch() } label: {
+                            HStack(spacing: 12) {
+                                LibraryArtwork(url: video.thumbnailURL, symbol: "play.fill").frame(width: 48, height: 48)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(video.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+                                    Text(video.creator).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: "play.fill").foregroundStyle(AppDesign.green)
+                            }.padding(8).contentShape(Rectangle())
+                        }.buttonStyle(.plain).focused($focusedRow, equals: app.previewQueries.count + index)
+                            .accessibilityLabel("Play \(video.title) by \(video.creator)")
+                        AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }
+                        AppIconButton(title: "Add \(video.title) to playlist", symbol: "plus") { app.offerAdd(video) }
+                    }.background(focusedRow == app.previewQueries.count + index ? AppDesign.raised : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                }
+            }
+            if app.previewLoading { HStack { ProgressView().controlSize(.small); Text("Searching YouTube…").font(.caption) }.padding(10) }
+            if let error = app.previewError {
+                Text(error).font(.caption).foregroundStyle(.orange).padding(10)
+                Button("Retry search preview") { app.retryPreview() }.padding(.horizontal, 10)
+            } else if !app.previewLoading && app.previewVideos.isEmpty && app.previewQueries.isEmpty {
+                Text(app.globalQuery.count < 2 ? "Type at least two characters to find videos." : "No matching videos. Try another search.")
+                    .font(.caption).foregroundStyle(AppDesign.muted).padding(10)
+            }
+            if !app.globalQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Button { app.submitSearch() } label: {
+                    HStack { Text("See all results for “\(app.globalQuery)”").lineLimit(1); Spacer(); Image(systemName: "arrow.right") }.padding(12)
+                }.buttonStyle(.plain).foregroundStyle(AppDesign.muted)
+            }
+        }.padding(8).frame(maxWidth: .infinity, alignment: .leading).background(AppDesign.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.12)))
+            .shadow(color: .black.opacity(0.7), radius: 18, y: 8)
+            .background(SearchPreviewBounds(geometry: geometry))
+            .onChange(of: focusedRow) { app.previewFocusedIndex = $0 }
+    }
+}
+
+private struct GlobalSearchField: NSViewRepresentable {
+    @ObservedObject var app: ApplicationModel
+    let geometry: SearchPreviewGeometry
+    func makeCoordinator() -> Coordinator { Coordinator(app: app, geometry: geometry) }
+    func makeNSView(context: Context) -> NSTextField {
+        let field = NSTextField()
+        field.isBordered = false; field.drawsBackground = false; field.focusRingType = .none
+        field.placeholderString = "What do you want to play?"; field.textColor = .white
+        field.font = .systemFont(ofSize: 14); field.delegate = context.coordinator
+        field.setAccessibilityLabel("Search YouTube")
+        context.coordinator.field = field; context.coordinator.installMonitor()
+        return field
+    }
+    func updateNSView(_ field: NSTextField, context: Context) {
+        if field.stringValue != app.globalQuery { field.stringValue = app.globalQuery }
+    }
+    static func dismantleNSView(_ field: NSTextField, coordinator: Coordinator) { coordinator.removeMonitor() }
+    @MainActor final class Coordinator: NSObject, NSTextFieldDelegate {
+        let app: ApplicationModel
+        let geometry: SearchPreviewGeometry
+        weak var field: NSTextField?
+        var monitor: Any?
+        var suppressNextFocus = false
+        init(app: ApplicationModel, geometry: SearchPreviewGeometry) { self.app = app; self.geometry = geometry }
+        func controlTextDidBeginEditing(_ notification: Notification) {
+            if suppressNextFocus { suppressNextFocus = false; return }
+            app.focusSearch()
+        }
+        func controlTextDidChange(_ notification: Notification) { if let field { app.globalQuery = field.stringValue } }
+        func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+            if selector == #selector(NSResponder.insertNewline(_:)) { app.submitSearch(); return true }
+            return false
+        }
+        func removeMonitor() { if let monitor { NSEvent.removeMonitor(monitor) }; monitor = nil }
+        func installMonitor() {
+            monitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .keyDown]) { [weak self] event in
+                guard let self, let field = self.field, event.window === field.window else { return event }
+                if event.type == .leftMouseDown {
+                    let fieldBounds = field.bounds.insetBy(dx: -55, dy: -12)
+                    let inField = fieldBounds.contains(field.convert(event.locationInWindow, from: nil))
+                    let inPreview = self.geometry.preview.map { $0.bounds.contains($0.convert(event.locationInWindow, from: nil)) } ?? false
+                    if inField && !self.app.previewOpen { self.app.focusSearch() }
+                    else if !inField && !inPreview { self.app.closeSearch() }
+                    return event
+                }
+                guard self.app.previewOpen else { return event }
+                switch event.keyCode {
+                case 53:
+                    self.suppressNextFocus = field.currentEditor() == nil
+                    self.app.dismissPreview(); field.window?.makeFirstResponder(field); return nil
+                case 125: self.app.movePreviewFocus(1); return nil
+                case 126: self.app.movePreviewFocus(-1); return nil
+                case 36, 76:
+                    if field.currentEditor() != nil { self.app.submitSearch() }
+                    else if self.app.previewFocusedIndex != nil { self.app.activateFocusedPreview() }
+                    else { return event }
+                    return nil
+                default: return event
+                }
+            }
+        }
+    }
+}
+
+@MainActor private final class SearchPreviewGeometry: ObservableObject { weak var preview: NSView? }
+private struct SearchPreviewBounds: NSViewRepresentable {
+    let geometry: SearchPreviewGeometry
+    func makeNSView(context: Context) -> NSView { let view = NSView(); geometry.preview = view; return view }
+    func updateNSView(_ view: NSView, context: Context) { geometry.preview = view }
 }
