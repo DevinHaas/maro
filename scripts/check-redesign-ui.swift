@@ -111,11 +111,27 @@ import Foundation
                 }
                 search.present()
                 if CommandLine.arguments.count > 2 && CommandLine.arguments[1] == "--capture" {
+                    let activity = ProcessInfo.processInfo.beginActivity(options: [.userInitiated, .latencyCritical],
+                        reason: "Capture settled native acceptance viewports")
+                    defer { ProcessInfo.processInfo.endActivity(activity) }
+                    NSApplication.shared.activate(ignoringOtherApps: true)
                     let output = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: true)
                     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
-                    for size in [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)] {
+                    let viewportArgument = CommandLine.arguments.firstIndex(of: "--viewport").flatMap {
+                        CommandLine.arguments.indices.contains($0 + 1) ? CommandLine.arguments[$0 + 1] : nil
+                    }
+                    let routeArgument = CommandLine.arguments.firstIndex(of: "--route").flatMap {
+                        CommandLine.arguments.indices.contains($0 + 1) ? CommandLine.arguments[$0 + 1] : nil
+                    }
+                    for size in [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768),
+                                 NSSize(width: 1199, height: 900), NSSize(width: 1200, height: 900),
+                                 NSSize(width: 1001, height: 900), NSSize(width: 1002, height: 900)] {
+                        if let viewportArgument, viewportArgument != "\(Int(size.width))x\(Int(size.height))" { continue }
                         window.setContentSize(size)
                         for route in ["home", "preview", "playlist", "rows", "fallback", "favorites", "results", "empty", "error", "filter"] {
+                            if let routeArgument, routeArgument != route { continue }
+                            print("Settling \(route)-\(Int(size.width))x\(Int(size.height))")
+                            fflush(stdout)
                             model.libraryFilter = ""
                             switch route {
                             case "playlist", "rows", "fallback":
@@ -130,8 +146,16 @@ import Foundation
                                 }
                             case "favorites": model.showFavorites()
                             case "results", "empty", "error":
+                                let timeout = DispatchWorkItem {
+                                    FileHandle.standardError.write(Data("Fixture failed: timed out settling \(route) search\n".utf8))
+                                    exit(EXIT_FAILURE)
+                                }
+                                DispatchQueue.global().asyncAfter(deadline: .now() + 15, execute: timeout)
                                 await controller.search(route == "results" ? "jazz" : route)
-                                model.render(); model.navigate(.search)
+                                print("Search settled \(route)"); fflush(stdout)
+                                timeout.cancel()
+                                model.render(); print("Rendered \(route)"); fflush(stdout)
+                                model.navigate(.search); print("Navigated \(route)"); fflush(stdout)
                             case "preview": model.showHome(); model.globalQuery = ""; model.focusSearch()
                             case "filter": model.showHome(); model.libraryFilter = "no matching collection"
                             default: model.showHome()
@@ -143,6 +167,7 @@ import Foundation
                                 }
                             }
                             try await Task.sleep(for: .milliseconds(350))
+                            print("Paint ready \(route)"); fflush(stdout)
                             // Window managers may retile a fixture window; constrain the
                             // rendered content explicitly for repeatable viewport checks.
                             hosting.setFrameSize(size)
@@ -154,6 +179,8 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
+                            try Self.writeGeometry(hosting: hosting, window: window, route: route, size: size,
+                                to: output.appendingPathComponent(name.replacingOccurrences(of: ".png", with: ".geometry.json")))
                             print("Captured \(name): logical content \(hosting.bounds.size), pixels \(bitmap.pixelsWide)×\(bitmap.pixelsHigh), window \(window.frame.size)")
                         }
                     }
@@ -165,6 +192,70 @@ import Foundation
                 NSApplication.shared.terminate(nil)
             }
         }
+    }
+
+    // Observe production boundaries without adding layout probes to production views.
+    private static func writeGeometry(hosting: NSView, window: NSWindow, route: String, size: NSSize, to url: URL) throws {
+        func frame(_ rect: NSRect) -> [Double] {
+            let y = hosting.isFlipped ? rect.minY : hosting.bounds.height - rect.maxY
+            return [rect.minX, y, rect.width, rect.height]
+        }
+        var accessibility: [[String: Any]] = []
+        var visited = Set<ObjectIdentifier>()
+        // Some SwiftUI AX children bridge value objects to temporary NSObject wrappers.
+        // Retain each wrapper for the walk so recycled addresses cannot suppress siblings.
+        var retainedElements: [AnyObject] = []
+        func observe(_ object: Any, path: String) {
+            let element = object as AnyObject
+            guard let screenRect = element.accessibilityFrame?() else { return }
+            let identifier = ObjectIdentifier(element as AnyObject)
+            guard visited.insert(identifier).inserted else { return }
+            retainedElements.append(element)
+            let localRect = hosting.convert(window.convertFromScreen(screenRect), from: nil)
+            var item: [String: Any] = ["path": path,
+                "role": element.accessibilityRole?()?.rawValue ?? "unknown", "frame": frame(localRect),
+                "enabled": element.isAccessibilityEnabled?() ?? false]
+            if let label = element.accessibilityLabel?(), !label.isEmpty { item["label"] = label }
+            if let native = object as? NSObject,
+               native.responds(to: NSSelectorFromString("accessibilityValue")),
+               let value = native.value(forKey: "accessibilityValue") as? String, !value.isEmpty { item["text"] = value }
+            if localRect.width > 0 && localRect.height > 0 {
+                item["center"] = [localRect.midX, hosting.isFlipped ? localRect.midY : hosting.bounds.height - localRect.midY]
+            }
+            accessibility.append(item)
+            for (index, child) in (element.accessibilityChildren?() ?? []).enumerated() {
+                observe(child, path: "\(path)/\(index)")
+            }
+        }
+        observe(hosting, path: "content")
+        var views: [[String: Any]] = []
+        func observeView(_ view: NSView, path: String) {
+            var item: [String: Any] = ["path": path, "class": String(describing: type(of: view)),
+                "frame": frame(view.convert(view.bounds, to: hosting)), "hidden": view.isHidden]
+            if let text = view as? NSTextField {
+                item["text"] = text.stringValue
+                item["firstBaselineOffsetFromTop"] = text.firstBaselineOffsetFromTop
+                item["lastBaselineOffsetFromBottom"] = text.lastBaselineOffsetFromBottom
+                if let font = text.font {
+                    item["font"] = ["postScriptName": font.fontName, "pointSize": font.pointSize,
+                        "ascender": font.ascender, "descender": font.descender, "leading": font.leading]
+                }
+            }
+            if let control = view as? NSControl { item["enabled"] = control.isEnabled }
+            views.append(item)
+            for (index, child) in view.subviews.enumerated() { observeView(child, path: "\(path)/\(index)") }
+        }
+        observeView(hosting, path: "content")
+        let value: [String: Any] = ["schemaVersion": 1, "route": route,
+            "coordinateSpace": "content-top-left-logical-points", "viewport": [size.width, size.height],
+            "backingScale": window.backingScaleFactor, "accessibility": accessibility, "views": views,
+            "limitations": [
+                "Accessibility text rectangles are exposed AX bounds, not glyph ink bounds or typographic baselines.",
+                "SwiftUI Text baselines and font descriptors are not exposed by the native NSView/AX tree; measure rendered glyphs separately.",
+                "AX control frames and centers do not prove custom contentShape hit regions; only native bridge view bounds are observed.",
+                "SwiftUI internal spacing/columns/overlay anchors are not individually exposed; use capture and production layout constants as supplemental reconstruction evidence."]]
+        let data = try JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted, .sortedKeys])
+        try data.write(to: url)
     }
 
     private static func silentAudio(in directory: URL) throws -> URL {
