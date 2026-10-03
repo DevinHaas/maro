@@ -53,7 +53,8 @@ struct PlaylistDragHandle: NSViewRepresentable {
                 let point = self.convert(event.locationInWindow, from: nil)
                 guard self.enabled, !self.isDragging, self.bounds.contains(point), self.visibleRect.contains(point),
                       let content = window.contentView,
-                      content.hitTest(content.convert(event.locationInWindow, from: nil)) !== self else { return event }
+                      let target = content.hitTest(content.convert(event.locationInWindow, from: nil)),
+                      target !== self, self.isDescendant(of: target) else { return event }
                 self.bridgedMouseSequence = true
                 self.mouseDown(with: event)
                 return nil
@@ -96,11 +97,11 @@ struct PlaylistDragHandle: NSViewRepresentable {
         writer.setString(value, forType: NSPasteboard.PasteboardType(PlaylistDragPayload.typeIdentifier))
         let draggingItem = NSDraggingItem(pasteboardWriter: writer)
         let image = dragImage(title: item.title)
-        let point = convert(event.locationInWindow, from: nil)
+        let point = convert(startEvent.locationInWindow, from: nil)
         draggingItem.setDraggingFrame(NSRect(x: point.x - 20, y: point.y - 24, width: 300, height: 52), contents: image)
         isDragging = true
         sourceScrollView = enclosingScrollView
-        let session = beginDraggingSession(with: [draggingItem], event: event, source: self)
+        let session = beginDraggingSession(with: [draggingItem], event: startEvent, source: self)
         session.animatesToStartingPositionsOnCancelOrFail = true
         edgeTimer = Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.scrollAtEdge() }
