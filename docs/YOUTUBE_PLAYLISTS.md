@@ -18,7 +18,7 @@ to resolve and play audio.
    Maro uses this permission only for reading and editing playlists.
 4. Create an OAuth client with application type **Desktop app** and download its
    JSON configuration. A web-app client or an API key alone will not work.
-5. Open Maro's library window, select **Playlists**, then **Import Google
+5. Open Maro's library window, open the **YouTube account** menu, then **Import Google
    credentials…**, and choose that JSON file. It is saved in macOS Keychain, not
    in the project or player-state file. Do not commit the downloaded credentials.
 6. Select **Connect YouTube**, sign in to the Google account/channel whose
@@ -39,17 +39,18 @@ References: [desktop OAuth setup](https://developers.google.com/youtube/v3/guide
 
 ## Use playlists
 
-- Opening the Playlists tab/window refreshes your owned playlists. Refresh is also
-  available manually. Select a playlist to load all its videos, including beyond
+- The persistent library shows all your owned playlists. Use **Refresh library**
+  to refresh it manually. Select a playlist to load all its videos, including beyond
   YouTube's first results page.
 - Create playlist makes a private playlist and immediately adds it to the list while
   refreshing from YouTube. Rename changes its name while preserving its description.
-  Open a playlist and choose Delete playlist… to permanently delete it from YouTube
+  Open a playlist's actions sheet and choose Delete playlist… to permanently delete it from YouTube
   after confirmation. This leaves the videos themselves intact. Change visibility
   directly on YouTube.
-- Select a search result and choose **Add to playlist…**, or use the plus-list button
+- Open a search result's actions menu and choose **Add to playlist…**, or use the plus-list button
   beside the current video's title. Choose a destination playlist and select Add.
-- Within a playlist, select an entry to move it up/down or remove it. Removing a
+- Within a playlist, drag an entry's handle to a new position, or open its ellipsis
+  actions sheet to move it to a chosen position or remove it. Removing a
   video removes only that occurrence from the YouTube playlist; it does not delete
   the video or another occurrence. Some playlists need Manual ordering enabled on
   YouTube before reordering through the API.
@@ -57,7 +58,7 @@ References: [desktop OAuth setup](https://developers.google.com/youtube/v3/guide
   next YouTube list response lags. Add checks every playlist page by video ID and
   refuses an existing video; titles are not used for identity. Existing duplicate
   occurrences are preserved and can still be removed individually.
-- Play all starts at the beginning. Each row's Play button starts there. Playback
+- The green playlist Play button starts at the beginning. Each row's Play button starts there. Playback
   advances in saved order, skips entries it cannot play, and stops at the end.
   Previous/next use the active playlist, even if you search for something else.
 - Playback takes a snapshot of the order when you press Play. Edits and refreshes
@@ -71,9 +72,15 @@ References: [desktop OAuth setup](https://developers.google.com/youtube/v3/guide
 
 Failed refreshes keep previously loaded data visible with an outdated-data label.
 No edits are queued. A write timeout can mean YouTube saved the change but its reply
-was lost: **Retry refresh** and inspect the list before submitting that edit again.
+was lost: choose **Refresh YouTube** and inspect the list before submitting that edit again.
 Maro never automatically repeats a failed write. If a write succeeded but its
 following refresh failed, the status explicitly says it was saved.
+
+During a reorder, Maro shows the optimistic order and serializes the save. A definite
+rejection restores the confirmed order and offers **Retry move**. An uncertain reply
+blocks further edits until you refresh; it never automatically repeats the write.
+Confirmed moves remain visible if the following refresh is unavailable or still
+returns the previous order.
 
 Account → Disconnect on this Mac removes Maro's saved tokens and visible library,
 retaining only the desktop-client configuration so you can reconnect. It leaves

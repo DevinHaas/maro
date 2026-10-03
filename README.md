@@ -1,25 +1,28 @@
 # Maro
 
-A native macOS companion for a small YouTube music player in SketchyBar.
+A native macOS YouTube music library with a synchronized SketchyBar player.
 
-Implementation is underway. The shared state, playback controller, source adapter,
-local command service, native companion lifecycle, and `maroctl` client are
-implemented. Native search and thumbnail caching are available, and a short live
-playback probe passed. UI acceptance, bar integration, packaging, and sustained
-listening verification remain.
+Maro opens on Home with playlist shortcuts and local, keyword-based discovery.
+The searchable library stays beside Home, global search results, Favorites, and
+playlist detail. Search previews support keyboard navigation; playlist rows offer
+playback, focused action sheets, and drag editing saved to YouTube. Bottom playback,
+the compact player, and `maroctl` share the same controller and captured queue.
 
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): artifact inventory, settled
   requirements, eight milestones, acceptance gates, and unattended execution rules.
 - [Progress](docs/PROGRESS.md): verified work, test command, blockers, and next step.
 - [YouTube playlists](docs/YOUTUBE_PLAYLISTS.md): connect your personal account,
   create and edit private playlists, and play them in saved order.
+- [Application redesign](docs/specs/redesign-implementation.md): specification,
+  implementation tickets, and verification evidence.
 - [Player polish and performance goals](.scratch/maro-player-polish/map.md): AFK tickets for transport layout, audio reuse, and faster YouTube search.
 
 The player uses native segmented audio when available, fetching a short forward
 buffer so long recordings can start without a whole-file download. Healthy loaded
 tracks reuse their player on pause/resume and reselection. Search keeps up to eight
 metadata batches for sixty seconds; repeated queries show five results immediately
-and retain all twenty for Load 5 more and navigation. New lookups still depend on
+and retain all twenty for Load 5 more and navigation. Home separately caches bounded
+discovery candidates for thirty minutes. New lookups still depend on
 YouTube, and cached playback is not an offline-download guarantee.
 
 Search and stream resolution share one lazily initialized, bundled Python/yt-dlp
@@ -49,7 +52,7 @@ with an explicit socket it also isolates the launched app's data directory.
 The `Maro` executable runs as an accessory app. For isolated development, set
 `MARO_DATA_DIRECTORY` to an absolute private directory; optional `MARO_EXTRACTOR`
 and `MARO_NODE` paths override bundled tools. The search command opens the native
-search window. Run `python3 scripts/check-app-lifecycle.py
+library window, which also opens on launch and reopen. Run `python3 scripts/check-app-lifecycle.py
 /absolute/build/directory` to verify app/CLI startup, shutdown, and paused restore
 using disposable state.
 

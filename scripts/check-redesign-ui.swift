@@ -79,7 +79,7 @@ import Foundation
                     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
                     for size in [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)] {
                         window.setContentSize(size)
-                        for route in ["home", "playlist", "favorites", "results", "empty", "filter"] {
+                        for route in ["home", "preview", "playlist", "favorites", "results", "empty", "error", "filter"] {
                             model.libraryFilter = ""
                             switch route {
                             case "playlist":
@@ -88,9 +88,10 @@ import Foundation
                                     while library.busy { await Task.yield() }
                                 }
                             case "favorites": model.showFavorites()
-                            case "results", "empty":
-                                await controller.search(route == "empty" ? "empty" : "jazz")
+                            case "results", "empty", "error":
+                                await controller.search(route == "results" ? "jazz" : route)
                                 model.render(); model.navigate(.search)
+                            case "preview": model.showHome(); model.globalQuery = ""; model.focusSearch()
                             case "filter": model.showHome(); model.libraryFilter = "no matching collection"
                             default: model.showHome()
                             }
@@ -145,6 +146,9 @@ actor RedesignFixtureResponses {
 
     func respond(_ request: URLRequest) throws -> (Data, URLResponse) {
         let url = request.url!
+        if request.httpMethod != "GET" {
+            print("Fixture API write: \(request.httpMethod ?? "") \(url.lastPathComponent)")
+        }
         var payload: [String: Any] = [:]
         if url.path.hasSuffix("/playlistItems"), request.httpMethod == "PUT",
            let body = request.httpBody,
@@ -170,7 +174,7 @@ actor RedesignFixtureResponses {
                 return ["id": id, "snippet": ["playlistId": "playlist0", "position": index,
                     "title": originalIndex == 3 ? "Deleted video" : "\(originalIndex + 1). Midnight jazz sessions — a long title to test row layout",
                     "videoOwnerChannelTitle": "Jazz collective", "publishedAt": "2026-10-01T12:00:00Z",
-                    "resourceId": ["kind": "youtube#video", "videoId": originalIndex == 3 ? "" : videoID]]]
+                    "resourceId": ["kind": "youtube#video", "videoId": videoID]]]
             }
             payload = ["items": rows]
         }
