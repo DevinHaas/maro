@@ -16,6 +16,62 @@ private actor LibraryResponses {
     }
 }
 
+@Test @MainActor func staleModalCannotRemoveAnotherPlaylistOccurrenceAndCancelDoesNotWrite() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: PlaybackEngine(), search: { _ in [] }, prepare: { _, _ in throw CancellationError() })
+    let requests = ModalRequests()
+    let api = YouTubePlaylists(token: { "fixture" }, send: { await requests.respond($0) })
+    let library = PlaylistLibrary(controller: controller, api: api)
+    let first = YouTubePlaylist(id: "PLone", title: "One", count: 2)
+    let other = YouTubePlaylist(id: "PLtwo", title: "Two", count: 1)
+    library.playlists = [first, other]
+    library.selected = first
+    let video = try VideoSummary(id: "abcdefghijk", title: "Duplicate", creator: "Test")
+    library.items = [YouTubePlaylistItem(id: "a", video: video, title: video.title),
+                     YouTubePlaylistItem(id: "b", video: video, title: video.title)]
+    library.presentItemActions(occurrenceID: "b", playlistID: first.id)
+    library.dismissActions()
+    #expect(await requests.writes.isEmpty)
+    library.presentItemActions(occurrenceID: "b", playlistID: first.id)
+    library.selected = other
+    library.items = [YouTubePlaylistItem(id: "b", video: video, title: video.title)]
+    library.remove(occurrenceID: "b", from: first.id)
+    #expect(await requests.writes.isEmpty)
+    #expect(library.items.map(\.id) == ["b"])
+    #expect(library.status.contains("no longer open"))
+    await controller.shutdown()
+}
+
+private actor ModalRequests {
+    var writes: [String] = []
+    func respond(_ request: URLRequest) -> (Data, URLResponse) {
+        if request.httpMethod != "GET" { writes.append(request.url!.absoluteString) }
+        return (Data(#"{"items":[]}"#.utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    }
+}
+
+@Test @MainActor func rowFavoriteCapacityGivesFeedbackAndAllowsRemoval() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let favorites = try (0..<20).map { try VideoSummary(id: String(format: "%011d", $0), title: "Saved \($0)", creator: "Test") }
+    var document = StateDocument()
+    for video in favorites { try document.toggleFavorite(video) }
+    let controller = try MaroController(loaded: StateLoadResult(document: document, preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: PlaybackEngine(), search: { _ in [] }, prepare: { _, _ in throw CancellationError() })
+    let library = PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { "fixture" }))
+    let new = try VideoSummary(id: "abcdefghijk", title: "New favorite", creator: "Test")
+    library.toggleFavorite(new)
+    #expect(controller.snapshot.favorites.count == 20)
+    #expect(library.status == "Favorites are full (20 of 20). Remove one before adding another.")
+    library.toggleFavorite(favorites[0])
+    library.toggleFavorite(new)
+    #expect(controller.snapshot.favorites.contains(new))
+    #expect(controller.snapshot.favorites.count == 20)
+    await controller.shutdown()
+}
+
 @Test(arguments: [false, true]) @MainActor func removedOccurrenceStaysRemovedAfterLaggingRefresh(rejectDelete: Bool) async throws {
     let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     defer { try? FileManager.default.removeItem(at: file) }
