@@ -24,3 +24,10 @@ children when merged. Open tickets remain open until then.
 Native reference assets are preserved in `assets/spotify-redesign/`. Final
 acceptance includes the nonparallel Swift suite, native visual/interaction checks,
 and independent standards/spec reviews against the application baseline.
+
+## Baseline verification
+
+`swift test --no-parallel --scratch-path /private/tmp/maro-redesign-baseline-build`
+passed all 95 existing tests. A fresh scratch directory avoids the copied local
+build cache's original checkout path; the original build/runtime assets remain
+available locally.
