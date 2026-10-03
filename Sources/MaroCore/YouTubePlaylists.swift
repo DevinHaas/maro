@@ -4,6 +4,17 @@ public struct YouTubePlaylist: Identifiable, Equatable, Sendable {
     public let id: String
     public let title: String
     public let count: Int
+    public let thumbnailURL: URL?
+    public let description: String?
+    public let owner: String?
+    public let privacy: String?
+
+    public init(id: String, title: String, count: Int, thumbnailURL: URL? = nil,
+                description: String? = nil, owner: String? = nil, privacy: String? = nil) {
+        self.id = id; self.title = title; self.count = count
+        self.thumbnailURL = thumbnailURL; self.description = description
+        self.owner = owner; self.privacy = privacy
+    }
 }
 
 /// The item ID identifies an occurrence: a playlist can contain a video twice.
@@ -37,13 +48,17 @@ public final class YouTubePlaylists {
     }
 
     public func playlists() async throws -> [YouTubePlaylist] {
-        try await pages("playlists", query: ["part": "snippet,contentDetails", "mine": "true"]).map { row in
+        try await pages("playlists", query: ["part": "snippet,contentDetails,status", "mine": "true"]).map { row in
             guard let id = row["id"] as? String,
                   let snippet = row["snippet"] as? [String: Any], let title = snippet["title"] as? String else {
                 throw YouTubeAccountError("YouTube returned an incomplete playlist. Refresh to try again.")
             }
+            let thumbnails = snippet["thumbnails"] as? [String: [String: Any]] ?? [:]
+            let thumbnail = ["high", "medium", "default"].compactMap { thumbnails[$0]?["url"] as? String }.first
             return YouTubePlaylist(id: id, title: title,
-                count: (row["contentDetails"] as? [String: Any])?["itemCount"] as? Int ?? 0)
+                count: (row["contentDetails"] as? [String: Any])?["itemCount"] as? Int ?? 0,
+                thumbnailURL: thumbnail.flatMap(URL.init(string:)), description: snippet["description"] as? String,
+                owner: snippet["channelTitle"] as? String, privacy: (row["status"] as? [String: String])?["privacyStatus"])
         }
     }
 
