@@ -22,6 +22,7 @@ final class PlaylistLibrary: ObservableObject {
     private var retry: (() async throws -> Void)?
     private var operation: Task<Void, Never>?
     private let controller: MaroController
+    private var accountRevision = 0
 
     init(controller: MaroController, api: YouTubePlaylists? = nil) {
         self.controller = controller
@@ -52,6 +53,7 @@ final class PlaylistLibrary: ObservableObject {
             self.account = account
             api = YouTubePlaylists(token: { try await account.accessToken() })
             configured = true; connected = false
+            accountRevision += 1
             playlists = []; items = []; selected = nil
             retry = nil; canRetry = false; stale = false
             status = "Credentials imported. Connect YouTube to continue."
@@ -76,6 +78,7 @@ final class PlaylistLibrary: ObservableObject {
     func disconnect() {
         do {
             try account?.disconnect()
+            accountRevision += 1
             connected = false; playlists = []; items = []; selected = nil
             pendingVideo = nil; retry = nil; canRetry = false; stale = false
             status = "Disconnected on this Mac. Your YouTube playlists are unchanged."
@@ -172,11 +175,19 @@ final class PlaylistLibrary: ObservableObject {
 
     private func reload() async throws {
         guard let api else { return }
+        let revision = accountRevision
         let fresh = try await api.playlists()
-        var freshItems: [YouTubePlaylistItem] = []
-        let freshSelected = selected.flatMap { selected in fresh.first { $0.id == selected.id } }
-        if let freshSelected { freshItems = try await api.items(in: freshSelected.id) }
-        playlists = fresh; selected = freshSelected; items = freshItems
+        // Opening another playlist while a read is in flight must not restore the old page.
+        while true {
+            let requestedID = selected?.id
+            let freshSelected = fresh.first { $0.id == requestedID }
+            var freshItems: [YouTubePlaylistItem] = []
+            if let freshSelected { freshItems = try await api.items(in: freshSelected.id) }
+            guard revision == accountRevision, connected else { return }
+            guard requestedID == selected?.id else { continue }
+            playlists = fresh; selected = freshSelected; items = freshItems
+            break
+        }
         if !fresh.contains(where: { $0.id == destination }) { destination = fresh.first?.id ?? "" }
         stale = false
         status = fresh.isEmpty ? "No playlists yet. Create your first private playlist." : "Up to date with YouTube."
