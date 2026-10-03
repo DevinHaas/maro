@@ -84,7 +84,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 if let controller { self?.barNotifier?.update(controller.snapshot) }
             }
             barNotifier?.update(controller.snapshot)
+            searchWindow?.present()
         }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag { searchWindow?.present() }
+        return true
     }
 
     private func finishController() async {
