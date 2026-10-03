@@ -51,6 +51,7 @@ import Foundation
                 self.app = model
                 controller.onChange = { [weak model] in model?.render() }
                 let hosting = NSHostingView(rootView: AppShellView(app: model, library: library))
+                hosting.sizingOptions = []
                 let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
                     styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
                 window.title = "Maro Redesign Acceptance"
@@ -91,7 +92,7 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
-                            print("Captured \(name)")
+                            print("Captured \(name): logical content \(hosting.bounds.size), pixels \(bitmap.pixelsWide)×\(bitmap.pixelsHigh)")
                         }
                     }
                     await controller.shutdown()

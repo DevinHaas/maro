@@ -19,7 +19,9 @@ import SwiftUI
         panel.minSize = NSSize(width: 760, height: 560)
         panel.isReleasedWhenClosed = false
         super.init(window: panel)
-        panel.contentView = NSHostingView(rootView: AppShellView(app: application, library: library))
+        let hosting = NSHostingView(rootView: AppShellView(app: application, library: library))
+        hosting.sizingOptions = []
+        panel.contentView = hosting
         panel.center()
     }
     required init?(coder: NSCoder) { nil }
