@@ -1,0 +1,40 @@
+/* Maro / Tidal v1 — preview tokens, not application integration. */
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:400;font-display:swap;src:url("./fonts/JetBrainsMono-Regular.woff2") format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url("./fonts/JetBrainsMono-Medium.woff2") format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:600;font-display:swap;src:url("./fonts/JetBrainsMono-SemiBold.woff2") format("woff2")}
+:root{
+  --p-abyss:#0B151A;
+  --p-ocean:#10232B;
+  --p-lagoon:#18323B;
+  --p-hover:#21434C;
+  --p-selected:#1D4547;
+  --p-foam:#DDF1F0;
+  --p-muted:#A0BDC4;
+  --p-mint:#91DAB8;
+  --p-mint-hover:#ABEDCE;
+  --p-mint-pressed:#79C9A7;
+  --p-cyan:#82CDDF;
+  --p-cyan-hover:#A4E5ED;
+  --p-cyan-pressed:#71BACA;
+  --p-focus:#B5F3E8;
+  --p-divider:#2B4A54;
+  --p-control:#729CA6;
+  --p-disabled:#78949E;
+  --p-error:#F0A0A0;
+  --p-warning:#E5C78D;
+  --font-mono:"JetBrains Mono","SF Mono",Menlo,monospace;
+  --surface-canvas:var(--p-abyss);--surface-panel:var(--p-ocean);--surface-raised:var(--p-lagoon);
+  --surface-hover:var(--p-hover);--surface-selected:var(--p-selected);
+  --text-primary:var(--p-foam);--text-secondary:var(--p-muted);--text-on-accent:var(--p-abyss);--text-disabled:var(--p-disabled);
+  --accent-primary:var(--p-mint);--accent-hover:var(--p-mint-hover);--accent-pressed:var(--p-mint-pressed);--accent-secondary:var(--p-cyan);
+  --border-decorative:var(--p-divider);--border-interactive:var(--p-control);--border-focus:var(--p-focus);
+  --status-success:var(--p-mint);--status-info:var(--p-cyan);--status-warning:var(--p-warning);--status-error:var(--p-error);
+  --button-bg:var(--accent-primary);--button-fg:var(--text-on-accent);--button-hover:var(--accent-hover);--button-pressed:var(--accent-pressed);
+  --search-bg:var(--surface-raised);--search-border:var(--border-interactive);
+  --row-hover:var(--surface-hover);--row-selected:var(--surface-selected);
+  --player-progress:var(--accent-primary);--player-track:var(--border-interactive);
+  --panel-opacity:.92;--panel-blur:18px;--feedback-duration:120ms;
+}
+[data-accent="cyan"]{--accent-primary:var(--p-cyan);--accent-hover:var(--p-cyan-hover);--accent-pressed:var(--p-cyan-pressed);--accent-secondary:var(--p-mint)}
+[data-accent="mixed"]{--accent-primary:var(--p-focus);--accent-hover:var(--p-foam);--accent-pressed:var(--p-mint);--accent-secondary:var(--p-cyan)}
+@media(prefers-reduced-motion:reduce){:root{--feedback-duration:0ms}}
