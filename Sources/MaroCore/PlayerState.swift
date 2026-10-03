@@ -120,6 +120,7 @@ public struct SearchSession: Sendable {
     }
 
     public var visibleResults: [VideoSummary] { Array(results.prefix(visibleCount)) }
+    public var allResults: [VideoSummary] { results }
     public var hasMore: Bool { visibleCount < results.count }
     public func neighbor(of id: String, offset: Int) -> VideoSummary? {
         guard offset == -1 || offset == 1,
