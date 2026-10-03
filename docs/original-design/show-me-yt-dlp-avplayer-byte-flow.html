@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From YouTube Page to Sound: yt-dlp and AVPlayer</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+  :root {
+    --bg: #1b1e28; --bg-deep: #171922; --bg-alt: #303340;
+    --border: #303340; --guide: #303340;
+    --text: #a6accd; --bright: #ffffff;
+    --muted: rgba(166, 172, 205, 0.55);
+    --accent: #add7ff; --accent-dim: rgba(173, 215, 255, 0.3);
+    --mint: #5de4c7; --yellow: #fffac2; --blue: #89ddff;
+    --rose: #d0679d; --pink: #f087bd;
+    --mono: "IBM Plex Mono", Consolas, Monaco, "Courier New", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; border-radius: 0; }
+  ::selection { background: #717cb425; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--sans);
+    margin: 0; padding: 26px 22px 120px; font-size: 15px; font-weight: 300;
+    line-height: 1.7; letter-spacing: 0.03em; -webkit-font-smoothing: antialiased;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  main, .wrap { max-width: 1120px; margin: 0 auto; }
+
+  /* headings - accent color, tight tracking, like the artifact viewer */
+  h1, h2, h3, h4 { color: var(--accent); font-weight: 600; line-height: 1.3; margin: 1.6em 0 0.5em; }
+  h1 { font-size: 24px; letter-spacing: -0.02em; margin-top: 0; }
+  h2 { font-size: 19px; letter-spacing: -0.02em; }
+  h3 { font-size: 16px; letter-spacing: -0.01em; }
+  h4 { font-size: 13px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+  /* prose */
+  p { margin: 0 0 1em; max-width: 84ch; line-height: 1.9; }
+  strong, b { color: var(--bright); font-weight: 600; }
+  em { color: var(--text); font-style: italic; }
+  a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; transition: color 0.15s ease; }
+  a:hover { color: var(--blue); }
+  ul, ol { margin: 0.5em 0 1em; padding-left: 1.6em; max-width: 84ch; }
+  li { margin: 0; line-height: 1.8; }
+  li + li { margin-top: 0.35em; }
+  li::marker { color: var(--muted); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+  /* code + preformatted */
+  code { font-family: var(--mono); font-size: 0.875em; background: var(--bg-alt); padding: 0.1em 0.35em 0; letter-spacing: normal; }
+  pre {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.7; background: var(--bg-deep);
+    border: 1px solid var(--border); padding: 12px 14px; overflow-x: auto; color: var(--text);
+    margin: 0.8em 0; white-space: pre; tab-size: 2; letter-spacing: normal;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  /* optional manual syntax spans inside <pre> */
+  pre .k { color: var(--mint); } pre .s { color: var(--blue); }
+  pre .c { color: rgba(166,172,205,0.5); font-style: italic; } pre .fn { color: var(--accent); }
+
+  blockquote { margin: 1em 0; padding: 2px 0 2px 16px; border-left: 2px solid var(--accent-dim); color: var(--muted); }
+
+  /* tables */
+  table { border-collapse: collapse; margin: 1em 0; font-size: 13px; width: 100%; }
+  th, td { border: 1px solid var(--border); padding: 7px 12px; text-align: left; vertical-align: top; }
+  th { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+
+  /* card - a bordered container for a self-contained block */
+  .card { border: 1px solid var(--border); background: var(--bg-deep); padding: 20px 24px; margin: 1em 0; }
+
+  /* badges - 1px border + color/10 fill; solid fill marks terminal states */
+  .badge { display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.08em; padding: 2px 6px; text-transform: uppercase; border: 1px solid; }
+  .b-accent   { color: var(--accent); border-color: var(--accent-dim);     background: rgba(173,215,255,0.1); }
+  .b-new      { color: var(--mint);   border-color: rgba(93,228,199,0.4);   background: rgba(93,228,199,0.1); }
+  .b-modified { color: var(--blue);   border-color: rgba(137,221,255,0.4);  background: rgba(137,221,255,0.1); }
+  .b-note     { color: var(--rose);   border-color: rgba(208,103,157,0.4);  background: rgba(208,103,157,0.1); }
+  .b-principle{ color: var(--pink);   border-color: rgba(240,135,189,0.4);  background: rgba(240,135,189,0.1); }
+  .b-kept     { color: var(--text);   border-color: var(--border);          background: rgba(166,172,205,0.08); }
+  .b-removed  { color: var(--bg);     border-color: var(--rose);            background: var(--rose); }
+
+  /* stats - mono key/value chips */
+  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+  .stat { background: var(--bg); border: 1px solid var(--border); padding: 8px 14px; font-family: var(--mono); font-size: 9.5px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.6; }
+  .stat b { display: block; font-size: 14px; font-weight: 500; color: var(--accent); text-transform: none; letter-spacing: 0; margin-bottom: 2px; }
+  .stat b.ok { color: var(--mint); }
+
+  /* before / after - side-by-side code comparison */
+  .ba { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0.8em 0; }
+  @media (max-width: 900px) { .ba { grid-template-columns: 1fr; } }
+  .ba > div { min-width: 0; }
+  .ba .label { font-family: var(--mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 4px; text-transform: uppercase; }
+  .ba .before .label { color: var(--rose); }
+  .ba .after .label { color: var(--mint); }
+  .ba .before pre { border-color: rgba(208,103,157,0.35); }
+  .ba .after pre { border-color: rgba(93,228,199,0.35); }
+  .ba pre { margin: 0; }
+</style>
+<style>
+  .hero { display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: end; border-bottom: 1px solid var(--border); padding-bottom: 22px; }
+  .hero p { margin-bottom: 0; }
+  .lesson-nav { position: sticky; top: 0; z-index: 5; display: flex; gap: 1px; overflow-x: auto; margin: 18px 0 28px; border: 1px solid var(--border); background: var(--border); }
+  button { appearance: none; border: 1px solid var(--border); background: var(--bg-deep); color: var(--text); padding: 10px 12px; font: 600 11px/1.4 var(--mono); cursor: pointer; }
+  button:hover, button:focus-visible { color: var(--bright); border-color: var(--accent); outline: none; }
+  button.active { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+  .lesson-nav button { flex: 1 0 150px; border: 0; }
+  .lesson { display: none; }
+  .lesson.active { display: block; animation: reveal 180ms ease-out; }
+  @keyframes reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .concept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .concept-grid .card { margin: 0; }
+  .pipeline { display: grid; grid-template-columns: repeat(7, minmax(70px, 1fr)); align-items: stretch; margin: 18px 0; }
+  .node { border: 1px solid var(--border); background: var(--bg-deep); padding: 16px 10px; min-height: 105px; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .node b { font: 600 12px/1.4 var(--mono); color: var(--accent); }
+  .node small { display: block; margin-top: 7px; color: var(--muted); font: 10px/1.5 var(--mono); }
+  .arrow { display: grid; place-items: center; color: var(--mint); font: 700 18px var(--mono); }
+  .owner { border-top: 2px solid var(--mint); }
+  .resolver { border-top: 2px solid var(--yellow); }
+  .upstream { border-top: 2px solid var(--rose); }
+  .bytebar { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; margin: 12px 0; }
+  .byte { height: 30px; background: var(--bg-alt); border: 1px solid var(--border); }
+  .byte.loaded { background: var(--accent-dim); border-color: var(--accent); }
+  .byte.requested { background: rgba(93,228,199,0.25); border-color: var(--mint); }
+  .trace { min-height: 170px; white-space: pre-wrap; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .choice { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; border: 1px solid var(--border); background: var(--bg-deep); padding: 15px; margin: 8px 0; }
+  .choice h3 { margin: 0 0 4px; }
+  .choice p { margin: 0; }
+  .choice.selected { border-color: var(--accent); }
+  .verdict { border-left: 3px solid var(--accent); }
+  .quiz-item { border-top: 1px solid var(--border); padding: 16px 0; }
+  .quiz-item:first-child { border-top: 0; }
+  .quiz-options { display: flex; flex-wrap: wrap; gap: 6px; }
+  .feedback { min-height: 25px; margin: 8px 0 0; font-family: var(--mono); font-size: 11px; }
+  .correct { color: var(--mint); }
+  .incorrect { color: var(--rose); }
+  .diagram { width: 100%; height: auto; border: 1px solid var(--border); background: var(--bg-deep); margin: 10px 0; }
+  .diagram text { fill: var(--text); font-family: var(--mono); font-size: 12px; }
+  .diagram .title { fill: var(--bright); font-weight: 600; }
+  .diagram .box { fill: var(--bg); stroke: var(--border); }
+  .diagram .line { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .diagram .bytes { stroke: var(--mint); stroke-width: 3; fill: none; stroke-dasharray: 7 5; }
+  .diagram .warn { stroke: var(--rose); }
+  .source-list { font-size: 12px; }
+  .hidden { display: none; }
+  @media (max-width: 800px) {
+    body { padding: 18px 14px 100px; }
+    .hero, .concept-grid { grid-template-columns: 1fr; }
+    .pipeline { grid-template-columns: 1fr; }
+    .arrow { min-height: 34px; transform: rotate(90deg); }
+    .choice { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div>
+      <span class="badge b-accent">Interactive lesson</span>
+      <h1>From a YouTube page to sound</h1>
+      <p>Learn where <strong>yt-dlp</strong> stops, where <strong>AVPlayer</strong> starts, and why seeking turns a simple stream into a byte-range design problem.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><b>yt-dlp</b>resolves sources</div>
+      <div class="stat"><b>AVPlayer</b>controls playback</div>
+      <div class="stat"><b>HTTP bytes</b>carry audio</div>
+    </div>
+  </section>
+
+  <nav class="lesson-nav" aria-label="Lesson sections">
+    <button class="active" data-step="1">1. Foundations</button>
+    <button data-step="2">2. The byte path</button>
+    <button data-step="3">3. Seeking lab</button>
+    <button data-step="4">4. Three designs</button>
+    <button data-step="5">5. Decision</button>
+  </nav>
+
+  <section class="lesson active" data-lesson="1">
+    <h2>The first foundation: metadata is not media</h2>
+    <p>A YouTube watch page is an address for a content experience. It is not itself a playable audio file. Before playback, something must discover the video's identity, inspect available formats, and produce a concrete media descriptor.</p>
+
+    <div class="pipeline" aria-label="Resolution and playback pipeline">
+      <div class="node upstream"><b>Watch URL</b><small>stable identity</small></div>
+      <div class="arrow">-&gt;</div>
+      <div class="node resolver"><b>yt-dlp</b><small>extract metadata and formats</small></div>
+      <div class="arrow">-&gt;</div>
+      <div class="node"><b>Descriptor</b><small>ephemeral URL + context</small></div>
+      <div class="arrow">-&gt;</div>
+      <div class="node owner"><b>AVFoundation</b><small>fetch, decode, play</small></div>
+    </div>
+
+    <div class="concept-grid">
+      <article class="card">
+        <span class="badge b-note">Identity</span>
+        <h3>Stable video record</h3>
+        <pre><code>{
+  "videoId": "dQw4w9WgXcQ",
+  "title": "Track title",
+  "creator": "Channel",
+  "watchURL": "https://youtube.com/watch?..."
+}</code></pre>
+        <p>Safe to keep in favorites. It describes <em>what</em> the user selected.</p>
+      </article>
+      <article class="card">
+        <span class="badge b-modified">Playback descriptor</span>
+        <h3>Temporary access details</h3>
+        <pre><code>{
+  "url": "https://media...signed...",
+  "format": "m4a/aac",
+  "headers": { "User-Agent": "..." },
+  "expiresAt": "..."
+}</code></pre>
+        <p>Resolved again for playback. It describes <em>how to access bytes now</em>.</p>
+      </article>
+      <article class="card">
+        <span class="badge b-new">Media payload</span>
+        <h3>Encoded audio bytes</h3>
+        <pre><code>00 00 00 18 66 74 79 70 ...
+... container metadata ...
+... compressed AAC frames ...</code></pre>
+        <p>These bytes travel over HTTP and are decoded into sound by AVFoundation.</p>
+      </article>
+    </div>
+
+    <h2>What yt-dlp actually contributes</h2>
+    <p><code>yt-dlp</code> is primarily an extractor and downloader. In our proposed use, it runs briefly as a child process, performs the undocumented YouTube-specific work, selects an audio-only rendition, prints structured information, and exits.</p>
+
+    <div class="ba">
+      <div class="before">
+        <div class="label">Extraction mode: proposed</div>
+        <pre><code>yt-dlp inspects YouTube
+  - resolves video metadata
+  - discovers available formats
+  - chooses audio-only format
+  - emits direct URL + request context
+  - exits
+
+AVPlayer later fetches media bytes</code></pre>
+      </div>
+      <div class="after">
+        <div class="label">Download/pipe mode: alternative</div>
+        <pre><code>yt-dlp inspects YouTube
+  - chooses a format
+  - opens the media URL itself
+  - downloads every media byte
+  - writes file or stdout
+  - stays alive through playback
+
+Another component consumes its bytes</code></pre>
+      </div>
+    </div>
+
+    <blockquote><strong>Key distinction:</strong> using yt-dlp to obtain the URL does not mean yt-dlp must carry the audio bytes. It enters the byte path only if we ask it to download or pipe the selected media.</blockquote>
+
+    <h2>What AVPlayer actually contributes</h2>
+    <table>
+      <thead><tr><th>Type</th><th>Responsibility</th><th>Maro usage</th></tr></thead>
+      <tbody>
+        <tr><td><code>AVURLAsset</code></td><td>Represents media located at a local or remote URL.</td><td>Wrap the newly resolved audio URL and supported request options.</td></tr>
+        <tr><td><code>AVPlayerItem</code></td><td>Owns the timing and status of one playable asset.</td><td>Observe readiness, failure, duration, and end-of-track behavior.</td></tr>
+        <tr><td><code>AVPlayer</code></td><td>Controls the current item: play, pause, seek, rate, replacement.</td><td>Own the single loaded video and expose the PRD's transport states.</td></tr>
+      </tbody>
+    </table>
+    <p>For an ordinary remote URL, AVFoundation performs the HTTP reads and decoding internally. Maro does not manually push each packet into <code>AVPlayer</code>.</p>
+  </section>
+
+  <section class="lesson" data-lesson="2">
+    <h2>The second foundation: access needs more than a URL sometimes</h2>
+    <p>A direct media URL is often signed and temporary. The upstream server may also expect request context: cookies, a User-Agent, a Referer, IP affinity, or other behavior. A URL that works in yt-dlp can fail in another client if that client cannot reproduce the required context.</p>
+
+    <svg class="diagram" viewBox="0 0 1000 330" role="img" aria-label="Control plane and byte plane">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#add7ff"/></marker>
+        <marker id="arrowBytes" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#5de4c7"/></marker>
+      </defs>
+      <text x="35" y="38" class="title">CONTROL PLANE: discover what to play</text>
+      <rect class="box" x="35" y="60" width="190" height="70"/>
+      <text x="130" y="90" text-anchor="middle">Maro</text><text x="130" y="112" text-anchor="middle">video ID</text>
+      <path class="line" marker-end="url(#arrow)" d="M225 95 H390"/>
+      <rect class="box" x="390" y="60" width="190" height="70"/>
+      <text x="485" y="90" text-anchor="middle">yt-dlp</text><text x="485" y="112" text-anchor="middle">extractor</text>
+      <path class="line" marker-end="url(#arrow)" d="M580 95 H745"/>
+      <rect class="box" x="745" y="60" width="220" height="70"/>
+      <text x="855" y="90" text-anchor="middle">YouTube interfaces</text><text x="855" y="112" text-anchor="middle">formats + signed URLs</text>
+      <path class="line" marker-end="url(#arrow)" d="M745 123 C650 180 310 180 225 123"/>
+
+      <text x="35" y="215" class="title">BYTE PLANE: fetch encoded audio</text>
+      <rect class="box" x="35" y="238" width="190" height="62"/>
+      <text x="130" y="275" text-anchor="middle">AVPlayer</text>
+      <path class="bytes" marker-end="url(#arrowBytes)" d="M225 269 H745"/>
+      <rect class="box" x="745" y="238" width="220" height="62"/>
+      <text x="855" y="264" text-anchor="middle">Media CDN</text><text x="855" y="284" text-anchor="middle">audio bytes</text>
+    </svg>
+
+    <p>In the simplest design, yt-dlp appears only in the control plane. AVPlayer talks directly to the media CDN in the byte plane. That separation is the reason the direct option is small.</p>
+
+    <h3>Container, codec, and protocol are separate compatibility gates</h3>
+    <div class="concept-grid">
+      <div class="card"><span class="badge b-accent">Container</span><p><strong>M4A, WebM</strong></p><p>The file structure that organizes metadata and encoded frames.</p></div>
+      <div class="card"><span class="badge b-accent">Codec</span><p><strong>AAC, Opus</strong></p><p>The compression algorithm AVFoundation must decode.</p></div>
+      <div class="card"><span class="badge b-accent">Delivery</span><p><strong>HTTP file, HLS</strong></p><p>How the player requests the container or segment graph.</p></div>
+    </div>
+    <p>Choosing <code>best audio</code> is not enough by itself. The selected rendition must be audio-only <em>and</em> playable by the target macOS AVFoundation stack.</p>
+
+    <h3>Which request context can direct AVFoundation carry?</h3>
+    <table>
+      <thead><tr><th>Requirement</th><th>Direct asset outlook</th><th>Design implication</th></tr></thead>
+      <tbody>
+        <tr><td>Signed URL only</td><td><span class="badge b-new">Good fit</span></td><td>AVPlayer can request the URL directly.</td></tr>
+        <tr><td>Cookies</td><td><span class="badge b-modified">Documented option</span></td><td><code>AVURLAssetHTTPCookiesKey</code>, subject to normal cookie scope.</td></tr>
+        <tr><td>Custom User-Agent</td><td><span class="badge b-modified">Documented option</span></td><td><code>AVURLAssetHTTPUserAgentKey</code> on macOS 13+.</td></tr>
+        <tr><td>Arbitrary Referer/header set</td><td><span class="badge b-note">Fragile</span></td><td>Public AVURLAsset options do not promise arbitrary per-request headers.</td></tr>
+        <tr><td>Special TLS/client behavior</td><td><span class="badge b-note">Poor fit</span></td><td>AVFoundation owns networking in the direct path.</td></tr>
+        <tr><td>Expired URL mid-session</td><td><span class="badge b-note">Needs recovery</span></td><td>Re-extract, recreate the item, and resume near saved time.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="lesson" data-lesson="3">
+    <h2>The seeking lab: a player does not always read front to back</h2>
+    <p>A byte stream is an ordered series of bytes, but a media player often needs random access. It may read container metadata near one end, request an initial audio region, buffer ahead, then jump elsewhere when the user seeks.</p>
+
+    <div class="card">
+      <h3>Simulated 4-minute audio resource</h3>
+      <div class="bytebar" id="bytebar" aria-label="Sixteen regions of an audio resource"></div>
+      <div class="controls">
+        <button data-range="start">Start playback</button>
+        <button data-range="ahead">Buffer ahead</button>
+        <button data-range="seek">Seek to 3:00</button>
+        <button data-range="replay">Replay</button>
+        <button data-range="reset">Reset</button>
+      </div>
+      <pre class="trace" id="rangeTrace">Choose an action to see the byte requests.</pre>
+    </div>
+
+    <h3>Why HTTP Range matters</h3>
+    <pre><code><span class="c"># Player asks for a specific region, not necessarily the whole object</span>
+GET /audio.m4a HTTP/1.1
+Range: bytes=8388608-9437183
+
+HTTP/1.1 206 Partial Content
+Content-Range: bytes 8388608-9437183/16777216
+Content-Length: 1048576
+Content-Type: audio/mp4</code></pre>
+    <p>A direct CDN can answer these requests itself. A local proxy must preserve the same semantics. A one-way stdout pipe cannot jump backward or forward unless another component buffers the content and implements random-access reads.</p>
+
+    <svg class="diagram" viewBox="0 0 1000 390" role="img" aria-label="Direct, proxy, and pipe seeking behavior">
+      <defs>
+        <marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#add7ff"/></marker>
+        <marker id="b2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#5de4c7"/></marker>
+      </defs>
+      <text x="30" y="34" class="title">DIRECT</text>
+      <rect class="box" x="30" y="50" width="180" height="55"/><text x="120" y="83" text-anchor="middle">AVPlayer</text>
+      <path class="bytes" marker-end="url(#b2)" d="M210 77 H760"/><text x="485" y="67" text-anchor="middle">Range: bytes=N-M</text>
+      <rect class="box" x="760" y="50" width="205" height="55"/><text x="862" y="83" text-anchor="middle">Media CDN</text>
+
+      <text x="30" y="154" class="title">LOOPBACK PROXY</text>
+      <rect class="box" x="30" y="170" width="180" height="55"/><text x="120" y="203" text-anchor="middle">AVPlayer</text>
+      <path class="line" marker-end="url(#a2)" d="M210 197 H390"/>
+      <rect class="box" x="390" y="170" width="205" height="55"/><text x="492" y="192" text-anchor="middle">Maro proxy</text><text x="492" y="211" text-anchor="middle">translate Range + headers</text>
+      <path class="bytes" marker-end="url(#b2)" d="M595 197 H760"/>
+      <rect class="box" x="760" y="170" width="205" height="55"/><text x="862" y="203" text-anchor="middle">Media CDN</text>
+
+      <text x="30" y="274" class="title">STDOUT PIPE</text>
+      <rect class="box" x="30" y="290" width="180" height="55"/><text x="120" y="323" text-anchor="middle">AVPlayer</text>
+      <path class="line warn" d="M210 317 H390"/><text x="300" y="307" text-anchor="middle">no native stdin asset</text>
+      <rect class="box" x="390" y="290" width="205" height="55"/><text x="492" y="312" text-anchor="middle">sequential pipe</text><text x="492" y="331" text-anchor="middle">cannot answer arbitrary ranges</text>
+      <path class="bytes" marker-end="url(#b2)" d="M760 317 H595"/>
+      <rect class="box" x="760" y="290" width="205" height="55"/><text x="862" y="323" text-anchor="middle">yt-dlp process</text>
+    </svg>
+
+    <blockquote><strong>The hard proxy problem is not forwarding one GET.</strong> It is correctly serving repeated, concurrent, cancelled, and nonsequential reads without buffering an entire track into memory.</blockquote>
+  </section>
+
+  <section class="lesson" data-lesson="4">
+    <h2>Compare the three architectures by tracing a play action</h2>
+    <p>Select an architecture, then run the trace. Notice which process owns media bytes and which failure modes the design introduces.</p>
+
+    <div class="controls" role="tablist" aria-label="Architecture selector">
+      <button class="active" data-arch="direct">Direct URL</button>
+      <button data-arch="proxy">Loopback proxy</button>
+      <button data-arch="pipe">yt-dlp pipe</button>
+      <button id="runTrace">Run trace</button>
+    </div>
+    <pre class="trace" id="archTrace">Select an architecture and run the trace.</pre>
+
+    <div id="arch-direct" class="arch-panel">
+      <div class="choice selected">
+        <div><h3>Direct compatible stream URL</h3><p>yt-dlp resolves once; AVFoundation fetches and decodes the audio-only resource.</p></div>
+        <span class="badge b-new">Smallest</span>
+      </div>
+      <table><tbody>
+        <tr><th>Wins</th><td>No long-lived extractor, no local HTTP server, native seeking and buffering.</td></tr>
+        <tr><th>Risks</th><td>Fails when required request context or media format cannot be represented by AVFoundation.</td></tr>
+        <tr><th>Recovery</th><td>Re-extract on expiry/auth failure; mark incompatible formats unavailable.</td></tr>
+      </tbody></table>
+    </div>
+    <div id="arch-proxy" class="arch-panel hidden">
+      <div class="choice selected">
+        <div><h3>Local loopback media proxy</h3><p>AVPlayer sees a local URL. Maro makes each upstream request with extractor-supplied context.</p></div>
+        <span class="badge b-modified">Most control</span>
+      </div>
+      <table><tbody>
+        <tr><th>Wins</th><td>Can attach required headers, control redirects, refresh descriptors, and mediate ranges.</td></tr>
+        <tr><th>Risks</th><td>Must implement secure loopback binding, streaming backpressure, cancellation, ranges, and HLS resource rewriting if used.</td></tr>
+        <tr><th>Recovery</th><td>Refresh upstream descriptor, recreate player item when byte identity cannot be guaranteed.</td></tr>
+      </tbody></table>
+    </div>
+    <div id="arch-pipe" class="arch-panel hidden">
+      <div class="choice selected">
+        <div><h3>Extractor/transcoder stdout pipe</h3><p>yt-dlp or FFmpeg stays alive and writes sequential bytes to another consumer.</p></div>
+        <span class="badge b-note">Highest mismatch</span>
+      </div>
+      <table><tbody>
+        <tr><th>Wins</th><td>The downloader reproduces its own request behavior; FFmpeg can remux or transcode.</td></tr>
+        <tr><th>Risks</th><td>AVPlayer is URL/asset-oriented, stdout is nonseekable, and process/codec/CPU complexity expands.</td></tr>
+        <tr><th>Recovery</th><td>Requires buffering/spooling or a custom asset loader, effectively rebuilding the proxy problem.</td></tr>
+      </tbody></table>
+    </div>
+
+    <h2>Failure map</h2>
+    <table>
+      <thead><tr><th>Failure</th><th>Direct</th><th>Proxy</th><th>Pipe/transcode</th></tr></thead>
+      <tbody>
+        <tr><td>Signed URL works without extra headers</td><td class="correct">Natural fit</td><td>Works, extra layer</td><td>Works, extra process</td></tr>
+        <tr><td>Arbitrary headers required</td><td class="incorrect">May fail</td><td class="correct">Can reproduce</td><td class="correct">yt-dlp reproduces</td></tr>
+        <tr><td>User seeks backward</td><td class="correct">CDN handles range</td><td>Proxy must handle range</td><td class="incorrect">Pipe cannot rewind</td></tr>
+        <tr><td>Unsupported codec</td><td class="incorrect">Unavailable</td><td class="incorrect">Proxy does not decode</td><td class="correct">FFmpeg can transcode</td></tr>
+        <tr><td>URL expires during playback</td><td>Re-extract + recreate item</td><td>Proxy can mediate refresh</td><td>Restart pipeline</td></tr>
+        <tr><td>Implementation surface</td><td class="correct">Low</td><td>Medium/high</td><td>High</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="lesson" data-lesson="5">
+    <h2>The solution proposition is a staged boundary, not blind optimism</h2>
+    <div class="card verdict">
+      <span class="badge b-principle">Proposed first release</span>
+      <h3>Resolve one compatible audio-only URL, then let AVFoundation own the bytes</h3>
+      <pre><code>video selection
+  yt-dlp.resolveAudio(videoId)
+    require audio-only rendition
+    require AVFoundation-compatible container + codec
+    capture documented cookie / User-Agent context when present
+  AVURLAsset(url, options)
+  AVPlayerItem(asset)
+  AVPlayer.replaceCurrentItem(item)
+  play
+
+on access expiry
+  resolve a fresh descriptor
+  recreate the player item
+  seek near last known time
+
+on unsupported header/protocol/codec
+  return video_unavailable
+  leave current playback unchanged</code></pre>
+    </div>
+    <p>This choice preserves the PRD's requirement that no combined video/audio fallback is used. It also keeps the first release small. The limitation is explicit: a video is unavailable if its audio-only source cannot be played through the documented AVFoundation URL path.</p>
+
+    <div class="ba">
+      <div class="before">
+        <div class="label">Not proposed yet</div>
+        <pre><code>AVPlayer
+  -&gt; local HTTP server
+      -&gt; header translation
+      -&gt; Range translation
+      -&gt; cancellation/backpressure
+      -&gt; expiry refresh
+      -&gt; media CDN</code></pre>
+      </div>
+      <div class="after">
+        <div class="label">Proposed boundary</div>
+        <pre><code>yt-dlp
+  -&gt; fresh compatible descriptor
+
+AVPlayer
+  -&gt; media CDN
+
+Maro observes status and retries
+only by resolving a fresh descriptor</code></pre>
+      </div>
+    </div>
+
+    <h2>Check your model</h2>
+    <div class="card" id="quiz">
+      <div class="quiz-item" data-answer="b">
+        <p><strong>1. In the direct design, who downloads the audio payload?</strong></p>
+        <div class="quiz-options"><button data-value="a">yt-dlp</button><button data-value="b">AVFoundation</button><button data-value="c">SketchyBar</button></div>
+        <p class="feedback"></p>
+      </div>
+      <div class="quiz-item" data-answer="c">
+        <p><strong>2. Why is a stdout pipe awkward for AVPlayer seeking?</strong></p>
+        <div class="quiz-options"><button data-value="a">It uses JSON</button><button data-value="b">It is local</button><button data-value="c">It is sequential, not random-access</button></div>
+        <p class="feedback"></p>
+      </div>
+      <div class="quiz-item" data-answer="a">
+        <p><strong>3. What belongs in favorites?</strong></p>
+        <div class="quiz-options"><button data-value="a">Stable video identity and metadata</button><button data-value="b">Signed media URL</button><button data-value="c">Raw audio bytes</button></div>
+        <p class="feedback"></p>
+      </div>
+      <div class="quiz-item" data-answer="b">
+        <p><strong>4. When does a proxy become justified?</strong></p>
+        <div class="quiz-options"><button data-value="a">For every source</button><button data-value="b">When app-owned request/range mediation is required</button><button data-value="c">To render SketchyBar icons</button></div>
+        <p class="feedback"></p>
+      </div>
+    </div>
+
+    <h2>Primary references</h2>
+    <ul class="source-list">
+      <li><a href="https://github.com/yt-dlp/yt-dlp#format-selection">yt-dlp format selection</a></li>
+      <li><a href="https://github.com/yt-dlp/yt-dlp#embedding-yt-dlp">yt-dlp extraction API</a></li>
+      <li><a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#i-extracted-a-video-url-but-it-does-not-play-on-another-machine--in-my-web-browser">yt-dlp FAQ: URL, headers, cookies, and IP affinity</a></li>
+      <li><a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-stream-directly-to-media-player">yt-dlp FAQ: streaming through stdout</a></li>
+      <li><a href="https://developer.apple.com/documentation/avfoundation/avplayer">Apple AVPlayer</a>, <a href="https://developer.apple.com/documentation/avfoundation/avplayeritem">AVPlayerItem</a>, and <a href="https://developer.apple.com/documentation/avfoundation/avurlasset">AVURLAsset</a></li>
+      <li><a href="https://developer.apple.com/documentation/avfoundation/avurlassethttpcookieskey">Apple AVURLAsset cookie option</a> and <a href="https://developer.apple.com/documentation/avfoundation/avurlassethttpuseragentkey">User-Agent option</a></li>
+      <li><a href="https://developer.apple.com/documentation/avfoundation/avassetresourceloadingdatarequest">Apple requested byte ranges</a></li>
+    </ul>
+  </section>
+</main>
+
+<script>
+  const navButtons = [...document.querySelectorAll('[data-step]')];
+  const lessons = [...document.querySelectorAll('[data-lesson]')];
+  navButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      navButtons.forEach((item) => item.classList.toggle('active', item === button));
+      lessons.forEach((lesson) => lesson.classList.toggle('active', lesson.dataset.lesson === button.dataset.step));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  const bytebar = document.getElementById('bytebar');
+  for (let index = 0; index < 16; index += 1) {
+    const byte = document.createElement('div');
+    byte.className = 'byte';
+    byte.title = `Region ${index + 1}`;
+    bytebar.appendChild(byte);
+  }
+  const bytes = [...bytebar.children];
+  const rangeTrace = document.getElementById('rangeTrace');
+  const rangeActions = {
+    start: { regions: [0, 1], text: '1. AVFoundation inspects the resource.\n2. GET bytes=0-2097151\n3. CDN replies 206 Partial Content.\n4. AVPlayer decodes the opening audio frames.' },
+    ahead: { regions: [2, 3, 4], text: '1. Playback approaches the buffered edge.\n2. GET bytes=2097152-5242879\n3. Buffer fills while sound continues.\n4. Earlier regions remain available to the CDN, not necessarily in Maro memory.' },
+    seek: { regions: [12, 13], text: '1. User seeks to 3:00.\n2. AVFoundation maps time to another media region.\n3. GET bytes=12582912-14680063\n4. CDN returns a nonsequential region.\n5. This is why a simple forward-only pipe is insufficient.' },
+    replay: { regions: [0, 1], text: '1. User chooses Replay.\n2. Player returns to time zero.\n3. It may reuse cached data or request the opening range again.\n4. A correct source must tolerate repeated reads.' }
+  };
+  document.querySelectorAll('[data-range]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const action = button.dataset.range;
+      if (action === 'reset') {
+        bytes.forEach((byte) => byte.className = 'byte');
+        rangeTrace.textContent = 'Choose an action to see the byte requests.';
+        return;
+      }
+      bytes.forEach((byte) => byte.classList.remove('requested'));
+      rangeActions[action].regions.forEach((index) => {
+        bytes[index].classList.add('loaded', 'requested');
+      });
+      rangeTrace.textContent = rangeActions[action].text;
+    });
+  });
+
+  let architecture = 'direct';
+  const architectureButtons = [...document.querySelectorAll('[data-arch]')];
+  architectureButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      architecture = button.dataset.arch;
+      architectureButtons.forEach((item) => item.classList.toggle('active', item === button));
+      document.querySelectorAll('.arch-panel').forEach((panel) => panel.classList.add('hidden'));
+      document.getElementById(`arch-${architecture}`).classList.remove('hidden');
+      document.getElementById('archTrace').textContent = 'Run the trace to see this architecture in motion.';
+    });
+  });
+  const traces = {
+    direct: [
+      '01  Maro -&gt; yt-dlp: resolve audio-only format',
+      '02  yt-dlp -&gt; Maro: URL + codec/container + request context',
+      '03  yt-dlp exits',
+      '04  Maro -&gt; AVURLAsset: compatible URL and documented options',
+      '05  AVFoundation -&gt; media CDN: HTTP byte-range requests',
+      '06  AVPlayer: decode, buffer, play, pause, seek'
+    ],
+    proxy: [
+      '01  Maro -&gt; yt-dlp: resolve audio-only format',
+      '02  yt-dlp -&gt; Maro: URL + complete request context',
+      '03  AVFoundation -&gt; 127.0.0.1: request local byte range',
+      '04  Maro proxy -&gt; media CDN: translate range + attach headers',
+      '05  media CDN -&gt; proxy -&gt; AVFoundation: stream 206 response',
+      '06  proxy: handle cancellation, repeat reads, expiry, backpressure'
+    ],
+    pipe: [
+      '01  Maro starts yt-dlp with stdout output',
+      '02  yt-dlp -&gt; media CDN: download sequential bytes',
+      '03  yt-dlp -&gt; stdout: write forward-only stream',
+      '04  BLOCKER: AVPlayer expects an asset/resource, not stdin',
+      '05  Added layer must spool or expose random-access byte ranges',
+      '06  Result converges on a custom loader/proxy plus process lifecycle'
+    ]
+  };
+  document.getElementById('runTrace').addEventListener('click', async () => {
+    const output = document.getElementById('archTrace');
+    output.textContent = '';
+    for (const line of traces[architecture]) {
+      output.textContent += `${line.replaceAll('&gt;', '>')}\n`;
+      await new Promise((resolve) => setTimeout(resolve, 240));
+    }
+  });
+
+  document.querySelectorAll('.quiz-item').forEach((item) => {
+    item.querySelectorAll('[data-value]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const correct = button.dataset.value === item.dataset.answer;
+        item.querySelectorAll('button').forEach((option) => option.classList.remove('active'));
+        button.classList.add('active');
+        const feedback = item.querySelector('.feedback');
+        feedback.className = `feedback ${correct ? 'correct' : 'incorrect'}`;
+        feedback.textContent = correct ? 'Correct. The ownership boundary is clear.' : 'Not quite. Revisit the pipeline or seeking lab.';
+      });
+    });
+  });
+</script>
+</body>
+</html>

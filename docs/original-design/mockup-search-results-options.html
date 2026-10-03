@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Results Options</title>
+  <style>
+    :root {
+      --black: #181819;
+      --white: #e2e2e3;
+      --grey: #7f8490;
+      --red: #fc5d7c;
+      --blue: #76cce0;
+      --yellow: #e7c664;
+      --green: #9ed072;
+      --bg: #2c2e34;
+      --bg1: #363944;
+      --bg2: #414550;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px;
+      color: var(--white);
+      font-family: "SF Pro Display", "Helvetica Neue", sans-serif;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(118, 204, 224, 0.13), transparent 29%),
+        radial-gradient(circle at 88% 86%, rgba(252, 93, 124, 0.1), transparent 28%),
+        var(--black);
+    }
+    header { max-width: 980px; margin: 0 auto 24px; }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: -0.03em; }
+    header p { margin: 0; max-width: 760px; color: var(--grey); line-height: 1.5; }
+    .options { max-width: 980px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .option {
+      padding: 20px;
+      border: 1px solid var(--bg2);
+      border-radius: 18px;
+      background: rgba(44, 46, 52, 0.9);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+    .recommended { border-color: var(--blue); }
+    .eyebrow { color: var(--blue); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+    h2 { margin: 8px 0; font-size: 20px; }
+    .description { min-height: 66px; margin: 0 0 20px; color: var(--grey); font-size: 14px; line-height: 1.5; }
+    .panel {
+      min-height: 405px;
+      overflow: hidden;
+      border: 1px solid var(--grey);
+      border-radius: 12px;
+      background: rgba(44, 46, 52, 0.97);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42);
+    }
+    .window-title { padding: 9px 12px; color: var(--grey); font-size: 11px; border-bottom: 1px solid var(--bg2); }
+    .search { margin: 12px; padding: 10px 12px; border-radius: 9px; border: 1px solid var(--blue); background: var(--black); font-size: 13px; }
+    .summary { padding: 0 12px 9px; color: var(--grey); font-size: 10px; }
+    .result { display: grid; grid-template-columns: 82px 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; border-top: 1px solid var(--bg2); }
+    .thumb { height: 48px; border-radius: 7px; background: linear-gradient(135deg, var(--red), var(--yellow) 58%, var(--blue)); }
+    .result:nth-child(even) .thumb { background: linear-gradient(135deg, #293d49, var(--blue), var(--green)); }
+    .result strong { display: block; font-size: 12px; }
+    .result span { display: block; margin-top: 4px; color: var(--grey); font-size: 10px; }
+    .play { color: var(--blue); font-size: 16px; }
+    .more { margin: 12px; padding: 9px; border: 1px solid var(--bg2); border-radius: 8px; color: var(--grey); text-align: center; font-size: 11px; }
+    .top {
+      margin: 0 12px 12px;
+      padding: 12px;
+      border: 1px solid var(--bg2);
+      border-radius: 10px;
+      background: var(--bg1);
+    }
+    .top .thumb { height: 155px; }
+    .top strong { display: block; margin-top: 10px; font-size: 14px; }
+    .top span { display: block; margin-top: 4px; color: var(--grey); font-size: 11px; }
+    .top button { margin-top: 10px; width: 100%; border: 0; border-radius: 8px; padding: 9px; color: var(--black); background: var(--blue); font-weight: 700; }
+    .flow { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 7px; align-items: center; color: var(--grey); font-size: 12px; }
+    .flow b { padding: 7px 9px; border-radius: 7px; color: var(--white); background: var(--bg1); }
+    @media (max-width: 760px) {
+      body { padding: 20px; }
+      .options { grid-template-columns: 1fr; }
+      .description { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>How much choice should search show?</h1>
+    <p>There is no playback queue, but the search panel still needs to decide whether a query exposes one likely match or a short list to choose from.</p>
+  </header>
+  <main class="options">
+    <section class="option recommended">
+      <div class="eyebrow">Option A · Recommended</div>
+      <h2>Show five results, then load more</h2>
+      <p class="description">The user chooses explicitly from a compact list. Loading more expands discovery without making any result part of a playback queue.</p>
+      <div class="panel">
+        <div class="window-title">MARO · YOUTUBE SEARCH</div>
+        <div class="search">midnight city m83</div>
+        <div class="summary">5 results · select one to replace the current track</div>
+        <div class="result"><div class="thumb"></div><div><strong>M83 — Midnight City</strong><span>M83 · 4:04</span></div><div class="play">▶</div></div>
+        <div class="result"><div class="thumb"></div><div><strong>Midnight City — Official Video</strong><span>M83 · 4:03</span></div><div class="play">▶</div></div>
+        <div class="result"><div class="thumb"></div><div><strong>Midnight City — Live</strong><span>M83 · 5:12</span></div><div class="play">▶</div></div>
+        <div class="more">Load 5 more results</div>
+      </div>
+      <div class="flow"><b>Search</b> → <b>Choose one result</b> → <b>Replace current track</b></div>
+    </section>
+    <section class="option">
+      <div class="eyebrow">Option B</div>
+      <h2>Show only the top result</h2>
+      <p class="description">The panel remains extremely small. If the match is wrong, the user changes the query rather than browsing alternatives.</p>
+      <div class="panel">
+        <div class="window-title">MARO · TOP YOUTUBE RESULT</div>
+        <div class="search">midnight city m83</div>
+        <div class="top">
+          <div class="thumb"></div>
+          <strong>M83 — Midnight City</strong>
+          <span>M83 · 4:04</span>
+          <button>Play this result</button>
+        </div>
+      </div>
+      <div class="flow"><b>Search</b> → <b>Top result</b> → <b>Play or refine query</b></div>
+    </section>
+  </main>
+</body>
+</html>

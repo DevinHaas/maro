@@ -1,0 +1,8 @@
+
+# Local Swift build products
+.build/
+.swiftpm/
+client_secret_*.json
+dist/
+__pycache__/
+*.pyc
