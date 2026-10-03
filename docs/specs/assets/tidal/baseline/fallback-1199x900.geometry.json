@@ -1,0 +1,6839 @@
+{
+  "accessibility" : [
+    {
+      "center" : [
+        599.5,
+        450
+      ],
+      "enabled" : false,
+      "frame" : [
+        0,
+        0,
+        1199,
+        900
+      ],
+      "path" : "content",
+      "role" : "AXGroup"
+    },
+    {
+      "center" : [
+        50,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        20,
+        18,
+        60,
+        28
+      ],
+      "path" : "content\/0",
+      "role" : "AXStaticText",
+      "text" : "maro"
+    },
+    {
+      "center" : [
+        111,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        92,
+        13,
+        38,
+        38
+      ],
+      "label" : "Back",
+      "path" : "content\/1",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        161,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        142,
+        13,
+        38,
+        38
+      ],
+      "label" : "Hide library",
+      "path" : "content\/2",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        393.5,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        374.5,
+        13,
+        38,
+        38
+      ],
+      "label" : "Home",
+      "path" : "content\/3",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        453.75,
+        32.25
+      ],
+      "enabled" : true,
+      "frame" : [
+        444.5,
+        23,
+        18.5,
+        18.5
+      ],
+      "label" : "Search",
+      "path" : "content\/4",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        701.75,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        477,
+        23.5,
+        449.5,
+        17
+      ],
+      "path" : "content\/5",
+      "role" : "AXTextField"
+    },
+    {
+      "center" : [
+        1159,
+        32
+      ],
+      "enabled" : true,
+      "frame" : [
+        1142,
+        24.5,
+        34,
+        15
+      ],
+      "label" : "YouTube account",
+      "path" : "content\/6",
+      "role" : "AXMenuButton"
+    },
+    {
+      "center" : [
+        81.75,
+        99.034423828125
+      ],
+      "enabled" : true,
+      "frame" : [
+        22,
+        89.534423828125,
+        119.5,
+        19
+      ],
+      "path" : "content\/7",
+      "role" : "AXStaticText",
+      "text" : "Your Library"
+    },
+    {
+      "center" : [
+        211,
+        99
+      ],
+      "enabled" : true,
+      "frame" : [
+        192,
+        80,
+        38,
+        38
+      ],
+      "label" : "Create playlist",
+      "path" : "content\/8",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        257,
+        99
+      ],
+      "enabled" : true,
+      "frame" : [
+        238,
+        80,
+        38,
+        38
+      ],
+      "label" : "Refresh library",
+      "path" : "content\/9",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        37.75,
+        148
+      ],
+      "enabled" : true,
+      "frame" : [
+        31.5,
+        141.5,
+        12.5,
+        13
+      ],
+      "label" : "Search",
+      "path" : "content\/10",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        159.75,
+        148
+      ],
+      "enabled" : true,
+      "frame" : [
+        53.5,
+        140,
+        212.5,
+        16
+      ],
+      "label" : "Filter your library",
+      "path" : "content\/11",
+      "role" : "AXTextField"
+    },
+    {
+      "center" : [
+        148,
+        460.5
+      ],
+      "enabled" : false,
+      "frame" : [
+        8,
+        178,
+        280,
+        565
+      ],
+      "path" : "content\/12",
+      "role" : "AXScrollArea"
+    },
+    {
+      "center" : [
+        148,
+        875
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        178,
+        268,
+        1394
+      ],
+      "path" : "content\/12\/0",
+      "role" : "AXOpaqueProviderGroup"
+    },
+    {
+      "center" : [
+        148,
+        211
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        178,
+        268,
+        66
+      ],
+      "label" : "Favorites, Saved on this Mac",
+      "path" : "content\/12\/0\/0",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        279
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        246,
+        268,
+        66
+      ],
+      "label" : "Late night jazz, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/1",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        347
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        314,
+        268,
+        66
+      ],
+      "label" : "Lofi focus, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/2",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        415
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        382,
+        268,
+        66
+      ],
+      "label" : "Electronic discoveries, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/3",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        483
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        450,
+        268,
+        66
+      ],
+      "label" : "Quiet afternoons, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/4",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        551
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        518,
+        268,
+        66
+      ],
+      "label" : "Piano favourites, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/5",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        619
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        586,
+        268,
+        66
+      ],
+      "label" : "Ambient journeys, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/6",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        687
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        654,
+        268,
+        66
+      ],
+      "label" : "Weekend listening, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/7",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        755
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        722,
+        268,
+        66
+      ],
+      "label" : "Café classics, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/8",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        148,
+        1539
+      ],
+      "enabled" : true,
+      "frame" : [
+        14,
+        1506,
+        268,
+        66
+      ],
+      "label" : "Long names remain readable in the library, Playlist · Local acceptance fixture · 40 videos",
+      "path" : "content\/12\/0\/9",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        279.5,
+        460.5
+      ],
+      "enabled" : true,
+      "frame" : [
+        270,
+        177,
+        19,
+        567
+      ],
+      "path" : "content\/12\/1",
+      "role" : "AXScrollBar"
+    },
+    {
+      "center" : [
+        282,
+        413.75
+      ],
+      "enabled" : false,
+      "frame" : [
+        279,
+        181,
+        6,
+        465.5
+      ],
+      "path" : "content\/12\/1\/0",
+      "role" : "AXValueIndicator"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        271,
+        178,
+        0,
+        0
+      ],
+      "path" : "content\/12\/1\/1",
+      "role" : "AXButton"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        271,
+        178,
+        0,
+        0
+      ],
+      "path" : "content\/12\/1\/2",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        282,
+        693.5
+      ],
+      "enabled" : false,
+      "frame" : [
+        279,
+        647,
+        6,
+        93
+      ],
+      "path" : "content\/12\/1\/3",
+      "role" : "AXButton"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        279,
+        181,
+        6,
+        0
+      ],
+      "path" : "content\/12\/1\/4",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        84.5,
+        777.5
+      ],
+      "enabled" : true,
+      "frame" : [
+        24,
+        771,
+        121,
+        13
+      ],
+      "path" : "content\/13",
+      "role" : "AXStaticText",
+      "text" : "Up to date with YouTube."
+    },
+    {
+      "center" : [
+        743.5,
+        436
+      ],
+      "enabled" : false,
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "path" : "content\/14",
+      "role" : "AXScrollArea"
+    },
+    {
+      "center" : [
+        366.75,
+        163.5
+      ],
+      "enabled" : true,
+      "frame" : [
+        324,
+        156,
+        85.5,
+        15
+      ],
+      "path" : "content\/14\/0",
+      "role" : "AXStaticText",
+      "text" : "Private playlist"
+    },
+    {
+      "center" : [
+        729.75,
+        246
+      ],
+      "enabled" : true,
+      "frame" : [
+        324,
+        183,
+        811.5,
+        126
+      ],
+      "label" : "Long names remain readable in the library",
+      "path" : "content\/14\/1",
+      "role" : "AXHeading"
+    },
+    {
+      "center" : [
+        430,
+        329
+      ],
+      "enabled" : true,
+      "frame" : [
+        324,
+        321,
+        212,
+        16
+      ],
+      "path" : "content\/14\/2",
+      "role" : "AXStaticText",
+      "text" : "A collection for unhurried listening."
+    },
+    {
+      "center" : [
+        429,
+        356.5
+      ],
+      "enabled" : true,
+      "frame" : [
+        324,
+        349,
+        210,
+        15
+      ],
+      "path" : "content\/14\/3",
+      "role" : "AXStaticText",
+      "text" : "Local acceptance fixture · 40 videos"
+    },
+    {
+      "center" : [
+        351,
+        447
+      ],
+      "enabled" : true,
+      "frame" : [
+        320,
+        416,
+        62,
+        62
+      ],
+      "label" : "Play Long names remain readable in the library in saved order",
+      "path" : "content\/14\/4",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        419,
+        447
+      ],
+      "enabled" : true,
+      "frame" : [
+        400,
+        428,
+        38,
+        38
+      ],
+      "label" : "Playlist actions for Long names remain readable in the library",
+      "path" : "content\/14\/5",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        1098.75,
+        447
+      ],
+      "enabled" : true,
+      "frame" : [
+        1064.5,
+        439.5,
+        68.5,
+        15
+      ],
+      "path" : "content\/14\/6",
+      "role" : "AXStaticText",
+      "text" : "Saved order"
+    },
+    {
+      "center" : [
+        1159,
+        447.25
+      ],
+      "enabled" : true,
+      "frame" : [
+        1152.5,
+        442.5,
+        13,
+        9.5
+      ],
+      "label" : "List",
+      "path" : "content\/14\/7",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        743.5,
+        232
+      ],
+      "enabled" : true,
+      "frame" : [
+        296,
+        -215.5,
+        895,
+        895
+      ],
+      "path" : "content\/14\/8",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        385.75,
+        2970
+      ],
+      "enabled" : true,
+      "frame" : [
+        320,
+        2963,
+        131.5,
+        14
+      ],
+      "path" : "content\/14\/9",
+      "role" : "AXStaticText",
+      "text" : "Up to date with YouTube."
+    },
+    {
+      "center" : [
+        743.5,
+        1778
+      ],
+      "enabled" : true,
+      "frame" : [
+        320,
+        538,
+        847,
+        2480
+      ],
+      "path" : "content\/14\/10",
+      "role" : "AXOpaqueProviderGroup"
+    },
+    {
+      "center" : [
+        336,
+        567
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        545,
+        16,
+        44
+      ],
+      "label" : "Reorder 1. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/0",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        567
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        547,
+        24,
+        40
+      ],
+      "label" : "Play 1. Midnight jazz sessions — a long title to test row layout from position 1",
+      "path" : "content\/14\/10\/1",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        639.5,
+        567
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        549,
+        371,
+        36
+      ],
+      "label" : "1. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 1",
+      "path" : "content\/14\/10\/2",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        567
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        560,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/3",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        567
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        548,
+        38,
+        38
+      ],
+      "label" : "Actions for 1. Midnight jazz sessions — a long title to test row layout, position 1",
+      "path" : "content\/14\/10\/4",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        627
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        605,
+        16,
+        44
+      ],
+      "label" : "Reorder 2. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/5",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        627
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        607,
+        24,
+        40
+      ],
+      "label" : "Play 2. Midnight jazz sessions — a long title to test row layout from position 2",
+      "path" : "content\/14\/10\/6",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.5,
+        627
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        609,
+        373,
+        36
+      ],
+      "label" : "2. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 2",
+      "path" : "content\/14\/10\/7",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        627
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        620,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/8",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        627
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        608,
+        38,
+        38
+      ],
+      "label" : "Actions for 2. Midnight jazz sessions — a long title to test row layout, position 2",
+      "path" : "content\/14\/10\/9",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        687
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        665,
+        16,
+        44
+      ],
+      "label" : "Reorder 3. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/10",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        687
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        667,
+        24,
+        40
+      ],
+      "label" : "Play 3. Midnight jazz sessions — a long title to test row layout from position 3",
+      "path" : "content\/14\/10\/11",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.5,
+        687
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        669,
+        373,
+        36
+      ],
+      "label" : "3. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 3",
+      "path" : "content\/14\/10\/12",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        687
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        680,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/13",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        687
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        668,
+        38,
+        38
+      ],
+      "label" : "Actions for 3. Midnight jazz sessions — a long title to test row layout, position 3",
+      "path" : "content\/14\/10\/14",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        747
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        725,
+        16,
+        44
+      ],
+      "label" : "Reorder Deleted video. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/15",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        747
+      ],
+      "enabled" : false,
+      "frame" : [
+        358,
+        727,
+        24,
+        40
+      ],
+      "label" : "Play Deleted video from position 4",
+      "path" : "content\/14\/10\/16",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        553.25,
+        747
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        729,
+        198.5,
+        36
+      ],
+      "label" : "Deleted video, Unavailable, position 4",
+      "path" : "content\/14\/10\/17",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        747
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        740,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/18",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        747
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        728,
+        38,
+        38
+      ],
+      "label" : "Actions for Deleted video, position 4",
+      "path" : "content\/14\/10\/19",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        807
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        785,
+        16,
+        44
+      ],
+      "label" : "Reorder 5. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/20",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        807
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        787,
+        24,
+        40
+      ],
+      "label" : "Play 5. Midnight jazz sessions — a long title to test row layout from position 5",
+      "path" : "content\/14\/10\/21",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.5,
+        807
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        789,
+        373,
+        36
+      ],
+      "label" : "5. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 5",
+      "path" : "content\/14\/10\/22",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        807
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        800,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/23",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        807
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        788,
+        38,
+        38
+      ],
+      "label" : "Actions for 5. Midnight jazz sessions — a long title to test row layout, position 5",
+      "path" : "content\/14\/10\/24",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 6. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/25",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 6. Midnight jazz sessions — a long title to test row layout from position 6",
+      "path" : "content\/14\/10\/26",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.5,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        373,
+        36
+      ],
+      "label" : "6. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 6",
+      "path" : "content\/14\/10\/27",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/28",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 6. Midnight jazz sessions — a long title to test row layout, position 6",
+      "path" : "content\/14\/10\/29",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 7. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/30",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 7. Midnight jazz sessions — a long title to test row layout from position 7",
+      "path" : "content\/14\/10\/31",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        639.5,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        371,
+        36
+      ],
+      "label" : "7. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 7",
+      "path" : "content\/14\/10\/32",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/33",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 7. Midnight jazz sessions — a long title to test row layout, position 7",
+      "path" : "content\/14\/10\/34",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 8. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/35",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 8. Midnight jazz sessions — a long title to test row layout from position 8",
+      "path" : "content\/14\/10\/36",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        373.5,
+        36
+      ],
+      "label" : "8. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 8",
+      "path" : "content\/14\/10\/37",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/38",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 8. Midnight jazz sessions — a long title to test row layout, position 8",
+      "path" : "content\/14\/10\/39",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 9. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/40",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 9. Midnight jazz sessions — a long title to test row layout from position 9",
+      "path" : "content\/14\/10\/41",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        640.5,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        373,
+        36
+      ],
+      "label" : "9. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 9",
+      "path" : "content\/14\/10\/42",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/43",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 9. Midnight jazz sessions — a long title to test row layout, position 9",
+      "path" : "content\/14\/10\/44",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 10. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/45",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 10. Midnight jazz sessions — a long title to test row layout from position 10",
+      "path" : "content\/14\/10\/46",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        643.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        379.5,
+        36
+      ],
+      "label" : "10. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 10",
+      "path" : "content\/14\/10\/47",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/48",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 10. Midnight jazz sessions — a long title to test row layout, position 10",
+      "path" : "content\/14\/10\/49",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 11. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/50",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 11. Midnight jazz sessions — a long title to test row layout from position 11",
+      "path" : "content\/14\/10\/51",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        642.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        377.5,
+        36
+      ],
+      "label" : "11. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 11",
+      "path" : "content\/14\/10\/52",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/53",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 11. Midnight jazz sessions — a long title to test row layout, position 11",
+      "path" : "content\/14\/10\/54",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 12. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/55",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 12. Midnight jazz sessions — a long title to test row layout from position 12",
+      "path" : "content\/14\/10\/56",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        643.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        379.5,
+        36
+      ],
+      "label" : "12. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 12",
+      "path" : "content\/14\/10\/57",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/58",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 12. Midnight jazz sessions — a long title to test row layout, position 12",
+      "path" : "content\/14\/10\/59",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 13. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/60",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 13. Midnight jazz sessions — a long title to test row layout from position 13",
+      "path" : "content\/14\/10\/61",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        643.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        379.5,
+        36
+      ],
+      "label" : "13. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 13",
+      "path" : "content\/14\/10\/62",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/63",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 13. Midnight jazz sessions — a long title to test row layout, position 13",
+      "path" : "content\/14\/10\/64",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 14. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/65",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 14. Midnight jazz sessions — a long title to test row layout from position 14",
+      "path" : "content\/14\/10\/66",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        644,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        380,
+        36
+      ],
+      "label" : "14. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 14",
+      "path" : "content\/14\/10\/67",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/68",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 14. Midnight jazz sessions — a long title to test row layout, position 14",
+      "path" : "content\/14\/10\/69",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 15. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/70",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 15. Midnight jazz sessions — a long title to test row layout from position 15",
+      "path" : "content\/14\/10\/71",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        643.75,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        379.5,
+        36
+      ],
+      "label" : "15. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 15",
+      "path" : "content\/14\/10\/72",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/73",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 15. Midnight jazz sessions — a long title to test row layout, position 15",
+      "path" : "content\/14\/10\/74",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 16. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/75",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 16. Midnight jazz sessions — a long title to test row layout from position 16",
+      "path" : "content\/14\/10\/76",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        644,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        380,
+        36
+      ],
+      "label" : "16. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 16",
+      "path" : "content\/14\/10\/77",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/78",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 16. Midnight jazz sessions — a long title to test row layout, position 16",
+      "path" : "content\/14\/10\/79",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        336,
+        2989
+      ],
+      "enabled" : false,
+      "frame" : [
+        328,
+        2967,
+        16,
+        44
+      ],
+      "label" : "Reorder 17. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard.",
+      "path" : "content\/14\/10\/80",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        370,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        358,
+        2969,
+        24,
+        40
+      ],
+      "label" : "Play 17. Midnight jazz sessions — a long title to test row layout from position 17",
+      "path" : "content\/14\/10\/81",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        643,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        454,
+        2971,
+        378,
+        36
+      ],
+      "label" : "17. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 17",
+      "path" : "content\/14\/10\/82",
+      "role" : "AXUnknown"
+    },
+    {
+      "center" : [
+        1036,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1007,
+        2982,
+        58,
+        14
+      ],
+      "path" : "content\/14\/10\/83",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "center" : [
+        1140,
+        2989
+      ],
+      "enabled" : true,
+      "frame" : [
+        1121,
+        2970,
+        38,
+        38
+      ],
+      "label" : "Actions for 17. Midnight jazz sessions — a long title to test row layout, position 17",
+      "path" : "content\/14\/10\/84",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        1182.5,
+        436
+      ],
+      "enabled" : true,
+      "frame" : [
+        1173,
+        71,
+        19,
+        730
+      ],
+      "path" : "content\/14\/11",
+      "role" : "AXScrollBar"
+    },
+    {
+      "center" : [
+        1185,
+        164.5
+      ],
+      "enabled" : false,
+      "frame" : [
+        1182,
+        75,
+        6,
+        179
+      ],
+      "path" : "content\/14\/11\/0",
+      "role" : "AXValueIndicator"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        1174,
+        72,
+        0,
+        0
+      ],
+      "path" : "content\/14\/11\/1",
+      "role" : "AXButton"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        1174,
+        72,
+        0,
+        0
+      ],
+      "path" : "content\/14\/11\/2",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        1185,
+        525.75
+      ],
+      "enabled" : false,
+      "frame" : [
+        1182,
+        254.5,
+        6,
+        542.5
+      ],
+      "path" : "content\/14\/11\/3",
+      "role" : "AXButton"
+    },
+    {
+      "enabled" : false,
+      "frame" : [
+        1182,
+        75,
+        6,
+        0
+      ],
+      "path" : "content\/14\/11\/4",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        48,
+        852
+      ],
+      "enabled" : true,
+      "frame" : [
+        20,
+        824,
+        56,
+        56
+      ],
+      "path" : "content\/15",
+      "role" : "AXImage"
+    },
+    {
+      "center" : [
+        210.75,
+        843
+      ],
+      "enabled" : true,
+      "frame" : [
+        88,
+        835.5,
+        245.5,
+        15
+      ],
+      "path" : "content\/16",
+      "role" : "AXStaticText",
+      "text" : "Midnight jazz — a very long title to verify truncation and full accessibility labels"
+    },
+    {
+      "center" : [
+        123.75,
+        862
+      ],
+      "enabled" : true,
+      "frame" : [
+        88,
+        855.5,
+        71.5,
+        13
+      ],
+      "path" : "content\/17",
+      "role" : "AXStaticText",
+      "text" : "Jazz collective"
+    },
+    {
+      "center" : [
+        371.5,
+        852
+      ],
+      "enabled" : true,
+      "frame" : [
+        352.5,
+        833,
+        38,
+        38
+      ],
+      "label" : "Toggle favorite",
+      "path" : "content\/18",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        547.5,
+        843
+      ],
+      "enabled" : false,
+      "frame" : [
+        528.5,
+        824,
+        38,
+        38
+      ],
+      "label" : "Previous",
+      "path" : "content\/19",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        599.5,
+        843
+      ],
+      "enabled" : true,
+      "frame" : [
+        580.5,
+        824,
+        38,
+        38
+      ],
+      "label" : "Play",
+      "path" : "content\/20",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        651.5,
+        843
+      ],
+      "enabled" : false,
+      "frame" : [
+        632.5,
+        824,
+        38,
+        38
+      ],
+      "label" : "Next",
+      "path" : "content\/21",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        1031.5,
+        852
+      ],
+      "enabled" : true,
+      "frame" : [
+        1012.5,
+        833,
+        38,
+        38
+      ],
+      "label" : "Add to playlist",
+      "path" : "content\/22",
+      "role" : "AXButton"
+    },
+    {
+      "center" : [
+        1134,
+        852
+      ],
+      "enabled" : true,
+      "frame" : [
+        1089,
+        844,
+        90,
+        16
+      ],
+      "label" : "Playback volume",
+      "path" : "content\/23",
+      "role" : "AXSlider"
+    },
+    {
+      "center" : [
+        1099,
+        852
+      ],
+      "enabled" : false,
+      "frame" : [
+        1089,
+        844,
+        20,
+        16
+      ],
+      "path" : "content\/23\/0",
+      "role" : "AXValueIndicator"
+    },
+    {
+      "center" : [
+        434.33333333333337,
+        871
+      ],
+      "enabled" : true,
+      "frame" : [
+        421.83333333333337,
+        864.5,
+        25,
+        13
+      ],
+      "path" : "content\/24",
+      "role" : "AXStaticText",
+      "text" : "0:38"
+    },
+    {
+      "center" : [
+        599.5,
+        871
+      ],
+      "enabled" : true,
+      "frame" : [
+        462.5,
+        863,
+        274,
+        16
+      ],
+      "path" : "content\/25",
+      "role" : "AXSlider"
+    },
+    {
+      "center" : [
+        504.5,
+        871
+      ],
+      "enabled" : false,
+      "frame" : [
+        494.5,
+        863,
+        20,
+        16
+      ],
+      "path" : "content\/25\/0",
+      "role" : "AXValueIndicator"
+    },
+    {
+      "center" : [
+        764.66666666666674,
+        871
+      ],
+      "enabled" : true,
+      "frame" : [
+        752.16666666666674,
+        864.5,
+        25,
+        13
+      ],
+      "path" : "content\/26",
+      "role" : "AXStaticText",
+      "text" : "5:00"
+    }
+  ],
+  "backingScale" : 2,
+  "coordinateSpace" : "content-top-left-logical-points",
+  "limitations" : [
+    "Accessibility text rectangles are exposed AX bounds, not glyph ink bounds or typographic baselines.",
+    "SwiftUI Text baselines and font descriptors are not exposed by the native NSView\/AX tree; measure rendered glyphs separately.",
+    "AX control frames and centers do not prove custom contentShape hit regions; only native bridge view bounds are observed.",
+    "SwiftUI internal spacing\/columns\/overlay anchors are not individually exposed; use capture and production layout constants as supplemental reconstruction evidence."
+  ],
+  "route" : "fallback",
+  "schemaVersion" : 1,
+  "viewport" : [
+    1199,
+    900
+  ],
+  "views" : [
+    {
+      "class" : "NSHostingView<AppShellView>",
+      "frame" : [
+        0,
+        0,
+        1199,
+        900
+      ],
+      "hidden" : false,
+      "path" : "content"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        142,
+        13,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/0"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        495,
+        13,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/1"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        232,
+        80,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/2"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        278,
+        80,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/3"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        433,
+        833,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/4"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        701.5,
+        824,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/5"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1254,
+        833,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/6"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        8,
+        72,
+        280,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/7"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        192,
+        80,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/7\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        8,
+        72,
+        280,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/8"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        238,
+        80,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/8\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        20,
+        130,
+        256,
+        36
+      ],
+      "hidden" : false,
+      "path" : "content\/9"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformTextFieldAdaptor>>",
+      "frame" : [
+        53.5,
+        140,
+        212.5,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/9\/0"
+    },
+    {
+      "class" : "AppKitTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".SFNS-Regular"
+      },
+      "frame" : [
+        51.5,
+        140,
+        216.5,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/9\/0\/0",
+      "text" : ""
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        51.5,
+        140,
+        216.5,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/9\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        8,
+        72,
+        280,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/10"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        8,
+        178,
+        280,
+        565
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        8,
+        178,
+        280,
+        565
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        8,
+        178,
+        280,
+        565
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        8,
+        178,
+        280,
+        678
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        8,
+        178,
+        280,
+        678
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        178,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        246,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        314,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        382,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        450,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        518,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        586,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        654,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        14,
+        722,
+        268,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/0\/0\/8"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        178,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/1"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        246,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/2"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        314,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/3"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        382,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/4"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        450,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/5"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        518,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/6"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        586,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/7"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        654,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/8"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        14,
+        722,
+        308,
+        66
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/0\/9"
+    },
+    {
+      "class" : "NSScroller",
+      "enabled" : true,
+      "frame" : [
+        271,
+        178,
+        17,
+        565
+      ],
+      "hidden" : false,
+      "path" : "content\/10\/0\/0\/1"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        8,
+        72,
+        280,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/11"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<SelectionOverlay>>",
+      "frame" : [
+        24,
+        771,
+        121,
+        13
+      ],
+      "hidden" : false,
+      "path" : "content\/11\/0"
+    },
+    {
+      "class" : "SelectionTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 10,
+      "font" : {
+        "ascender" : 9.66796875,
+        "descender" : -2.109375,
+        "leading" : 0,
+        "pointSize" : 10,
+        "postScriptName" : ".SFNS-Regular"
+      },
+      "frame" : [
+        22,
+        771,
+        125,
+        13
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/11\/0\/0",
+      "text" : "Up to date with YouTube."
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/12"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        296,
+        72,
+        895,
+        1684
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        1684
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        96,
+        847,
+        260
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        708,
+        294,
+        121,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        380,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        320,
+        380,
+        221.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/1\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        380,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        549.5,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/2\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        380,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        605.5,
+        380,
+        222,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/3\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        380,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        835.5,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/4\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        891.5,
+        380,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        891.5,
+        380,
+        221.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/5\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        891.5,
+        380,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/6\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        452,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        320,
+        452,
+        221.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/7\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        452,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/8"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        549.5,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/8\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        452,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/9"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        605.5,
+        452,
+        222,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/9\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        452,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/10"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        835.5,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/10\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        891.5,
+        452,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/11"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        891.5,
+        452,
+        221.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/11\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        891.5,
+        452,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/12"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/12\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        524,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/13"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        320,
+        524,
+        221.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/13\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        524,
+        275.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/14"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        549.5,
+        536,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/14\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        524,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/15"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        605.5,
+        524,
+        222,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/15\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        605.5,
+        524,
+        276,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/16"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        835.5,
+        536,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/16\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1122.5,
+        642,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/17"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        320,
+        671,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        320,
+        671,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        320,
+        671,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        320,
+        671,
+        1666,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        320,
+        671,
+        1666,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        330,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        330,
+        938,
+        77,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        325,
+        938,
+        82,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        333,
+        939,
+        16,
+        14
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        351,
+        938,
+        42,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0\/0\/1",
+      "text" : "Saved"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        351,
+        938,
+        42,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        394,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/1\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        540,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/2\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        540,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        535,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        543,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        560,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        560,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        595,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/3\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        750,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/4\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        750,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        745,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        753,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        770,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        770,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        805,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/5\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        960,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/6\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        960,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        955,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        963,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        980,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        980,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1015,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/7\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1160,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/8"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1170,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/8\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1160,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1170,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1165,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1173,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1190,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1190,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1225,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/9\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1370,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/10"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1380,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/10\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1370,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1380,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1375,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1383,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1400,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1400,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1435,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/11\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1580,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/12"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1590,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/12\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1580,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1590,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1585,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1593,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1610,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1610,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1645,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/13\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1790,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/14"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1800,
+        681,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/14\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1790,
+        671,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1800,
+        938,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1795,
+        938,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1803,
+        938.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1820,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1820,
+        938,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1855,
+        943.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/18\/0\/0\/0\/0\/15\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1122.5,
+        1024,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/19"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        320,
+        1053,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        320,
+        1053,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        320,
+        1053,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        320,
+        1053,
+        1666,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        320,
+        1053,
+        1666,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        330,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        330,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        325,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        333,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        350,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        350,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        385,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/1\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        540,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/2\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        540,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        535,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        543,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        560,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        560,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        595,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/3\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        750,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/4\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        750,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        745,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        753,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        770,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        770,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        805,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/5\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        960,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/6\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        960,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        955,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        963,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        980,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        980,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1015,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/7\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1160,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/8"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1170,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/8\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1160,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1170,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1165,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1173,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1190,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1190,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1225,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/9\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1370,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/10"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1380,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/10\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1370,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1380,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1375,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1383,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1400,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1400,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1435,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/11\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1580,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/12"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1590,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/12\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1580,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1590,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1585,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1593,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1610,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1610,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1645,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/13\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1790,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/14"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1800,
+        1063,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/14\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        1790,
+        1053,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1800,
+        1320,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1795,
+        1320,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1803,
+        1320.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        1820,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        1820,
+        1320,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1855,
+        1325.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/20\/0\/0\/0\/0\/15\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1122.5,
+        1406,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/21"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        320,
+        1435,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        320,
+        1435,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        320,
+        1435,
+        847,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        320,
+        1435,
+        826,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        320,
+        1435,
+        826,
+        297
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        330,
+        1445,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        320,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        330,
+        1702,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        325,
+        1702,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        333,
+        1702.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        350,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        350,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        385,
+        1707.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/1\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        540,
+        1445,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/2\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        530,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        540,
+        1702,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        535,
+        1702,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        543,
+        1702.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        560,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        560,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        595,
+        1707.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/3\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        750,
+        1445,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/4\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        740,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        750,
+        1702,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        745,
+        1702,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        753,
+        1702.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        770,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        770,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        805,
+        1707.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/5\/0\/0\/2"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        960,
+        1445,
+        176,
+        247
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/6\/0"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        950,
+        1435,
+        196,
+        293
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        960,
+        1702,
+        68,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        955,
+        1702,
+        73,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        963,
+        1702.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0\/0\/0"
+    },
+    {
+      "class" : "NSButtonTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 13,
+      "font" : {
+        "ascender" : 12.568359375,
+        "descender" : -2.7421875,
+        "leading" : 0,
+        "pointSize" : 13,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        980,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0\/0\/1",
+      "text" : "Save"
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        980,
+        1702,
+        34,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0\/0\/1\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1015,
+        1707.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/0\/0\/22\/0\/0\/0\/0\/7\/0\/0\/2"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        794.5,
+        294,
+        121,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/1"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        320,
+        380,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/2"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        528.5,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/3"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        584.5,
+        380,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/4"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        793,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/5"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        849,
+        380,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/6"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1057.5,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/7"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1113.5,
+        380,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/8"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1322,
+        392,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/9"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        320,
+        452,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/10"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        528.5,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/11"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        584.5,
+        452,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/12"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        793,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/13"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        849,
+        452,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/14"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1057.5,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/15"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1113.5,
+        452,
+        200.5,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/16"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1322,
+        464,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/17"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1323.5,
+        610,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/18"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1323.5,
+        681,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/19"
+    },
+    {
+      "class" : "KeyViewProxy",
+      "frame" : [
+        1323.5,
+        752,
+        44.5,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/0\/20"
+    },
+    {
+      "class" : "NSScroller",
+      "enabled" : true,
+      "frame" : [
+        1174,
+        72,
+        17,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/12\/0\/0\/1"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/13"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/13\/0"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/13\/0\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/13\/0\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        296,
+        72,
+        895,
+        183
+      ],
+      "hidden" : false,
+      "path" : "content\/13\/0\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        183
+      ],
+      "hidden" : false,
+      "path" : "content\/13\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "NSScroller",
+      "enabled" : false,
+      "frame" : [
+        296,
+        72,
+        0,
+        100
+      ],
+      "hidden" : true,
+      "path" : "content\/13\/0\/0\/1"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/14"
+    },
+    {
+      "class" : "PlatformContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0"
+    },
+    {
+      "class" : "HostingScrollView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0"
+    },
+    {
+      "class" : "NSClipView",
+      "frame" : [
+        296,
+        72,
+        895,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0"
+    },
+    {
+      "class" : "DocumentView",
+      "frame" : [
+        296,
+        72,
+        895,
+        2929
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0"
+    },
+    {
+      "class" : "PlatformGroupContainer",
+      "frame" : [
+        296,
+        72,
+        895,
+        2929
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        320,
+        416,
+        62,
+        62
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        400,
+        428,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/1"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        400,
+        428,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/2"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<DraggingDestinationView>>",
+      "frame" : [
+        320,
+        538,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/3"
+    },
+    {
+      "class" : "_PlatformDraggingDestinationView",
+      "frame" : [
+        320,
+        538,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/3\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaylistDragHandle>>",
+      "frame" : [
+        328,
+        545,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/4"
+    },
+    {
+      "class" : "PlaylistDragHandleView",
+      "frame" : [
+        328,
+        545,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/4\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        358,
+        547,
+        24,
+        40
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/5"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        548,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/6"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        548,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/7"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<DraggingDestinationView>>",
+      "frame" : [
+        320,
+        598,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/8"
+    },
+    {
+      "class" : "_PlatformDraggingDestinationView",
+      "frame" : [
+        320,
+        598,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/8\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaylistDragHandle>>",
+      "frame" : [
+        328,
+        605,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/9"
+    },
+    {
+      "class" : "PlaylistDragHandleView",
+      "frame" : [
+        328,
+        605,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/9\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        358,
+        607,
+        24,
+        40
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/10"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        608,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/11"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        608,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/12"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<DraggingDestinationView>>",
+      "frame" : [
+        320,
+        658,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/13"
+    },
+    {
+      "class" : "_PlatformDraggingDestinationView",
+      "frame" : [
+        320,
+        658,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/13\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaylistDragHandle>>",
+      "frame" : [
+        328,
+        665,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/14"
+    },
+    {
+      "class" : "PlaylistDragHandleView",
+      "frame" : [
+        328,
+        665,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/14\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        358,
+        667,
+        24,
+        40
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/15"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        668,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/16"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        668,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/17"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<DraggingDestinationView>>",
+      "frame" : [
+        320,
+        718,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/18"
+    },
+    {
+      "class" : "_PlatformDraggingDestinationView",
+      "frame" : [
+        320,
+        718,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/18\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaylistDragHandle>>",
+      "frame" : [
+        328,
+        725,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/19"
+    },
+    {
+      "class" : "PlaylistDragHandleView",
+      "frame" : [
+        328,
+        725,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/19\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        358,
+        727,
+        24,
+        40
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/20"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        728,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/21"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        728,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/22"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<DraggingDestinationView>>",
+      "frame" : [
+        320,
+        778,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/23"
+    },
+    {
+      "class" : "_PlatformDraggingDestinationView",
+      "frame" : [
+        320,
+        778,
+        847,
+        58
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/23\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaylistDragHandle>>",
+      "frame" : [
+        328,
+        785,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/24"
+    },
+    {
+      "class" : "PlaylistDragHandleView",
+      "frame" : [
+        328,
+        785,
+        16,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/24\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        358,
+        787,
+        24,
+        40
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/25"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        788,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/26"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1121,
+        788,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/27"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<SelectionOverlay>>",
+      "frame" : [
+        320,
+        2963,
+        131.5,
+        14
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/28"
+    },
+    {
+      "class" : "SelectionTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 11,
+      "font" : {
+        "ascender" : 10.634765625,
+        "descender" : -2.3203125,
+        "leading" : 0,
+        "pointSize" : 11,
+        "postScriptName" : ".SFNS-Regular"
+      },
+      "frame" : [
+        318,
+        2963,
+        135.5,
+        14
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/14\/0\/0\/0\/0\/0\/28\/0",
+      "text" : "Up to date with YouTube."
+    },
+    {
+      "class" : "NSScroller",
+      "enabled" : true,
+      "frame" : [
+        1174,
+        72,
+        17,
+        728
+      ],
+      "hidden" : false,
+      "path" : "content\/14\/0\/0\/1"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        352.5,
+        833,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/15"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        528.5,
+        824,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/16"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        580.5,
+        824,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/17"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        632.5,
+        824,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/18"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlaybackTimelineSlider>>",
+      "frame" : [
+        462.5,
+        863,
+        274,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/19"
+    },
+    {
+      "class" : "TimelineSlider",
+      "enabled" : true,
+      "frame" : [
+        462.5,
+        863,
+        274,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/19\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        1012.5,
+        833,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/20"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<SystemSlider>>",
+      "frame" : [
+        1089,
+        844,
+        90,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21"
+    },
+    {
+      "class" : "CustomMarkedSlider",
+      "enabled" : true,
+      "frame" : [
+        1089,
+        844,
+        90,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21\/0"
+    },
+    {
+      "class" : "_NSCoreHostingView<SliderWrapper>",
+      "frame" : [
+        1089,
+        844,
+        90,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21\/0\/0"
+    },
+    {
+      "class" : "NSCorePlatformViewHost<PlatformViewRepresentableAdaptor<WindowPortal<_ViewModifier_Content<LiftPortalEffect>>>>",
+      "frame" : [
+        1089,
+        844,
+        20,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21\/0\/0\/0"
+    },
+    {
+      "class" : "LiftPortalView",
+      "frame" : [
+        1089,
+        844,
+        20,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_NSCoreHostingView<_ViewModifier_Content<LiftPortalEffect>>",
+      "frame" : [
+        1089,
+        844,
+        20,
+        16
+      ],
+      "hidden" : false,
+      "path" : "content\/21\/0\/0\/0\/0\/0"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        92,
+        13,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/22"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        142,
+        13,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/23"
+    },
+    {
+      "class" : "_FocusRingView",
+      "frame" : [
+        374.5,
+        13,
+        38,
+        38
+      ],
+      "hidden" : false,
+      "path" : "content\/24"
+    },
+    {
+      "class" : "_NSGraphicsView",
+      "frame" : [
+        424.5,
+        10,
+        520,
+        44
+      ],
+      "hidden" : false,
+      "path" : "content\/25"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<GlobalSearchField>>",
+      "frame" : [
+        477,
+        23.5,
+        449.5,
+        17
+      ],
+      "hidden" : false,
+      "path" : "content\/25\/0"
+    },
+    {
+      "class" : "NSTextField",
+      "enabled" : true,
+      "firstBaselineOffsetFromTop" : 14,
+      "font" : {
+        "ascender" : 13.53515625,
+        "descender" : -2.953125,
+        "leading" : 0,
+        "pointSize" : 14,
+        "postScriptName" : ".AppleSystemUIFont"
+      },
+      "frame" : [
+        475,
+        23.5,
+        453.5,
+        17
+      ],
+      "hidden" : false,
+      "lastBaselineOffsetFromBottom" : 3,
+      "path" : "content\/25\/0\/0",
+      "text" : ""
+    },
+    {
+      "class" : "NSTextFieldSimpleLabel",
+      "frame" : [
+        475,
+        23.5,
+        453.5,
+        17
+      ],
+      "hidden" : false,
+      "path" : "content\/25\/0\/0\/0"
+    },
+    {
+      "class" : "AppKitPlatformViewHost<PlatformViewRepresentableAdaptor<PlatformView>>",
+      "frame" : [
+        1142,
+        24.5,
+        34,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/26"
+    },
+    {
+      "class" : "SwiftUIPopupButton",
+      "enabled" : true,
+      "frame" : [
+        1137,
+        24.5,
+        39,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/26\/0"
+    },
+    {
+      "class" : "NSButtonImageView",
+      "frame" : [
+        1145,
+        24.5,
+        15,
+        15
+      ],
+      "hidden" : false,
+      "path" : "content\/26\/0\/0"
+    },
+    {
+      "class" : "NSPopUpIndicatorView",
+      "frame" : [
+        1163,
+        29.5,
+        7,
+        5
+      ],
+      "hidden" : false,
+      "path" : "content\/26\/0\/1"
+    }
+  ]
+}

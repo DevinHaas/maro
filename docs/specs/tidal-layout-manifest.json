@@ -1,0 +1,42 @@
+{
+  "baselineRevision": "ce978cf6738a92583770931238b0492ed1acbe42",
+  "coordinateSpace": "content-top-left-logical-points",
+  "coverage": {"status": "preparatory partial; stopped at user request", "pairedStates": 46, "pngFiles": 59, "plannedStates": 60, "pairedRoutesAtAllViewports": ["home", "preview", "playlist", "rows", "fallback", "favorites", "results"], "missingGeometryAtAllViewports": ["empty", "error"], "additionalMissingGeometry": ["filter-1200x900", "filter-1002x900"], "guardCheckedDuringRun": 31},
+  "evidence": "assets/tidal/baseline/{route}-{width}x{height}.geometry.json and .png",
+  "primaryViewports": {
+    "1440x900": {"topBar": [8, 0, 1424, 64], "library": [8, 72, 320, 728], "content": [336, 72, 1096, 728], "player": [8, 808, 1424, 88]},
+    "1024x768": {"topBar": [8, 0, 1008, 64], "library": [8, 72, 280, 596], "content": [296, 72, 720, 596], "player": [8, 676, 1008, 88]}
+  },
+  "shell": {"evidenceKind": "source-constraints corroborated by rendered AX scroll bounds", "outerHorizontalPadding": 8, "bottomPadding": 4, "gap": 8, "sidebarBreakpoint": 1200, "sidebarWidths": [280, 320], "surfaceCornerRadius": 8},
+  "home": {
+    "evidenceKind": "source-constraints; use route AX text and button rectangles for final placement",
+    "contentPadding": 24, "sectionGap": 24, "featureHeight": 260, "featureArtworkWidth": "max(160, featureWidth * 0.43)",
+    "featureTextPadding": 24, "featureTextGap": 14, "featureTitleSizes": [26, 34], "featureTitleBreakpoint": 650,
+    "observedTitleThreshold": {"1001x900": {"titleAX": [623.07, 147, 175, 30], "contentScrollWidth": 697}, "1002x900": {"titleAX": [623.5, 147, 228, 40], "contentScrollWidth": 698}},
+    "shortcutGridMinimumWidth": 218, "shortcutGridGap": 10, "shortcutArtwork": [62, 62], "shortcutTextGap": 12,
+    "videoCardWidth": 196, "videoCardPadding": 10, "videoArtwork": [176, 176], "videoTitleContainerHeight": 36,
+    "observed1440": {"featureTitleAX": [834.64, 147, 228, 40], "openPlaylistAX": [834.5, 294, 121, 38]},
+    "observed1024": {"featureTitleAX": [632.96, 147, 228, 40], "openPlaylistAX": [633, 294, 121, 38]}
+  },
+  "playlist": {
+    "evidenceKind": "source-constraints plus playlist/rows AX and native PlaylistDragHandleView rectangles",
+    "coverHeaderHeight": 320, "headerTextPadding": 28, "headerTextGap": 12, "titlePointSize": 54, "minimumTitleScale": 0.6,
+    "columnGap": 14, "columnHorizontalPadding": 8, "dragHandleColumn": 16, "indexColumn": 24, "dateColumn": 100, "durationColumn": 48, "actionsColumn": 38,
+    "titleColumn": "remaining available width", "rowHeadingBottomPadding": 10
+  },
+  "preview": {
+    "evidenceKind": "native bridge bounds from preview geometry; source constraints for surrounding painted shape",
+    "searchMaximumWidth": 520, "searchHeight": 44, "fieldHeight": 28, "searchHorizontalPadding": 18, "searchGap": 12,
+    "overlayTopOffset": 52, "queryRowPadding": 10, "queryIconColumn": 40, "queryGap": 14, "videoArtwork": [48, 48], "videoTextGap": 12,
+    "observed1440": {"globalSearchFieldAX": [597.5, 23.5, 449.5, 17], "previewBridge": [545, 62, 520, 520], "navigateTextAX": [562, 78, 63.5, 13]},
+    "observed1024": {"globalSearchFieldAX": [389.5, 23.5, 449.5, 17], "previewBridge": [337, 62, 520, 520]}
+  },
+  "results": {"evidenceKind": "use results AX row rectangles and screenshot; search data is the shared 20-video fixture", "route": "results"},
+  "player": {
+    "evidenceKind": "source constraints and per-route observed AX/native slider bounds; control centers can vary with content state",
+    "height": 88, "clusterGap": 24, "artwork": [56, 56], "metadataGap": 12, "buttonSize": [38, 38], "transportGap": 14, "timelineHeight": 18, "clockColumns": 40,
+    "observedHome1440": {"previousAX": [649.5, 824, 38, 38], "playAX": [701.5, 824, 38, 38], "nextAX": [753.5, 824, 38, 38], "volumeAX": [1330.5, 844, 90, 16]},
+    "observedHome1024": {"previousAX": [441, 692, 38, 38], "playAX": [493, 692, 38, 38], "nextAX": [545, 692, 38, 38], "volumeAX": [914, 712, 90, 16]}
+  },
+  "limits": ["Source constraints are supplemental reconstruction data, not independent resolved SwiftUI measurements.", "AX text frames are exposed text bounds; glyph ink bounds, SwiftUI baselines and fonts are not exposed.", "AX button rectangles do not prove contentShape hit regions.", "Use each route's geometry; do not reuse Home player centers for a different playback/content state."]
+}
