@@ -37,7 +37,7 @@ private struct PlaylistDetailContent: View {
                                     .accessibilityLabel("Play \(playlist.title) in saved order")
                                 AppIconButton(title: "Playlist actions for \(playlist.title)", symbol: "ellipsis", enabled: !library.busy) {
                                     invokingControl = "playlist-actions"; library.presentPlaylistActions()
-                                }.focused($focusedControl, equals: "playlist-actions")
+                                }.focusable().focused($focusedControl, equals: "playlist-actions")
                                 Spacer()
                                 if library.busy { ProgressView().controlSize(.small) }
                                 Text("Saved order").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
@@ -233,7 +233,7 @@ struct PlaylistTrackRow: View {
                 let duration = Int(seconds); return "\(duration / 60):\(String(format: "%02d", duration % 60))"
             } ?? "").monospacedDigit().font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: 48) }
             AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
-                .focused(focusedControl, equals: item.id)
+                .focusable().focused(focusedControl, equals: item.id)
         }.padding(.horizontal, 8).padding(.vertical, 7)
             .background(RoundedRectangle(cornerRadius: 5).fill(hovered || playFocused || focusedControl.wrappedValue == item.id ? Color.white.opacity(0.10) : active ? Color.white.opacity(0.035) : .clear))
             .onHover { hovered = $0 }
