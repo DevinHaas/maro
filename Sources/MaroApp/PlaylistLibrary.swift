@@ -17,6 +17,10 @@ final class PlaylistLibrary: ObservableObject {
     @Published var destination = ""
     @Published var signingIn = false
     @Published var canRetry = false
+    @Published var actionContext: PlaylistActionContext?
+    @Published private(set) var loadedItemsByPlaylist: [String: [YouTubePlaylistItem]] = [:]
+    @Published private(set) var recommendationScope = UUID().uuidString
+    private var loadedPlaylistOrder: [String] = []
     private var account: YouTubeAccount?
     private var api: YouTubePlaylists?
     private var retry: (() async throws -> Void)?
@@ -54,7 +58,7 @@ final class PlaylistLibrary: ObservableObject {
             api = YouTubePlaylists(token: { try await account.accessToken() })
             configured = true; connected = false
             accountRevision += 1
-            playlists = []; items = []; selected = nil
+            playlists = []; items = []; selected = nil; clearLoadedEvidence()
             retry = nil; canRetry = false; stale = false
             status = "Credentials imported. Connect YouTube to continue."
         } catch { status = error.localizedDescription }
@@ -68,7 +72,7 @@ final class PlaylistLibrary: ObservableObject {
             self.status = "Finish Google sign-in in your browser."
             try await account.connect { NSWorkspace.shared.open($0) }
             self.connected = true
-            self.playlists = []; self.items = []; self.selected = nil
+            self.playlists = []; self.items = []; self.selected = nil; self.clearLoadedEvidence()
             try await self.reload()
         }
     }
@@ -79,7 +83,7 @@ final class PlaylistLibrary: ObservableObject {
         do {
             try account?.disconnect()
             accountRevision += 1
-            connected = false; playlists = []; items = []; selected = nil
+            connected = false; playlists = []; items = []; selected = nil; clearLoadedEvidence()
             pendingVideo = nil; retry = nil; canRetry = false; stale = false
             status = "Disconnected on this Mac. Your YouTube playlists are unchanged."
         } catch { status = error.localizedDescription }
@@ -141,8 +145,86 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func rename() {
-        guard let selected, let name = askName(title: "Rename playlist", value: selected.title), let api else { return }
-        mutate { try await api.rename(selected.id, title: name) }
+        guard let selected, let name = askName(title: "Rename playlist", value: selected.title) else { return }
+        rename(playlistID: selected.id, title: name)
+    }
+
+    func rename(playlistID: String, title: String) {
+        guard let playlist = playlists.first(where: { $0.id == playlistID }), let api else { return }
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty, title.count <= 150 else { status = "Enter a playlist name of 1–150 characters."; return }
+        let renamed = YouTubePlaylist(id: playlist.id, title: title, count: playlist.count,
+            thumbnailURL: playlist.thumbnailURL, description: playlist.description, owner: playlist.owner, privacy: playlist.privacy)
+        mutate({ try await api.rename(playlistID, title: title) }, reconcile: {
+            if let index = self.playlists.firstIndex(where: { $0.id == playlistID }) { self.playlists[index] = renamed }
+            if self.selected?.id == playlistID { self.selected = renamed }
+        })
+    }
+
+    func presentItemActions(occurrenceID: String, playlistID: String) {
+        guard let item = item(occurrenceID: occurrenceID, in: playlistID), let selected else { return }
+        actionContext = PlaylistActionContext(playlist: selected, item: item)
+    }
+
+    func presentPlaylistActions() {
+        guard let selected else { return }
+        actionContext = PlaylistActionContext(playlist: selected)
+    }
+
+    func dismissActions() { actionContext = nil }
+
+    func item(occurrenceID: String, in playlistID: String) -> YouTubePlaylistItem? {
+        guard selected?.id == playlistID else { status = "This playlist is no longer open. Open it again to edit this occurrence."; return nil }
+        guard let item = items.first(where: { $0.id == occurrenceID }) else {
+            status = "This occurrence is no longer in the playlist. Refresh to see its current contents."; return nil
+        }
+        return item
+    }
+
+    func remove(occurrenceID: String, from playlistID: String) {
+        guard let item = item(occurrenceID: occurrenceID, in: playlistID) else { return }
+        remove(item)
+    }
+
+    func add(_ video: VideoSummary, to playlistID: String) {
+        guard playlists.contains(where: { $0.id == playlistID }), let api else { return }
+        mutate { try await api.add(video, to: playlistID) }
+    }
+
+    func toggleFavorite(_ video: VideoSummary) {
+        do { try controller.toggleFavorite(video); status = "Favorites: \(controller.snapshot.favorites.count) of 20 saved." }
+        catch StateError.favoritesFull { status = "Favorites are full (20 of 20). Remove one before adding another." }
+        catch { status = error.localizedDescription }
+    }
+
+    /// Accessible move extension point; ticket #6 replaces its persistence with serialized reconciliation.
+    func move(occurrenceID: String, in playlistID: String, to position: Int) {
+        guard let item = item(occurrenceID: occurrenceID, in: playlistID), let api,
+              items.indices.contains(position), let old = items.firstIndex(where: { $0.id == occurrenceID }), old != position else { return }
+        guard item.video != nil else { status = "This unavailable entry cannot be reordered. You can remove it instead."; return }
+        mutate { try await api.move(item, in: playlistID, to: position) }
+    }
+
+    func play(occurrenceID: String, in playlistID: String) {
+        guard let item = item(occurrenceID: occurrenceID, in: playlistID), item.video != nil,
+              let index = items.firstIndex(where: { $0.id == occurrenceID }) else { return }
+        play(from: index)
+    }
+
+    func play(_ playlist: YouTubePlaylist) {
+        guard let api, connected else { return }
+        let revision = accountRevision
+        Task {
+            do {
+                let queue = selected?.id == playlist.id && !busy ? items : try await api.items(in: playlist.id)
+                guard revision == accountRevision, connected else { return }
+                rememberLoaded(queue, playlistID: playlist.id)
+                guard !queue.isEmpty else { status = "This playlist is empty."; return }
+                try await controller.playPlaylist(queue, playlistID: playlist.id)
+                status = controller.snapshot.error ?? "Playing in saved order. Edits apply the next time you play this playlist."
+            } catch is CancellationError { }
+            catch { status = error.localizedDescription }
+        }
     }
 
     func remove(_ item: YouTubePlaylistItem) {
@@ -150,6 +232,7 @@ final class PlaylistLibrary: ObservableObject {
         mutate({ try await api.remove(item) }, reconcile: {
             guard self.selected?.id == playlistID else { return }
             self.items.removeAll { $0.id == item.id }
+            self.rememberLoaded(self.items, playlistID: playlistID)
         })
     }
 
@@ -161,10 +244,11 @@ final class PlaylistLibrary: ObservableObject {
 
     func play(from index: Int = 0) {
         let items = items
+        let playlistID = selected?.id
         guard items.indices.contains(index) else { return }
         Task {
             do {
-                try await controller.playPlaylist(items, startingAt: index)
+                try await controller.playPlaylist(items, startingAt: index, playlistID: playlistID)
                 status = controller.snapshot.error ?? "Playing in saved order. Edits apply the next time you play this playlist."
             } catch is CancellationError { }
             catch { status = "Could not play this selection. \(controller.snapshot.error ?? error.localizedDescription)" }
@@ -186,6 +270,8 @@ final class PlaylistLibrary: ObservableObject {
             guard revision == accountRevision, connected else { return }
             guard requestedID == selected?.id else { continue }
             playlists = fresh; selected = freshSelected; items = freshItems
+            if let requestedID { rememberLoaded(freshItems, playlistID: requestedID) }
+            loadedItemsByPlaylist = loadedItemsByPlaylist.filter { entry in fresh.contains { $0.id == entry.key } }
             break
         }
         if !fresh.contains(where: { $0.id == destination }) { destination = fresh.first?.id ?? "" }
@@ -208,6 +294,17 @@ final class PlaylistLibrary: ObservableObject {
             do { try await self.reload() }
             catch { throw YouTubeAccountError("Saved on YouTube, but refresh failed. Retry refresh to see the updated playlist.") }
         }
+    }
+
+    private func rememberLoaded(_ items: [YouTubePlaylistItem], playlistID: String) {
+        loadedPlaylistOrder.removeAll { $0 == playlistID }; loadedPlaylistOrder.append(playlistID)
+        loadedItemsByPlaylist[playlistID] = Array(items.prefix(50))
+        while loadedPlaylistOrder.count > 12 { loadedItemsByPlaylist.removeValue(forKey: loadedPlaylistOrder.removeFirst()) }
+    }
+
+    private func clearLoadedEvidence() {
+        recommendationScope = UUID().uuidString
+        loadedItemsByPlaylist = [:]; loadedPlaylistOrder = []; actionContext = nil
     }
 
     private func run(_ action: @escaping () async throws -> Void) {
