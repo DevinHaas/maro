@@ -34,6 +34,19 @@ private actor PlaylistRequests {
     }
 }
 
+@Test @MainActor func unavailablePlaylistEntriesRetainDatesAndResourceIdentityWithoutBecomingPlayable() async throws {
+    let api = YouTubePlaylists(token: { "fixture" }, send: { request in
+        let body = #"{"items":[{"id":"private","snippet":{"title":"Private video","publishedAt":"2026-09-02T13:45:00Z","resourceId":{"videoId":"01234567890"}}},{"id":"deleted","snippet":{"title":"Deleted video","resourceId":{"videoId":"01234567891"}}},{"id":"live","snippet":{"title":"Live set","publishedAt":"unknown","resourceId":{"videoId":"01234567892"}}}]}"#
+        return (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!)
+    })
+    let items = try await api.items(in: "PLone")
+    #expect(items[0].video == nil && items[1].video == nil)
+    #expect(items[0].resourceVideoID == "01234567890")
+    #expect(items[0].addedAt == ISO8601DateFormatter().date(from: "2026-09-02T13:45:00Z"))
+    #expect(items[2].video?.title == "Live set")
+    #expect(items[2].addedAt == nil)
+}
+
 @Test @MainActor func playlistAPIPaginatesPreservesDuplicatesAndWritesOnlyRequestedFields() async throws {
     let probe = PlaylistRequests()
     let api = YouTubePlaylists(token: { "test-token" }, send: { try await probe.respond($0) })
@@ -122,6 +135,35 @@ private actor PlaylistRequests {
     #expect(controller.snapshot.timelineID != id)
     controller.seek(to: 0.8, timelineID: id)
     #expect(controller.snapshot.seekTarget == nil, "Old occurrence's draft must not seek the reused player")
+    await controller.shutdown()
+}
+
+@Test @MainActor func selectedDuplicateKeepsOccurrenceAndOriginThroughCapturedQueueAndPause() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let audio = try makeSilentAudio()
+    defer { try? FileManager.default.removeItem(at: file); try? FileManager.default.removeItem(at: audio) }
+    let video = try VideoSummary(id: "01234567890", title: "Repeated", creator: "Test")
+    let next = try VideoSummary(id: "01234567891", title: "Next", creator: "Test")
+    let engine = PlaybackEngine()
+    let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: engine, search: { _ in [] }, prepare: { requested, position in
+            try await engine.prepareAsset(AVURLAsset(url: audio), video: requested, positionSeconds: position)
+        })
+    var saved = [YouTubePlaylistItem(id: "first", video: video, title: video.title),
+                 YouTubePlaylistItem(id: "second", video: video, title: video.title),
+                 YouTubePlaylistItem(id: "third", video: next, title: next.title)]
+    try await controller.playPlaylist(saved, startingAt: 1, playlistID: "PLone")
+    controller.pause()
+    saved.remove(at: 1)
+    #expect(controller.snapshot.activePlaylistItemID == "second")
+    #expect(controller.snapshot.originPlaylistID == "PLone")
+    #expect(controller.snapshot.playback == .paused)
+    #expect(try await controller.execute(CommandRequest(command: .next), openSearch: {}).ok)
+    #expect(controller.snapshot.activePlaylistItemID == "third")
+    #expect(controller.snapshot.loadedVideo?.video == next)
+    try await controller.select(video)
+    #expect(controller.snapshot.activePlaylistItemID == nil)
+    #expect(controller.snapshot.originPlaylistID == nil)
     await controller.shutdown()
 }
 

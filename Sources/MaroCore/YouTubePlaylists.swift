@@ -22,9 +22,13 @@ public struct YouTubePlaylistItem: Identifiable, Equatable, Sendable {
     public let id: String
     public let video: VideoSummary?
     public let title: String
+    public let addedAt: Date?
+    /// Resource identity is retained even when YouTube marks the video unavailable.
+    public let resourceVideoID: String?
 
-    public init(id: String, video: VideoSummary?, title: String) {
+    public init(id: String, video: VideoSummary?, title: String, addedAt: Date? = nil, resourceVideoID: String? = nil) {
         self.id = id; self.video = video; self.title = title
+        self.addedAt = addedAt; self.resourceVideoID = resourceVideoID ?? video?.id
     }
 }
 
@@ -71,10 +75,13 @@ public final class YouTubePlaylists {
             let title = snippet["title"] as? String ?? "Unavailable video"
             let videoID = (snippet["resourceId"] as? [String: Any])?["videoId"] as? String ?? ""
             let thumbnail = ((snippet["thumbnails"] as? [String: Any])?["medium"] as? [String: Any])?["url"] as? String
-            let video = try? VideoSummary(id: videoID, title: title,
+            let unavailable = title == "Private video" || title == "Deleted video"
+            let video = unavailable ? nil : try? VideoSummary(id: videoID, title: title,
                 creator: snippet["videoOwnerChannelTitle"] as? String ?? "",
                 thumbnailURL: thumbnail.flatMap(URL.init(string:)))
-            return YouTubePlaylistItem(id: id, video: video, title: title)
+            let addedAt = (snippet["publishedAt"] as? String).flatMap { ISO8601DateFormatter().date(from: $0) }
+            return YouTubePlaylistItem(id: id, video: video, title: title, addedAt: addedAt,
+                resourceVideoID: videoID.isEmpty ? nil : videoID)
         }
     }
 

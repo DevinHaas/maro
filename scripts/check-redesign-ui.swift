@@ -1,6 +1,7 @@
 // Isolated native acceptance fixture. No credentials, remote playlist writes, or audio.
 // Compile alongside Sources/MaroApp/*.swift except MaroApp.swift, linking MaroCore.
 import AppKit
+import AVFoundation
 import SwiftUI
 import Foundation
 @testable import MaroCore
@@ -35,20 +36,25 @@ import Foundation
                 let directory = FileManager.default.temporaryDirectory.appendingPathComponent("maro-redesign-fixture-" + UUID().uuidString)
                 self.directory = directory
                 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                let audio = try Self.silentAudio(in: directory)
+                let engine = PlaybackEngine()
+                engine.volume = 0
                 let videos = try (0..<20).map { index in
                     try VideoSummary(id: String(format: "fixture%04d", index),
                         title: index == 0 ? "Midnight jazz — a very long title to verify truncation and full accessibility labels" : "Quiet sessions \(index + 1)",
-                        creator: index < 4 ? "Jazz collective" : "Creator \(index)", durationSeconds: Double(180 + index * 13))
+                        creator: index < 4 ? "Jazz collective" : "Creator \(index)", durationSeconds: 300)
                 }
                 var document = StateDocument(loadedVideo: try LoadedVideo(video: videos[0], positionSeconds: 38))
                 try document.toggleFavorite(videos[0])
                 let controller = try MaroController(loaded: StateLoadResult(document: document, preservedFile: nil, warning: nil),
-                    store: StateStore(file: directory.appendingPathComponent("state.json")), engine: PlaybackEngine(),
+                    store: StateStore(file: directory.appendingPathComponent("state.json")), engine: engine,
                     search: { query in
                         if query == "error" { throw SourceFailure.noCompatibleAudio }
                         if query == "loading" { try await Task.sleep(for: .seconds(2)) }
                         return query == "empty" ? [] : videos
-                    }, prepare: { _, _ in throw SourceFailure.noCompatibleAudio })
+                    }, prepare: { video, position in
+                        try await engine.prepareAsset(AVURLAsset(url: audio), video: video, positionSeconds: position)
+                    })
                 self.controller = controller
                 let responses = RedesignFixtureResponses()
                 let api = YouTubePlaylists(token: { "disposable-local-fixture" }, send: { try await responses.respond($0) })
@@ -114,6 +120,24 @@ import Foundation
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+
+    private static func silentAudio(in directory: URL) throws -> URL {
+        // Five minutes of silent PCM enables real native pause/seek/queue checks.
+        let bytes = UInt32(8000 * 2 * 300)
+        var data = Data()
+        func text(_ value: String) { data.append(contentsOf: value.utf8) }
+        func number<T: FixedWidthInteger>(_ value: T) {
+            var littleEndian = value.littleEndian
+            withUnsafeBytes(of: &littleEndian) { data.append(contentsOf: $0) }
+        }
+        text("RIFF"); number(bytes + 36); text("WAVEfmt "); number(UInt32(16))
+        number(UInt16(1)); number(UInt16(1)); number(UInt32(8000)); number(UInt32(16000))
+        number(UInt16(2)); number(UInt16(16)); text("data"); number(bytes)
+        data.append(Data(repeating: 0, count: Int(bytes)))
+        let file = directory.appendingPathComponent("silent.wav")
+        try data.write(to: file)
+        return file
+    }
 }
 
 actor RedesignFixtureResponses {

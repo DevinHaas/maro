@@ -19,6 +19,8 @@ public struct PlayerSnapshot: Codable, Sendable {
     public var playbackID: UUID? = nil
     public var timelineID: UUID? = nil
     public var seekTarget: Double? = nil
+    public var activePlaylistItemID: String? = nil
+    public var originPlaylistID: String? = nil
 }
 
 public struct SearchViewState: Sendable {
@@ -58,6 +60,7 @@ public final class MaroController {
     private var session: SearchSession?
     private var playlistQueue: [YouTubePlaylistItem] = []
     private var playlistIndex: Int?
+    private var originPlaylistID: String?
     private var queueID = UUID()
     private var queueTask: Task<Void, Error>?
     private var queueAutoplay = false
@@ -87,7 +90,9 @@ public final class MaroController {
             canGoNext: !selecting && !needsUpdate && canNavigate(1),
             volume: engine.volume,
             timeline: selecting || needsUpdate || isShutDown ? nil : engine.timeline,
-            playbackID: engine.playbackID, timelineID: selectionID, seekTarget: seekTarget)
+            playbackID: engine.playbackID, timelineID: selectionID, seekTarget: seekTarget,
+            activePlaylistItemID: playlistIndex.flatMap { playlistQueue.indices.contains($0) ? playlistQueue[$0].id : nil },
+            originPlaylistID: playlistIndex == nil ? nil : originPlaylistID)
     }
     public var searchState: SearchViewState {
         SearchViewState(query: query, results: session?.visibleResults ?? [], isSearching: searching,
@@ -220,18 +225,18 @@ public final class MaroController {
             selectionTask?.cancel(); selectionID = UUID(); selecting = false
         }
         queueTask?.cancel(); queueTask = nil
-        playlistQueue = []; playlistIndex = nil
+        playlistQueue = []; playlistIndex = nil; originPlaylistID = nil
         try await load(video, position: 0)
     }
 
     /// Snapshot the saved order. Browsing or editing a playlist does not rewrite active playback.
-    public func playPlaylist(_ items: [YouTubePlaylistItem], startingAt index: Int = 0) async throws {
+    public func playPlaylist(_ items: [YouTubePlaylistItem], startingAt index: Int = 0, playlistID: String? = nil) async throws {
         guard !isShutDown else { throw ControllerFailure.shutDown }
         guard items.indices.contains(index) else { throw CommandProtocolFailure.invalidArguments }
         queueTask?.cancel()
         selectionTask?.cancel(); selectionID = UUID(); selecting = false
         queueID = UUID()
-        playlistQueue = items; playlistIndex = nil
+        playlistQueue = items; playlistIndex = nil; originPlaylistID = playlistID
         try await runQueue(from: index, step: 1, autoplay: true)
     }
 
