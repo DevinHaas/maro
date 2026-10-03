@@ -27,6 +27,7 @@ struct AppIconButton: View {
 }
 struct LibraryArtwork: View {
     var url: URL?
+    var localPath: String?
     var symbol = "music.note.list"
     var favorites = false
     var body: some View {
@@ -36,10 +37,29 @@ struct LibraryArtwork: View {
                 Image(systemName: "heart.fill").font(.system(size: 22)).foregroundStyle(.white)
             } else {
                 AppDesign.raised
-                AsyncImage(url: url) { image in image.resizable().scaledToFill() }
-                    placeholder: { Image(systemName: symbol).font(.system(size: 22)).foregroundStyle(AppDesign.muted) }
+                if let localPath, let image = CachedArtworkImages.image(at: localPath) {
+                    Image(nsImage: image).resizable().scaledToFill()
+                } else {
+                    AsyncImage(url: url) { image in image.resizable().scaledToFill() }
+                        placeholder: { Image(systemName: symbol).font(.system(size: 22)).foregroundStyle(AppDesign.muted) }
+                }
             }
         }.clipped().clipShape(RoundedRectangle(cornerRadius: 5)).accessibilityHidden(true)
+    }
+}
+
+@MainActor private enum CachedArtworkImages {
+    private static let images: NSCache<NSString, NSImage> = {
+        let cache = NSCache<NSString, NSImage>()
+        cache.countLimit = 80
+        return cache
+    }()
+    static func image(at path: String) -> NSImage? {
+        guard FileManager.default.fileExists(atPath: path) else { return nil }
+        if let image = images.object(forKey: path as NSString) { return image }
+        guard let image = NSImage(contentsOfFile: path) else { return nil }
+        images.setObject(image, forKey: path as NSString)
+        return image
     }
 }
 struct LibraryRow: View {

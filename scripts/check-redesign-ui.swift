@@ -17,11 +17,19 @@ import Foundation
 
 @MainActor final class RedesignFixtureDelegate: NSObject, NSApplicationDelegate {
     private var window: NSWindow?
+    private var search: SearchWindow?
     private var app: ApplicationModel?
     private var controller: MaroController?
     private var directory: URL?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        let menu = NSMenu()
+        let item = NSMenuItem()
+        menu.addItem(item)
+        let applicationMenu = NSMenu()
+        item.submenu = applicationMenu
+        applicationMenu.addItem(NSMenuItem(title: "Quit acceptance fixture", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        NSApplication.shared.mainMenu = menu
         Task {
             do {
                 let directory = FileManager.default.temporaryDirectory.appendingPathComponent("maro-redesign-fixture-" + UUID().uuidString)
@@ -47,21 +55,19 @@ import Foundation
                 let library = PlaylistLibrary(controller: controller, api: api)
                 library.refresh()
                 while library.busy { await Task.yield() }
-                let model = ApplicationModel(controller: controller, library: library)
+                let search = SearchWindow(controller: controller, cacheDirectory: directory, playlistLibrary: library)
+                self.search = search
+                let model = search.application
                 self.app = model
-                controller.onChange = { [weak model] _ in model?.render() }
-                let hosting = NSHostingView(rootView: AppShellView(app: model, library: library))
-                let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
-                    styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
+                controller.onChange = { [weak model] in model?.render() }
+                guard let window = search.window,
+                      let hosting = window.contentView as? NSHostingView<AppShellView> else { throw CocoaError(.coderInvalidValue) }
                 window.title = "Maro Redesign Acceptance"
                 window.isReleasedWhenClosed = false
                 window.appearance = NSAppearance(named: .darkAqua)
                 window.titlebarAppearsTransparent = true
-                window.minSize = NSSize(width: 800, height: 600)
-                window.contentView = hosting
                 self.window = window
-                window.center(); window.makeKeyAndOrderFront(nil)
-                NSApplication.shared.activate(ignoringOtherApps: true)
+                search.present()
                 if CommandLine.arguments.count > 2 && CommandLine.arguments[1] == "--capture" {
                     let output = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: true)
                     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
@@ -83,6 +89,9 @@ import Foundation
                             default: model.showHome()
                             }
                             try await Task.sleep(for: .milliseconds(350))
+                            // Window managers may retile a fixture window; constrain the
+                            // rendered content explicitly for repeatable viewport checks.
+                            hosting.setFrameSize(size)
                             hosting.layoutSubtreeIfNeeded()
                             guard let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds),
                                   let data = { () -> Data? in
@@ -91,7 +100,7 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
-                            print("Captured \(name)")
+                            print("Captured \(name): logical content \(hosting.bounds.size), pixels \(bitmap.pixelsWide)×\(bitmap.pixelsHigh), window \(window.frame.size)")
                         }
                     }
                     await controller.shutdown()
@@ -103,6 +112,8 @@ import Foundation
             }
         }
     }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }
 
 actor RedesignFixtureResponses {
