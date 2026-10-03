@@ -61,8 +61,12 @@ struct PlaylistActionsSheet: View {
             } else { Text("This video is unavailable. It will be skipped during playback; you can still remove this occurrence.").font(.system(size: 12)).foregroundStyle(AppDesign.muted) }
             HStack {
                 Stepper("Move to position \(position)", value: $position, in: 1...max(1, library.items.count))
-                Button("Move") { library.move(occurrenceID: item.id, in: context.playlist.id, to: position - 1) }.disabled(item.video == nil || library.busy)
-            }.disabled(item.video == nil)
+                Button("Move") { library.move(occurrenceID: item.id, in: context.playlist.id, to: position - 1) }
+                    .disabled(item.resourceVideoID == nil || !library.canReorder || library.selected?.id != context.playlist.id)
+            }.disabled(item.resourceVideoID == nil || !library.canReorder)
+            if library.canRetry || library.reorderState == .unconfirmed {
+                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") { library.retryLast() }.disabled(library.busy)
+            }
             Button("Remove this occurrence", role: .destructive) {
                 library.remove(occurrenceID: item.id, from: context.playlist.id); library.dismissActions()
             }.disabled(library.busy)
