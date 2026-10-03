@@ -57,7 +57,11 @@ private struct PlaylistDetailContent: View {
                                         reorderLibrary: library, playlistID: playlist.id,
                                         play: { library.play(occurrenceID: item.id, in: playlist.id) },
                                         actions: { invokingControl = item.id; library.presentItemActions(occurrenceID: item.id, playlistID: playlist.id) })
-                                        .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: index, splitRow: true))
+                                        .background {
+                                            // Keep the native handle above the drop surface in hit testing.
+                                            Color.clear.contentShape(Rectangle())
+                                                .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: index, splitRow: true))
+                                        }
                                         .overlay(alignment: .top) {
                                             if library.dragInsertion == index { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
                                         }
