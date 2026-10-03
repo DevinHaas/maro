@@ -16,6 +16,7 @@ struct HomeSection: Identifiable {
     @Published private(set) var sections: [HomeSection] = []
     @Published private(set) var isLoading = false
     @Published private(set) var error: String?
+    @Published private(set) var isPaused = false
     var suggestedQueries: [String] { profile.seeds.map(\.query) }
     var onChange: (() -> Void)?
 
@@ -53,7 +54,7 @@ struct HomeSection: Identifiable {
         guard self.scope != scope || profile != fresh else { return }
         task?.cancel(); task = nil; isLoading = false; generation = UUID()
         if self.scope != scope { cache.removeAll(); sections = [] }
-        self.scope = scope; profile = fresh; error = nil
+        self.scope = scope; profile = fresh; error = nil; isPaused = false
         pending = fresh.seeds.filter { seed in
             guard let entry = entry(for: seed) else { return true }
             return entry.expires <= now()
@@ -72,7 +73,12 @@ struct HomeSection: Identifiable {
         task = Task { [weak self] in
             guard let self else { return }
             defer {
-                if generation == revision { task = nil; isLoading = false; onChange?() }
+                if generation == revision {
+                    task = nil; isLoading = false; onChange?()
+                    // Foreground may finish before this cancelled await unwinds.
+                    // Resuming remaining seeds here closes that callback race without replaying a query.
+                    resumeIfNeeded()
+                }
             }
             while generation == revision, !Task.isCancelled, let seed = pending.first {
                 guard !controller.hasForegroundMetadataRequest, !controller.snapshot.isSelecting else { return }
@@ -86,7 +92,12 @@ struct HomeSection: Identifiable {
                     trimCache()
                     rebuild()
                 } catch is CancellationError {
-                    // Keep this query pending. Foreground search or audio preparation owns priority.
+                    // One automatic attempt per seed preserves the three-search cold budget.
+                    // A deliberate Retry can finish an interrupted query after foreground work.
+                    if generation == revision, !Task.isCancelled {
+                        pending.removeFirst()
+                        isPaused = true
+                    }
                     return
                 } catch {
                     guard generation == revision, !Task.isCancelled else { return }
@@ -100,7 +111,7 @@ struct HomeSection: Identifiable {
 
     func retry() {
         guard task == nil else { return }
-        error = nil
+        error = nil; isPaused = false
         pending = profile.seeds.filter { entry(for: $0).map { $0.expires <= now() } ?? true }
         rebuild(); resumeIfNeeded()
     }

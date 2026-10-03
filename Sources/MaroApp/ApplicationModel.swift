@@ -194,6 +194,7 @@ enum ApplicationRoute: Equatable {
     }
     func toggleFavorite(_ video: VideoSummary) {
         do { try controller.toggleFavorite(video); actionError = nil }
+        catch StateError.favoritesFull { actionError = "Favorites are full. Remove one before adding another." }
         catch { actionError = error.localizedDescription }
         render()
     }

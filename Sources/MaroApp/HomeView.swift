@@ -22,6 +22,13 @@ struct HomeView: View {
                     HStack(spacing: 10) { ProgressView().controlSize(.small); Text("Finding suggestions…").foregroundStyle(AppDesign.muted) }
                         .font(.system(size: 12)).accessibilityElement(children: .combine)
                 }
+                if home.isPaused && !home.isLoading {
+                    HStack {
+                        Text("Some suggestions paused for search or playback.").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
+                        Spacer(minLength: 0)
+                        Button("Resume suggestions") { home.retry() }
+                    }
+                }
                 if let error = home.error {
                     HStack(alignment: .top, spacing: 14) {
                         VStack(alignment: .leading, spacing: 4) {
