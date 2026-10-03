@@ -23,7 +23,10 @@ private struct PlaylistDetailContent: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         PlaylistCoverHeader(playlist: playlist, loadedCount: library.busy ? nil : library.items.count,
-                            fallbackURL: library.items.compactMap { $0.video?.thumbnailURL }.first, color: $artworkColor)
+                            fallbackURL: library.items.compactMap { item in
+                                guard let video = item.video else { return nil as URL? }
+                                return player.snapshot.localThumbnailPaths?[video.id].map { URL(fileURLWithPath: $0) } ?? video.thumbnailURL
+                            }.first, color: $artworkColor)
                         VStack(alignment: .leading, spacing: 18) {
                             HStack(spacing: 18) {
                                 Button { library.play() } label: {
@@ -50,7 +53,7 @@ private struct PlaylistDetailContent: View {
                                     PlaylistTrackRow(item: item, position: index + 1,
                                         active: player.snapshot.originPlaylistID == playlist.id && player.snapshot.activePlaylistItemID == item.id,
                                         playback: player.snapshot.playback, showsDates: showsDates, showsDurations: showsDurations,
-                                        busy: library.busy, focusedControl: $focusedControl,
+                                        busy: library.busy, localPath: item.video.flatMap { player.snapshot.localThumbnailPaths?[$0.id] }, focusedControl: $focusedControl,
                                         play: { library.play(occurrenceID: item.id, in: playlist.id) },
                                         actions: { invokingControl = item.id; library.presentItemActions(occurrenceID: item.id, playlistID: playlist.id) })
                                 }
@@ -155,6 +158,7 @@ struct PlaylistTrackRow: View {
     let showsDates: Bool
     let showsDurations: Bool
     let busy: Bool
+    var localPath: String? = nil
     var focusedControl: FocusState<String?>.Binding
     let play: () -> Void
     let actions: () -> Void
@@ -171,7 +175,7 @@ struct PlaylistTrackRow: View {
                 }.frame(width: 24, height: 40).contentShape(Rectangle())
             }.buttonStyle(.plain).disabled(item.video == nil || busy).focused($playFocused)
                 .foregroundStyle(active ? AppDesign.green : AppDesign.muted).accessibilityLabel("Play \(item.title) from position \(position)")
-            LibraryArtwork(url: item.video?.thumbnailURL, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
+            LibraryArtwork(url: item.video?.thumbnailURL, localPath: localPath, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
                 .frame(width: 44, height: 44).opacity(item.video == nil ? 0.5 : 1)
             VStack(alignment: .leading, spacing: 5) {
                 Text(item.title).font(.system(size: 14, weight: .medium)).foregroundStyle(active ? AppDesign.green : .white).lineLimit(1)
