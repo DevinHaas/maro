@@ -10,6 +10,7 @@ struct PlaylistDragHandle: NSViewRepresentable {
     @ObservedObject var library: PlaylistLibrary
 
     func makeNSView(context: Context) -> PlaylistDragHandleView { PlaylistDragHandleView() }
+    static func dismantleNSView(_ view: PlaylistDragHandleView, coordinator: Void) { view.stopInputMonitoring() }
     func updateNSView(_ view: PlaylistDragHandleView, context: Context) {
         view.item = item; view.playlistID = playlistID; view.library = library
         view.enabled = library.canReorder && item.resourceVideoID != nil
@@ -30,6 +31,8 @@ struct PlaylistDragHandle: NSViewRepresentable {
     private weak var sourceScrollView: NSScrollView?
     private var artwork: NSImage?
     private var artworkURL: URL?
+    private var inputMonitor: Any?
+    private var bridgedMouseSequence = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -37,6 +40,43 @@ struct PlaylistDragHandle: NSViewRepresentable {
         toolTip = "Drag to reorder. Actions offers Move to position."
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        stopInputMonitoring()
+        guard window != nil else { return }
+        // SwiftUI can hit-test its row container ahead of an embedded NSView. Route only
+        // real events inside this handle; AppKit owns the gesture once its drag starts.
+        inputMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp]) { [weak self] event in
+            guard let self, let window = self.window, event.window === window else { return event }
+            switch event.type {
+            case .leftMouseDown:
+                let point = self.convert(event.locationInWindow, from: nil)
+                guard self.enabled, !self.isDragging, self.bounds.contains(point), self.visibleRect.contains(point),
+                      let content = window.contentView,
+                      content.hitTest(content.convert(event.locationInWindow, from: nil)) !== self else { return event }
+                self.bridgedMouseSequence = true
+                self.mouseDown(with: event)
+                return nil
+            case .leftMouseDragged:
+                guard self.bridgedMouseSequence, !self.isDragging else { return event }
+                self.mouseDragged(with: event)
+                return nil
+            case .leftMouseUp:
+                guard self.bridgedMouseSequence, !self.isDragging else { return event }
+                self.bridgedMouseSequence = false
+                self.mouseUp(with: event)
+                return nil
+            default: return event
+            }
+        }
+    }
+    func stopInputMonitoring() {
+        if let inputMonitor { NSEvent.removeMonitor(inputMonitor) }
+        inputMonitor = nil; bridgedMouseSequence = false; startEvent = nil
+        edgeTimer?.invalidate(); edgeTimer = nil
+        if isDragging { library?.cancelDrag() }
+        isDragging = false; sourceScrollView = nil
+    }
     override func draw(_ dirtyRect: NSRect) {
         (enabled ? NSColor.secondaryLabelColor : NSColor.disabledControlTextColor).setFill()
         for x in [bounds.midX - 3, bounds.midX + 3] {
@@ -71,7 +111,7 @@ struct PlaylistDragHandle: NSViewRepresentable {
         context == .withinApplication ? .move : []
     }
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
-        edgeTimer?.invalidate(); edgeTimer = nil; startEvent = nil; isDragging = false
+        edgeTimer?.invalidate(); edgeTimer = nil; startEvent = nil; isDragging = false; bridgedMouseSequence = false
         library?.cancelDrag()
     }
     func ignoreModifierKeys(for session: NSDraggingSession) -> Bool { true }
