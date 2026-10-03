@@ -12,6 +12,7 @@ import SwiftUI
         let panel = ApplicationPanel(contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
             styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         panel.title = "Maro"
+        panel.hidesOnDeactivate = false
         panel.appearance = NSAppearance(named: .darkAqua)
         panel.backgroundColor = .black
         panel.titlebarAppearsTransparent = true
