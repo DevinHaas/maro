@@ -8,6 +8,7 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
         let id: UUID
         let query: String
         var intent: MetadataSearchIntent
+        var consumers: Set<UUID>
         let task: Task<[VideoSummary], Error>
     }
     private var active: Active?
@@ -23,6 +24,12 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
     func cancelForeground() { if foregroundActive { cancelActive() } }
     func cancelActive() { let hadActive = active != nil; active?.task.cancel(); active = nil; if hadActive { onChange?() } }
     func clear() { cancelActive(); tail?.cancel(); cache.removeAll() }
+    private func cancelConsumer(_ consumer: UUID, requestID: UUID) {
+        guard var current = active, current.id == requestID else { return }
+        current.consumers.remove(consumer)
+        active = current
+        if current.consumers.isEmpty { cancelActive() }
+    }
     func request(_ query: String, intent: MetadataSearchIntent) async throws -> [VideoSummary] {
         try Task.checkCancellation()
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -35,8 +42,11 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
             return cached.videos
         }
         let request: Active
+        let consumer = UUID()
         if var current = active, current.query == query, !current.task.isCancelled {
-            if intent == .foreground { current.intent = .foreground; active = current; onChange?() }
+            current.consumers.insert(consumer)
+            if intent == .foreground { current.intent = .foreground }
+            active = current; onChange?()
             request = current
         } else {
             cancelActive()
@@ -49,12 +59,14 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
                 try Task.checkCancellation()
                 return try SearchSession(query: query, results: videos).allResults
             }
-            request = Active(id: UUID(), query: query, intent: intent, task: task)
+            request = Active(id: UUID(), query: query, intent: intent, consumers: [consumer], task: task)
             active = request; tail = task
             onChange?()
         }
         do {
-            let videos = try await withTaskCancellationHandler { try await request.task.value } onCancel: { request.task.cancel() }
+            let videos = try await withTaskCancellationHandler { try await request.task.value } onCancel: { [weak self] in
+                Task { @MainActor in self?.cancelConsumer(consumer, requestID: request.id) }
+            }
             try Task.checkCancellation()
             guard active?.id == request.id else {
                 if let cached = cache[query] { return cached.videos }
@@ -67,7 +79,8 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
             onChange?()
             return videos
         } catch {
-            if active?.id == request.id { active = nil; onChange?() }
+            if Task.isCancelled { cancelConsumer(consumer, requestID: request.id) }
+            else if active?.id == request.id { active = nil; onChange?() }
             throw error
         }
     }

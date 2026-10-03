@@ -52,6 +52,29 @@ import Testing
     await controller.shutdown()
 }
 
+@Test @MainActor func promotedForegroundSurvivesItsDiscoveryConsumerCancellation() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let source = HeldMetadataSource()
+    let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: PlaybackEngine(), search: { query in try await source.search(query) },
+        prepare: { _, _ in throw CancellationError() })
+    let discovery = Task { try await controller.metadataSearch("shared", intent: .discovery) }
+    await metadataWait { await source.calls == ["shared"] }
+    let submitted = Task { await controller.search("shared") }
+    await metadataWait { controller.hasForegroundMetadataRequest }
+    discovery.cancel()
+    await Task.yield()
+    await source.complete("shared")
+    await submitted.value
+    do { _ = try await discovery.value; Issue.record("Cancelled consumer must not return matches") }
+    catch { #expect(error is CancellationError) }
+    #expect(controller.searchState.results.first?.title == "shared")
+    #expect(await source.calls == ["shared"])
+    #expect(await source.maximumActive == 1)
+    await controller.shutdown()
+}
+
 private actor HeldMetadataSource {
     var calls: [String] = []
     var active = 0

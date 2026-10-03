@@ -27,12 +27,12 @@ private actor ReorderResponses {
     }
 }
 
-@MainActor private func reorderFixture(_ responses: ReorderResponses) async throws -> (PlaylistLibrary, MaroController, URL) {
+@MainActor private func reorderFixture(_ responses: ReorderResponses, now: @escaping () -> Date = Date.init) async throws -> (PlaylistLibrary, MaroController, URL) {
     let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
         store: StateStore(file: file), engine: PlaybackEngine(), search: { _ in [] }, prepare: { _, _ in throw CancellationError() })
     let api = YouTubePlaylists(token: { "fixture" }, send: { try await responses.respond($0) })
-    let library = PlaylistLibrary(controller: controller, api: api)
+    let library = PlaylistLibrary(controller: controller, api: api, now: now)
     library.refresh()
     while library.busy { await Task.yield() }
     library.open(try #require(library.playlists.first))
@@ -53,6 +53,30 @@ private actor ReorderResponses {
     library.open(try #require(library.playlists.first))
     while library.busy { await Task.yield() }
     #expect(library.items.map(\.id) == ["b", "c", "a"])
+    await controller.shutdown()
+}
+
+@Test @MainActor func priorExternalOrderBecomesAuthoritativeAfterSaveLagWindow() async throws {
+    let responses = ReorderResponses()
+    var time = Date(timeIntervalSince1970: 1_000)
+    let (library, controller, file) = try await reorderFixture(responses, now: { time })
+    defer { try? FileManager.default.removeItem(at: file) }
+    library.move(occurrenceID: "a", in: "PLone", to: 2)
+    while library.busy { await Task.yield() }
+    #expect(library.items.map(\.id) == ["b", "c", "a"])
+    time = time.addingTimeInterval(61)
+    await responses.setMode("failedRefresh")
+    library.refresh()
+    while library.busy { await Task.yield() }
+    #expect(library.items.map(\.id) == ["b", "c", "a"])
+    await responses.setMode("lag")
+    await responses.setOrder(["a", "b", "c"])
+    library.refresh()
+    while library.busy { await Task.yield() }
+    #expect(library.items.map(\.id) == ["a", "b", "c"])
+    #expect(library.reorderState == .idle)
+    #expect(library.status.contains("Playlist changed"))
+    #expect(await responses.writes.count == 1)
     await controller.shutdown()
 }
 
@@ -174,6 +198,28 @@ private actor ReorderResponses {
     let accountPayload = try #require(library.beginDrag(occurrenceID: "b", in: "PLone"))
     library.disconnect()
     #expect(!library.drop(accountPayload, in: "PLone", insertionIndex: 0))
+    #expect(await responses.writes.isEmpty)
+    await controller.shutdown()
+}
+
+@Test @MainActor func applicationHomeAndBackRejectCapturedDragEvenWhenPlaylistStaysSelected() async throws {
+    let responses = ReorderResponses()
+    let (library, controller, file) = try await reorderFixture(responses)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let app = ApplicationModel(controller: controller, library: library)
+    app.navigate(.playlist("PLone"))
+    let payload = try #require(library.beginDrag(occurrenceID: "b", in: "PLone"))
+    app.showHome()
+    app.goBack()
+    #expect(app.route == .playlist("PLone"))
+    #expect(library.selected?.id == "PLone")
+    #expect(!library.drop(payload, in: "PLone", insertionIndex: 0))
+    while library.busy { await Task.yield() }
+    app.showFavorites()
+    let backPayload = try #require(library.beginDrag(occurrenceID: "b", in: "PLone"))
+    app.goBack()
+    #expect(!library.drop(backPayload, in: "PLone", insertionIndex: 0))
+    while library.busy { await Task.yield() }
     #expect(await responses.writes.isEmpty)
     await controller.shutdown()
 }

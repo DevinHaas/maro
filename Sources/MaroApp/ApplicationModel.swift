@@ -76,6 +76,7 @@ enum ApplicationRoute: Equatable {
     }
     func goBack() {
         guard let previous = history.popLast() else { return }
+        library.cancelDrag()
         route = previous
         closeSearch()
         if case let .playlist(id) = previous, let playlist = library.playlists.first(where: { $0.id == id }), library.selected?.id != id {
@@ -85,6 +86,7 @@ enum ApplicationRoute: Equatable {
     func navigate(_ destination: ApplicationRoute) {
         closeSearch(cancelRequest: destination != .search)
         guard route != destination else { return }
+        library.cancelDrag()
         history.append(route)
         route = destination
     }
