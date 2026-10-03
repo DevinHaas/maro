@@ -38,6 +38,14 @@ public struct YouTubeAccountError: LocalizedError, Sendable {
     public init(_ message: String) { self.message = message }
 }
 
+public struct YouTubeWriteError: LocalizedError, Sendable {
+    public enum Outcome: Sendable { case rejected, ambiguous }
+    public let outcome: Outcome
+    public let message: String
+    public var errorDescription: String? { message }
+    public init(outcome: Outcome, message: String) { self.outcome = outcome; self.message = message }
+}
+
 @MainActor
 public final class YouTubePlaylists {
     private let token: () async throws -> String
@@ -141,13 +149,20 @@ public final class YouTubePlaylists {
     }
 
     public func move(_ item: YouTubePlaylistItem, in playlist: String, to position: Int) async throws {
-        try validID(item.id); try validID(playlist)
-        guard position >= 0, let video = item.video else {
-            throw YouTubeAccountError("This unavailable entry cannot be reordered. You can remove it instead.")
-        }
-        _ = try await request("playlistItems", method: "PUT", query: ["part": "snippet"], body: [
-            "id": item.id, "snippet": ["playlistId": playlist, "position": position,
-                "resourceId": ["kind": "youtube#video", "videoId": video.id]]])
+        do {
+            try validID(item.id); try validID(playlist)
+            guard position >= 0, let resourceID = item.resourceVideoID else {
+                throw YouTubeAccountError("This entry has no resource identity and cannot be reordered.")
+            }
+            try validID(resourceID)
+        } catch { throw YouTubeWriteError(outcome: .rejected, message: error.localizedDescription) }
+        // Only snippet is replaced; contentDetails (including start/end time) and date metadata are untouched.
+        do {
+            _ = try await request("playlistItems", method: "PUT", query: ["part": "snippet"], body: [
+                "id": item.id, "snippet": ["playlistId": playlist, "position": position,
+                    "resourceId": ["kind": "youtube#video", "videoId": item.resourceVideoID!]]], classifyWrite: true)
+        } catch let error as YouTubeWriteError { throw error }
+        catch { throw YouTubeWriteError(outcome: .rejected, message: error.localizedDescription) }
     }
 
     private func pages(_ path: String, query: [String: String]) async throws -> [[String: Any]] {
@@ -169,7 +184,7 @@ public final class YouTubePlaylists {
     }
 
     private func request(_ path: String, method: String = "GET", query: [String: String],
-                         body: [String: Any]? = nil) async throws -> [String: Any] {
+                         body: [String: Any]? = nil, classifyWrite: Bool = false) async throws -> [String: Any] {
         var url = URLComponents(string: "https://www.googleapis.com/youtube/v3/\(path)")!
         url.queryItems = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) }
         var request = URLRequest(url: url.url!, cachePolicy: .reloadIgnoringLocalCacheData)
@@ -180,9 +195,29 @@ public final class YouTubePlaylists {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
-        let (data, response) = try await send(request)
-        guard let response = response as? HTTPURLResponse else { throw YouTubeAccountError("No response from YouTube.") }
+        let data: Data
+        let response: URLResponse
+        do { (data, response) = try await send(request) }
+        catch {
+            if classifyWrite { throw YouTubeWriteError(outcome: .ambiguous, message: error.localizedDescription) }
+            throw error
+        }
+        guard let response = response as? HTTPURLResponse else {
+            if classifyWrite { throw YouTubeWriteError(outcome: .ambiguous, message: "No response from YouTube.") }
+            throw YouTubeAccountError("No response from YouTube.")
+        }
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        if classifyWrite && (200..<300).contains(response.statusCode),
+           (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] == nil {
+            throw YouTubeWriteError(outcome: .ambiguous, message: "YouTube returned an unreadable move response. Refresh before another edit.")
+        }
+        if classifyWrite && !(200..<300).contains(response.statusCode) {
+            let reason = (((json["error"] as? [String: Any])?["errors"] as? [[String: Any]])?.first)?["reason"] as? String
+            let message = reason == "manualSortRequired" ? "Set this playlist's ordering to Manual on YouTube, then retry."
+                : reason == "quotaExceeded" || reason == "dailyLimitExceeded" ? "YouTube's daily API allowance is exhausted. Try again tomorrow."
+                : "YouTube could not save the move (\(response.statusCode)). Check editing access and refresh if the item changed."
+            throw YouTubeWriteError(outcome: response.statusCode >= 500 ? .ambiguous : .rejected, message: message)
+        }
         guard (200..<300).contains(response.statusCode) else {
             let reason = (((json["error"] as? [String: Any])?["errors"] as? [[String: Any]])?.first)?["reason"] as? String
             switch reason {

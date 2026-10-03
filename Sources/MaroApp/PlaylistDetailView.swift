@@ -54,9 +54,19 @@ private struct PlaylistDetailContent: View {
                                         active: player.snapshot.originPlaylistID == playlist.id && player.snapshot.activePlaylistItemID == item.id,
                                         playback: player.snapshot.playback, showsDates: showsDates, showsDurations: showsDurations,
                                         busy: library.busy, localPath: item.video.flatMap { player.snapshot.localThumbnailPaths?[$0.id] }, focusedControl: $focusedControl,
+                                        reorderLibrary: library, playlistID: playlist.id,
                                         play: { library.play(occurrenceID: item.id, in: playlist.id) },
                                         actions: { invokingControl = item.id; library.presentItemActions(occurrenceID: item.id, playlistID: playlist.id) })
+                                        .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: index, splitRow: true))
+                                        .overlay(alignment: .top) {
+                                            if library.dragInsertion == index { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
+                                        }
                                 }
+                                Color.clear.frame(height: 18).contentShape(Rectangle())
+                                    .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: library.items.count))
+                                    .overlay(alignment: .top) {
+                                        if library.dragInsertion == library.items.count { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
+                                    }
                             }
                             if library.items.isEmpty && !library.busy {
                                 VStack(spacing: 10) {
@@ -68,6 +78,18 @@ private struct PlaylistDetailContent: View {
                             if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(.orange) }
                             Text(library.status).font(.system(size: 11)).foregroundStyle(AppDesign.muted).textSelection(.enabled)
                         }.padding(24).background(LinearGradient(colors: [artworkColor.opacity(0.55), AppDesign.surface], startPoint: .top, endPoint: .bottom))
+                    }
+                }.safeAreaInset(edge: .bottom, spacing: 0) {
+                    if library.reorderState != .idle || library.status.hasPrefix("Saved") {
+                        HStack(spacing: 12) {
+                            if library.busy { ProgressView().controlSize(.small) }
+                            Text(library.status).font(.system(size: 12)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+                            if library.canRetry || library.reorderState == .unconfirmed || library.reorderState == .savedRefreshUnavailable {
+                                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") {
+                                    if library.canRetry { library.retryLast() } else { library.refresh() }
+                                }.disabled(library.busy)
+                            }
+                        }.padding(14).background(AppDesign.raised)
                     }
                 }
             } else {
@@ -83,6 +105,7 @@ private struct PlaylistDetailContent: View {
 
     private var rowHeadings: some View {
         HStack(spacing: 14) {
+            Color.clear.frame(width: 16, height: 1)
             Text("#").frame(width: 24)
             Text("Title").frame(maxWidth: .infinity, alignment: .leading)
             if showsDates { Text("Date added").frame(width: 100, alignment: .leading) }
@@ -149,7 +172,7 @@ private struct PlaylistCoverHeader: View {
     }
 }
 
-/// Ticket #6 adds drag targets to this occurrence-identified row.
+/// Playback, drag and action controls retain separate native hit regions.
 struct PlaylistTrackRow: View {
     let item: YouTubePlaylistItem
     let position: Int
@@ -160,6 +183,8 @@ struct PlaylistTrackRow: View {
     let busy: Bool
     var localPath: String? = nil
     var focusedControl: FocusState<String?>.Binding
+    var reorderLibrary: PlaylistLibrary? = nil
+    var playlistID = ""
     let play: () -> Void
     let actions: () -> Void
     @State private var hovered = false
@@ -167,6 +192,10 @@ struct PlaylistTrackRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
+            if let reorderLibrary {
+                PlaylistDragHandle(item: item, playlistID: playlistID, localPath: localPath, library: reorderLibrary)
+                    .frame(width: 16, height: 44)
+            }
             Button(action: play) {
                 ZStack {
                     if hovered || playFocused { Image(systemName: "play.fill") }

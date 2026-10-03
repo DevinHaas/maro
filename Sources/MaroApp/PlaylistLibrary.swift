@@ -27,6 +27,18 @@ final class PlaylistLibrary: ObservableObject {
     private var operation: Task<Void, Never>?
     private let controller: MaroController
     private var accountRevision = 0
+    @Published private(set) var reorderState: PlaylistReorderState = .idle
+    @Published private(set) var orderRevision = UUID()
+    @Published private(set) var dragPayload: PlaylistDragPayload?
+    @Published private(set) var dragInsertion: Int?
+    private struct AcknowledgedOrder {
+        var items: [YouTubePlaylistItem]
+        var laggingSignatures: [[String]]
+    }
+    private var acknowledgedOrders: [String: AcknowledgedOrder] = [:]
+    private var unconfirmedPlaylists: Set<String> = []
+    private var rejectedMove: (occurrenceID: String, playlistID: String, position: Int, signature: [String])?
+    var canReorder: Bool { connected && !busy && selected != nil && unconfirmedPlaylists.isEmpty }
 
     init(controller: MaroController, api: YouTubePlaylists? = nil) {
         self.controller = controller
@@ -91,15 +103,17 @@ final class PlaylistLibrary: ObservableObject {
 
     func refresh() {
         guard connected else { return }
-        run { try await self.reload() }
+        run { self.announce("Refreshing playlists from YouTube."); try await self.reload() }
     }
 
     func open(_ playlist: YouTubePlaylist) {
+        invalidateDrag()
         selected = playlist; items = []
+        reorderState = unconfirmedPlaylists.contains(playlist.id) ? .unconfirmed : .idle
         refresh()
     }
 
-    func back() { selected = nil; items = []; refresh() }
+    func back() { invalidateDrag(); selected = nil; items = []; refresh() }
 
     func addPending() {
         guard let video = pendingVideo, !destination.isEmpty, let api else { return }
@@ -197,12 +211,50 @@ final class PlaylistLibrary: ObservableObject {
         catch { status = error.localizedDescription }
     }
 
-    /// Accessible move extension point; ticket #6 replaces its persistence with serialized reconciliation.
+    /// Final zero-based position in the complete saved-order array, shared by keyboard and drag.
     func move(occurrenceID: String, in playlistID: String, to position: Int) {
-        guard let item = item(occurrenceID: occurrenceID, in: playlistID), let api,
+        guard canReorder, let item = item(occurrenceID: occurrenceID, in: playlistID), let api,
               items.indices.contains(position), let old = items.firstIndex(where: { $0.id == occurrenceID }), old != position else { return }
-        guard item.video != nil else { status = "This unavailable entry cannot be reordered. You can remove it instead."; return }
-        mutate { try await api.move(item, in: playlistID, to: position) }
+        guard item.resourceVideoID != nil else { status = "This entry has no resource identity and cannot be reordered."; return }
+        let previous = items
+        var moved = items
+        moved.insert(moved.remove(at: old), at: position)
+        let revision = accountRevision
+        let priorReceipt = acknowledgedOrders[playlistID]
+        rejectedMove = nil
+        invalidateDrag()
+        items = moved; reorderState = .saving
+        announce("Moving \(item.title) to position \(position + 1). Saving to YouTube.")
+        run {
+            do { try await api.move(item, in: playlistID, to: position) }
+            catch {
+                guard revision == self.accountRevision, self.connected else { return }
+                if (error as? YouTubeWriteError)?.outcome == .rejected {
+                    if self.selected?.id == playlistID { self.items = previous; self.reorderState = .rejected }
+                    self.rejectedMove = (occurrenceID, playlistID, position, previous.map(\.id))
+                    self.retry = { try await self.reload() }
+                    self.announce("Move rejected. Previous saved order restored. \(error.localizedDescription) Retry move when ready.")
+                } else {
+                    self.unconfirmedPlaylists.insert(playlistID)
+                    if self.selected?.id == playlistID { self.reorderState = .unconfirmed }
+                    self.retry = { try await self.reload() }
+                    self.announce("Move outcome unconfirmed. Refresh YouTube before another edit. The move will not be repeated automatically.")
+                }
+                throw YouTubeAccountError(self.status)
+            }
+            guard revision == self.accountRevision, self.connected else { return }
+            self.acknowledgedOrders[playlistID] = AcknowledgedOrder(items: moved,
+                laggingSignatures: (priorReceipt?.laggingSignatures ?? []) + [previous.map(\.id)])
+            self.rememberLoaded(moved, playlistID: playlistID)
+            self.retry = { try await self.reload() }
+            do { try await self.reload() }
+            catch {
+                guard revision == self.accountRevision, self.connected else { return }
+                if self.selected?.id == playlistID { self.items = moved; self.reorderState = .savedRefreshUnavailable }
+                self.announce("Saved; refresh unavailable. Your confirmed order is retained. Retry refresh when connected.")
+                throw YouTubeAccountError(self.status)
+            }
+        }
     }
 
     func play(occurrenceID: String, in playlistID: String) {
@@ -230,6 +282,11 @@ final class PlaylistLibrary: ObservableObject {
     func remove(_ item: YouTubePlaylistItem) {
         guard let api, let playlistID = selected?.id else { return }
         mutate({ try await api.remove(item) }, reconcile: {
+            if var receipt = self.acknowledgedOrders[playlistID], receipt.items.contains(where: { $0.id == item.id }) {
+                receipt.laggingSignatures.append(receipt.items.map(\.id))
+                receipt.items.removeAll { $0.id == item.id }
+                self.acknowledgedOrders[playlistID] = receipt
+            }
             guard self.selected?.id == playlistID else { return }
             self.items.removeAll { $0.id == item.id }
             self.rememberLoaded(self.items, playlistID: playlistID)
@@ -237,9 +294,9 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func move(_ item: YouTubePlaylistItem, offset: Int) {
-        guard let selected, let api, let index = items.firstIndex(where: { $0.id == item.id }),
+        guard let selected, let index = items.firstIndex(where: { $0.id == item.id }),
               items.indices.contains(index + offset) else { return }
-        mutate { try await api.move(item, in: selected.id, to: index + offset) }
+        move(occurrenceID: item.id, in: selected.id, to: index + offset)
     }
 
     func play(from index: Int = 0) {
@@ -255,7 +312,13 @@ final class PlaylistLibrary: ObservableObject {
         }
     }
 
-    func retryLast() { if let retry { run(retry) } }
+    func retryLast() {
+        guard !busy else { return }
+        if reorderState == .rejected, let move = rejectedMove {
+            guard selected?.id == move.playlistID, items.map(\.id) == move.signature else { refresh(); return }
+            self.move(occurrenceID: move.occurrenceID, in: move.playlistID, to: move.position)
+        } else if let retry { run(retry) }
+    }
 
     private func reload() async throws {
         guard let api else { return }
@@ -267,19 +330,63 @@ final class PlaylistLibrary: ObservableObject {
             let freshSelected = fresh.first { $0.id == requestedID }
             var freshItems: [YouTubePlaylistItem] = []
             if let freshSelected { freshItems = try await api.items(in: freshSelected.id) }
+            var recovered: [String: [YouTubePlaylistItem]] = [:]
+            // Refresh also resolves an uncertain save after navigation back to Home.
+            for playlistID in unconfirmedPlaylists where playlistID != requestedID && fresh.contains(where: { $0.id == playlistID }) {
+                recovered[playlistID] = try await api.items(in: playlistID)
+            }
             guard revision == accountRevision, connected else { return }
             guard requestedID == selected?.id else { continue }
+            for (playlistID, authoritativeItems) in recovered {
+                unconfirmedPlaylists.remove(playlistID); acknowledgedOrders.removeValue(forKey: playlistID)
+                rememberLoaded(authoritativeItems, playlistID: playlistID)
+            }
+            unconfirmedPlaylists.formIntersection(Set(fresh.map(\.id)))
+            acknowledgedOrders = acknowledgedOrders.filter { receipt in fresh.contains { $0.id == receipt.key } }
+            let oldIDs = items.map(\.id)
+            var message = "Up to date with YouTube."
+            if !recovered.isEmpty || (requestedID == nil && unconfirmedPlaylists.isEmpty && reorderState == .unconfirmed) {
+                reorderState = .idle
+                message = "Refreshed YouTube's authoritative order. You can reorder again."
+            }
+            if let requestedID {
+                if unconfirmedPlaylists.remove(requestedID) != nil {
+                    acknowledgedOrders.removeValue(forKey: requestedID)
+                    message = "Refreshed YouTube's authoritative order. You can reorder again."
+                    reorderState = .idle
+                } else if let receipt = acknowledgedOrders[requestedID] {
+                    if freshItems.map(\.id) == receipt.items.map(\.id) {
+                        acknowledgedOrders.removeValue(forKey: requestedID); reorderState = .idle
+                        message = "Saved and confirmed with YouTube."
+                    } else if receipt.laggingSignatures.contains(freshItems.map(\.id)) {
+                        // Match occurrences, never video IDs; preserve fresh metadata alongside acknowledged order.
+                        let byID = Dictionary(freshItems.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+                        freshItems = receipt.items.map { byID[$0.id] ?? $0 }
+                        reorderState = .savedRefreshUnavailable
+                        message = "Saved; refresh unavailable. YouTube's read is still catching up; confirmed order retained."
+                    } else {
+                        acknowledgedOrders.removeValue(forKey: requestedID); reorderState = .idle
+                        message = "Playlist changed on YouTube. Its current membership and order are now shown."
+                    }
+                } else if !oldIDs.isEmpty && oldIDs != freshItems.map(\.id) {
+                    message = "Playlist changed on YouTube. Its current membership and order are now shown."
+                }
+            }
+            if oldIDs != freshItems.map(\.id) { invalidateDrag(); actionContext = nil }
             playlists = fresh; selected = freshSelected; items = freshItems
             if let requestedID { rememberLoaded(freshItems, playlistID: requestedID) }
             loadedItemsByPlaylist = loadedItemsByPlaylist.filter { entry in fresh.contains { $0.id == entry.key } }
+            announce(fresh.isEmpty ? "No playlists yet. Create your first private playlist." : message)
             break
         }
         if !fresh.contains(where: { $0.id == destination }) { destination = fresh.first?.id ?? "" }
         stale = false
-        status = fresh.isEmpty ? "No playlists yet. Create your first private playlist." : "Up to date with YouTube."
     }
 
     private func mutate(_ write: @escaping () async throws -> Void, reconcile: @escaping () -> Void = {}) {
+        guard unconfirmedPlaylists.isEmpty else {
+            announce("Move outcome unconfirmed. Refresh YouTube before another edit."); return
+        }
         run {
             do { try await write() }
             catch {
@@ -305,6 +412,41 @@ final class PlaylistLibrary: ObservableObject {
     private func clearLoadedEvidence() {
         recommendationScope = UUID().uuidString
         loadedItemsByPlaylist = [:]; loadedPlaylistOrder = []; actionContext = nil
+        invalidateDrag(); acknowledgedOrders = [:]; unconfirmedPlaylists = []; rejectedMove = nil; reorderState = .idle
+    }
+
+    private func invalidateDrag() { dragPayload = nil; dragInsertion = nil; orderRevision = UUID() }
+
+    func beginDrag(occurrenceID: String, in playlistID: String) -> PlaylistDragPayload? {
+        guard canReorder, selected?.id == playlistID, let item = items.first(where: { $0.id == occurrenceID }), item.resourceVideoID != nil else { return nil }
+        let payload = PlaylistDragPayload(playlistID: playlistID, occurrenceID: occurrenceID, revision: orderRevision, accountScope: recommendationScope)
+        dragPayload = payload; return payload
+    }
+
+    func acceptsDrag(_ payload: PlaylistDragPayload, in playlistID: String) -> Bool {
+        canReorder && dragPayload == payload && payload.playlistID == playlistID && selected?.id == playlistID
+            && payload.revision == orderRevision && payload.accountScope == recommendationScope
+            && items.contains { $0.id == payload.occurrenceID }
+    }
+
+    func updateDragInsertion(_ insertion: Int?) { dragInsertion = insertion }
+    func cancelDrag() { dragPayload = nil; dragInsertion = nil }
+
+    @discardableResult func drop(_ payload: PlaylistDragPayload, in playlistID: String, insertionIndex: Int) -> Bool {
+        guard acceptsDrag(payload, in: playlistID), (0...items.count).contains(insertionIndex),
+              let old = items.firstIndex(where: { $0.id == payload.occurrenceID }) else { cancelDrag(); return false }
+        let destination = insertionIndex > old ? insertionIndex - 1 : insertionIndex
+        cancelDrag()
+        guard destination != old else { return false }
+        move(occurrenceID: payload.occurrenceID, in: playlistID, to: destination)
+        return true
+    }
+
+    private func announce(_ message: String) {
+        status = message
+        guard let window = NSApp?.keyWindow else { return }
+        NSAccessibility.post(element: window, notification: .announcementRequested,
+            userInfo: [.announcement: message, .priority: NSAccessibilityPriorityLevel.high.rawValue])
     }
 
     private func run(_ action: @escaping () async throws -> Void) {
@@ -314,7 +456,7 @@ final class PlaylistLibrary: ObservableObject {
             defer { busy = false; operation = nil }
             do { try await action(); canRetry = false; retry = nil }
             catch is CancellationError { status = "Sign-in cancelled."; retry = nil }
-            catch { stale = !playlists.isEmpty; status = error.localizedDescription; canRetry = true }
+            catch { stale = !playlists.isEmpty; announce(error.localizedDescription); canRetry = true }
         }
     }
 
