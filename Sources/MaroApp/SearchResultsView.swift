@@ -76,7 +76,7 @@ struct SearchVideoRow: View {
                           prominent: hovered) { app.play(video) }.opacity(hovered || current ? 1 : 0.6)
             Button { app.play(video) } label: {
                 HStack(spacing: 12) {
-                    LibraryArtwork(url: video.thumbnailURL, symbol: "music.note").frame(width: 52, height: 52)
+                    LibraryArtwork(url: video.thumbnailURL, localPath: player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note").frame(width: 52, height: 52)
                     VStack(alignment: .leading, spacing: 6) {
                         Text(video.title).font(.system(size: 14, weight: .medium)).foregroundStyle(current ? AppDesign.green : .white).lineLimit(1)
                         Text(video.creator).font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)

@@ -18,7 +18,13 @@ struct GlobalSearchView: View {
             .onChange(of: app.previewFocusedIndex) { focusedRow = $0 }
     }
     private var preview: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Label("Navigate", systemImage: "arrow.up.arrow.down")
+                Spacer()
+                Text("Return to search").font(.system(size: 10))
+            }.font(.system(size: 10)).foregroundStyle(AppDesign.muted).padding(8)
             ForEach(Array(app.previewQueries.enumerated()), id: \.offset) { index, query in
                 Button { app.submitSearch(query) } label: {
                     HStack(spacing: 14) {
@@ -27,7 +33,7 @@ struct GlobalSearchView: View {
                         Spacer(minLength: 0)
                         Image(systemName: "arrow.up.left").foregroundStyle(AppDesign.muted)
                     }.padding(10).contentShape(Rectangle())
-                }.buttonStyle(.plain).focused($focusedRow, equals: index)
+                }.buttonStyle(.plain).focusable().focused($focusedRow, equals: index)
                     .background(focusedRow == index ? AppDesign.raised : Color.clear).clipShape(RoundedRectangle(cornerRadius: 5))
                     .accessibilityLabel("Search for \(query)")
             }
@@ -38,7 +44,7 @@ struct GlobalSearchView: View {
                     HStack(spacing: 2) {
                         Button { app.play(video); app.closeSearch() } label: {
                             HStack(spacing: 12) {
-                                LibraryArtwork(url: video.thumbnailURL, symbol: "play.fill").frame(width: 48, height: 48)
+                                LibraryArtwork(url: video.thumbnailURL, localPath: app.player.snapshot.localThumbnailPaths?[video.id], symbol: "play.fill").frame(width: 48, height: 48)
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(video.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
                                     Text(video.creator).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
@@ -46,7 +52,7 @@ struct GlobalSearchView: View {
                                 Spacer(minLength: 0)
                                 Image(systemName: "play.fill").foregroundStyle(AppDesign.green)
                             }.padding(8).contentShape(Rectangle())
-                        }.buttonStyle(.plain).focused($focusedRow, equals: app.previewQueries.count + index)
+                        }.buttonStyle(.plain).focusable().focused($focusedRow, equals: app.previewQueries.count + index)
                             .accessibilityLabel("Play \(video.title) by \(video.creator)")
                         AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }
                         AppIconButton(title: "Add \(video.title) to playlist", symbol: "plus") { app.offerAdd(video) }
@@ -67,7 +73,9 @@ struct GlobalSearchView: View {
                     HStack { Text("See all results for “\(app.globalQuery)”").lineLimit(1); Spacer(); Image(systemName: "arrow.right") }.padding(12)
                 }.buttonStyle(.plain).foregroundStyle(AppDesign.muted)
             }
-        }.padding(8).frame(maxWidth: .infinity, alignment: .leading).background(AppDesign.surface)
+        }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
+        }.frame(height: min(CGFloat(app.previewQueries.count * 45 + app.previewVideos.count * 64 + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
+            .background(AppDesign.raised)
             .clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.12)))
             .shadow(color: .black.opacity(0.7), radius: 18, y: 8)
             .background(SearchPreviewBounds(geometry: geometry))
@@ -86,6 +94,7 @@ private struct GlobalSearchField: NSViewRepresentable {
         field.font = .systemFont(ofSize: 14); field.delegate = context.coordinator
         field.setAccessibilityLabel("Search YouTube")
         context.coordinator.field = field; context.coordinator.installMonitor()
+        geometry.field = field
         return field
     }
     func updateNSView(_ field: NSTextField, context: Context) {
@@ -117,7 +126,7 @@ private struct GlobalSearchField: NSViewRepresentable {
                     let inField = fieldBounds.contains(field.convert(event.locationInWindow, from: nil))
                     let inPreview = self.geometry.preview.map { $0.bounds.contains($0.convert(event.locationInWindow, from: nil)) } ?? false
                     if inField && !self.app.previewOpen { self.app.focusSearch() }
-                    else if !inField && !inPreview { self.app.closeSearch() }
+                    else if self.app.previewOpen && !inField && !inPreview { self.app.closeSearch() }
                     return event
                 }
                 guard self.app.previewOpen else { return event }
@@ -139,7 +148,7 @@ private struct GlobalSearchField: NSViewRepresentable {
     }
 }
 
-@MainActor private final class SearchPreviewGeometry: ObservableObject { weak var preview: NSView? }
+@MainActor private final class SearchPreviewGeometry: ObservableObject { weak var preview: NSView?; weak var field: NSTextField? }
 private struct SearchPreviewBounds: NSViewRepresentable {
     let geometry: SearchPreviewGeometry
     func makeNSView(context: Context) -> NSView { let view = NSView(); geometry.preview = view; return view }

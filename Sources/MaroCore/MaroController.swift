@@ -191,7 +191,8 @@ public final class MaroController {
         if intent == .discovery, selecting || metadataRequests.foregroundActive { throw CancellationError() }
         do {
             let videos = try await metadataRequests.request(query, intent: intent)
-            metadataArtworkVideos = videos
+            var seen = Set<String>()
+            metadataArtworkVideos = Array((videos + metadataArtworkVideos).filter { seen.insert($0.id).inserted }.prefix(60))
             refreshArtwork()
             return videos
         }
