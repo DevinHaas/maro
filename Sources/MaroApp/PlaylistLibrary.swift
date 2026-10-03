@@ -26,6 +26,7 @@ final class PlaylistLibrary: ObservableObject {
     private var retry: (() async throws -> Void)?
     private var operation: Task<Void, Never>?
     private let controller: MaroController
+    private let now: () -> Date
     private var accountRevision = 0
     @Published private(set) var reorderState: PlaylistReorderState = .idle
     @Published private(set) var orderRevision = UUID()
@@ -34,14 +35,16 @@ final class PlaylistLibrary: ObservableObject {
     private struct AcknowledgedOrder {
         var items: [YouTubePlaylistItem]
         var laggingSignatures: [[String]]
+        let protectsLagUntil: Date
     }
     private var acknowledgedOrders: [String: AcknowledgedOrder] = [:]
     private var unconfirmedPlaylists: Set<String> = []
     private var rejectedMove: (occurrenceID: String, playlistID: String, position: Int, signature: [String])?
     var canReorder: Bool { connected && !busy && selected != nil && unconfirmedPlaylists.isEmpty }
 
-    init(controller: MaroController, api: YouTubePlaylists? = nil) {
+    init(controller: MaroController, api: YouTubePlaylists? = nil, now: @escaping () -> Date = Date.init) {
         self.controller = controller
+        self.now = now
         if let api {
             self.api = api; connected = true; configured = true
             return
@@ -244,7 +247,8 @@ final class PlaylistLibrary: ObservableObject {
             }
             guard revision == self.accountRevision, self.connected else { return }
             self.acknowledgedOrders[playlistID] = AcknowledgedOrder(items: moved,
-                laggingSignatures: (priorReceipt?.laggingSignatures ?? []) + [previous.map(\.id)])
+                laggingSignatures: Array(((priorReceipt?.laggingSignatures ?? []) + [previous.map(\.id)]).suffix(8)),
+                protectsLagUntil: self.now().addingTimeInterval(60))
             self.rememberLoaded(moved, playlistID: playlistID)
             self.retry = { try await self.reload() }
             do { try await self.reload() }
@@ -358,7 +362,10 @@ final class PlaylistLibrary: ObservableObject {
                     if freshItems.map(\.id) == receipt.items.map(\.id) {
                         acknowledgedOrders.removeValue(forKey: requestedID); reorderState = .idle
                         message = "Saved and confirmed with YouTube."
-                    } else if receipt.laggingSignatures.contains(freshItems.map(\.id)) {
+                    } else if now() < receipt.protectsLagUntil && receipt.laggingSignatures.contains(freshItems.map(\.id)) {
+                        // YouTube supplies no read revision: old lag and an external restoration are
+                        // indistinguishable. Protect immediate lag for one minute, then accept a
+                        // successful read as authoritative. Failed reads still retain visible order.
                         // Match occurrences, never video IDs; preserve fresh metadata alongside acknowledged order.
                         let byID = Dictionary(freshItems.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
                         freshItems = receipt.items.map { byID[$0.id] ?? $0 }

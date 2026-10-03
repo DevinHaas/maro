@@ -122,7 +122,10 @@ private struct PlaylistCoverHeader: View {
     let fallbackURL: URL?
     @Binding var color: Color
     @State private var artwork: NSImage?
-    private var url: URL? { playlist.thumbnailURL ?? fallbackURL }
+    private var urls: [URL] {
+        var seen = Set<URL>()
+        return [playlist.thumbnailURL, fallbackURL].compactMap { $0 }.filter { seen.insert($0).inserted }
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -140,22 +143,29 @@ private struct PlaylistCoverHeader: View {
                 Text([playlist.owner, "\(loadedCount ?? playlist.count) \((loadedCount ?? playlist.count) == 1 ? "video" : "videos")"].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
                     .font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.88))
             }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
-        }.frame(height: 320).clipped().task(id: url) {
+        }.frame(height: 320).clipped().task(id: urls) {
             artwork = nil; color = Color(red: 0.20, green: 0.23, blue: 0.26)
-            guard let url else { return }
-            do {
-                let data: Data
-                if url.isFileURL { data = try Data(contentsOf: url) }
-                else {
-                    guard url.scheme == "https" else { return }
-                    let (bytes, response) = try await URLSession.shared.data(from: url)
-                    guard (response as? HTTPURLResponse).map({ (200..<300).contains($0.statusCode) }) ?? false else { return }
-                    data = bytes
+            for url in urls {
+                guard !Task.isCancelled else { return }
+                do {
+                    let data: Data
+                    if url.isFileURL { data = try Data(contentsOf: url) }
+                    else {
+                        guard url.scheme == "https" else { continue }
+                        let (bytes, response) = try await URLSession.shared.data(from: url)
+                        guard (response as? HTTPURLResponse).map({ (200..<300).contains($0.statusCode) }) ?? false else { continue }
+                        data = bytes
+                    }
+                    guard !Task.isCancelled else { return }
+                    guard data.count <= 10_485_760, let image = NSImage(data: data),
+                          image.cgImage(forProposedRect: nil, context: nil, hints: nil) != nil else { continue }
+                    artwork = image
+                    if let sampled = averageColor(image) { color = Color(nsColor: sampled) }
+                    return
+                } catch {
+                    // Try the first available video after failed primary HTTP, file or decode.
                 }
-                guard !Task.isCancelled, data.count <= 10_485_760, let image = NSImage(data: data) else { return }
-                artwork = image
-                if let sampled = averageColor(image) { color = Color(nsColor: sampled) }
-            } catch { /* Placeholder remains available while playback and browsing continue. */ }
+            }
         }
     }
 

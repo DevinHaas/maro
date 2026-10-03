@@ -120,11 +120,37 @@ import Testing
     await controller.shutdown()
 }
 
+@Test @MainActor func submittedSearchSurvivesCancellingItsSharedPreview() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let source = LatePreviewSource()
+    let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: PlaybackEngine(), search: { query in try await source.search(query) },
+        prepare: { _, _ in throw CancellationError() })
+    let app = ApplicationModel(controller: controller,
+        library: PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { throw CancellationError() })), previewDelay: { _ in })
+    app.focusSearch(); app.globalQuery = "old"
+    await waitUntil { await source.hasPending("old") }
+    app.submitSearch()
+    await waitUntil { controller.searchState.isSearching }
+    app.dismissPreview()
+    await Task.yield()
+    await source.complete("old")
+    await waitUntil { !controller.searchState.isSearching }
+    app.render()
+    #expect(app.route == .search)
+    #expect(app.searchState.results.first?.title == "old")
+    #expect(await source.calls == ["old"])
+    await controller.shutdown()
+}
+
 private actor LatePreviewSource {
+    var calls: [String] = []
     var pending: [String: CheckedContinuation<Void, Never>] = [:]
     func hasPending(_ query: String) -> Bool { pending[query] != nil }
     func complete(_ query: String) { pending.removeValue(forKey: query)?.resume() }
     func search(_ query: String) async throws -> [VideoSummary] {
+        calls.append(query)
         if query == "old" || query == "new" { await withCheckedContinuation { pending[query] = $0 } }
         return [try VideoSummary(id: "aaaaaaaaaaa", title: query, creator: "Fixture")]
     }
