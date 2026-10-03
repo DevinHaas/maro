@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import MaroCore
 import SwiftUI
 
@@ -11,6 +12,7 @@ enum ApplicationRoute: Equatable {
     let controller: MaroController
     let library: PlaylistLibrary
     let player: PlayerPresentation
+    let home: HomeRecommendations
     @Published private(set) var route: ApplicationRoute = .home
     @Published private(set) var history: [ApplicationRoute] = []
     @Published var globalQuery = "" { didSet { if oldValue != globalQuery { updatePreview() } } }
@@ -32,13 +34,28 @@ enum ApplicationRoute: Equatable {
     @Published var actionError: String?
     private var searchTask: Task<Void, Never>?
     private var selectionTask: Task<Void, Never>?
+    private var libraryObservation: AnyCancellable?
 
     init(controller: MaroController, library: PlaylistLibrary,
-         previewDelay: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }) {
+         previewDelay: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) },
+         recommendationNow: @escaping () -> Date = Date.init) {
         self.controller = controller; self.library = library
         self.previewDelay = previewDelay
         player = PlayerPresentation(snapshot: controller.snapshot)
         searchState = controller.searchState
+        home = HomeRecommendations(controller: controller, now: recommendationNow)
+        home.onChange = { [weak self] in
+            guard let self else { return }
+            self.setSearchSeeds(videos: self.home.sections.flatMap(\.videos), queries: self.home.suggestedQueries)
+            self.objectWillChange.send()
+        }
+        libraryObservation = library.objectWillChange.sink { [weak self] in
+            Task { @MainActor in
+                await Task.yield()
+                self?.updateHomePreferences()
+            }
+        }
+        updateHomePreferences()
     }
 
     var filteredPlaylists: [YouTubePlaylist] {
@@ -74,6 +91,24 @@ enum ApplicationRoute: Equatable {
     func render() {
         player.snapshot = controller.snapshot
         searchState = controller.searchState
+        updateHomePreferences()
+        home.resumeIfNeeded()
+    }
+    func updateHomePreferences() {
+        home.update(favorites: controller.snapshot.favorites,
+            playlists: library.connected ? library.playlists : [],
+            loaded: library.connected ? library.loadedItemsByPlaylist : [:], scope: library.recommendationScope)
+    }
+    func playFavorites() {
+        let items = controller.snapshot.favorites.map { YouTubePlaylistItem(id: "favorite-" + $0.id, video: $0, title: $0.title) }
+        guard !items.isEmpty else { return }
+        selectionTask?.cancel()
+        selectionTask = Task {
+            do { try await controller.playPlaylist(items) }
+            catch is CancellationError { }
+            catch { actionError = controller.snapshot.error ?? error.localizedDescription }
+            render()
+        }
     }
     func submitSearch(_ query: String? = nil) {
         let query = (query ?? globalQuery).trimmingCharacters(in: .whitespacesAndNewlines)
@@ -161,6 +196,7 @@ enum ApplicationRoute: Equatable {
     }
     func toggleFavorite(_ video: VideoSummary) {
         do { try controller.toggleFavorite(video); actionError = nil }
+        catch StateError.favoritesFull { actionError = "Favorites are full. Remove one before adding another." }
         catch { actionError = error.localizedDescription }
         render()
     }
