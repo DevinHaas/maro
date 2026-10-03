@@ -90,6 +90,46 @@ import Testing
     await controller.shutdown()
 }
 
+@Test @MainActor func supersededPreviewDiscardsLateReplyAndFocusedQuerySubmitsItsOwnText() async throws {
+    let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    defer { try? FileManager.default.removeItem(at: file) }
+    let probe = LatePreviewSource()
+    let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(), preservedFile: nil, warning: nil),
+        store: StateStore(file: file), engine: PlaybackEngine(), search: { query in try await probe.search(query) },
+        prepare: { _, _ in throw CancellationError() })
+    let app = ApplicationModel(controller: controller,
+        library: PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { throw CancellationError() })), previewDelay: { _ in })
+    app.focusSearch(); app.globalQuery = "old"
+    await waitUntil { await probe.hasPending("old") }
+    app.globalQuery = "new"
+    await probe.complete("old")
+    await waitUntil { await probe.hasPending("new") }
+    #expect(app.previewVideos.isEmpty)
+    #expect(app.previewLoading)
+    await probe.complete("new")
+    await waitUntil { !app.previewLoading }
+    #expect(app.previewVideos.first?.title == "new")
+    app.globalQuery = ""
+    app.setSearchSeeds(videos: [], queries: ["a focused suggestion"])
+    app.movePreviewFocus(1)
+    app.activateFocusedPreview()
+    await waitUntil { app.searchState.query == "a focused suggestion" && !app.searchState.isSearching }
+    #expect(app.globalQuery == "a focused suggestion")
+    #expect(app.route == .search)
+    #expect(!app.previewOpen)
+    await controller.shutdown()
+}
+
+private actor LatePreviewSource {
+    var pending: [String: CheckedContinuation<Void, Never>] = [:]
+    func hasPending(_ query: String) -> Bool { pending[query] != nil }
+    func complete(_ query: String) { pending.removeValue(forKey: query)?.resume() }
+    func search(_ query: String) async throws -> [VideoSummary] {
+        if query == "old" || query == "new" { await withCheckedContinuation { pending[query] = $0 } }
+        return [try VideoSummary(id: "aaaaaaaaaaa", title: query, creator: "Fixture")]
+    }
+}
+
 private actor RetryPreviewSource {
     var failing = true
     var calls: [String] = []

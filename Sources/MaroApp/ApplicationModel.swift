@@ -126,7 +126,9 @@ enum ApplicationRoute: Equatable {
         previewQueries = Array((searchSeedQueries + known.map(\.creator)).filter {
             !$0.isEmpty && queries.insert($0.lowercased()).inserted && (query.isEmpty || $0.localizedStandardContains(query))
         }.prefix(4))
-        previewError = nil; previewLoading = false
+        previewError = player.snapshot.sourceNeedsUpdate ? ExtractorFailure.sourceNeedsUpdate.message : nil
+        previewLoading = false
+        guard !player.snapshot.sourceNeedsUpdate else { return }
         guard query.count >= 2 else { return }
         previewLoading = true
         previewTask = Task { [weak self, controller, previewDelay] in

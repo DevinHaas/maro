@@ -23,7 +23,7 @@ struct GlobalSearchView: View {
             HStack {
                 Label("Navigate", systemImage: "arrow.up.arrow.down")
                 Spacer()
-                Text("Return to search").font(.system(size: 10))
+                Text(app.previewFocusedIndex == nil ? "Return to search" : "Return to select").font(.system(size: 10))
             }.font(.system(size: 10)).foregroundStyle(AppDesign.muted).padding(8)
             ForEach(Array(app.previewQueries.enumerated()), id: \.offset) { index, query in
                 Button { app.submitSearch(query) } label: {
@@ -63,7 +63,7 @@ struct GlobalSearchView: View {
             if app.previewLoading { HStack { ProgressView().controlSize(.small); Text("Searching YouTube…").font(.caption) }.padding(10) }
             if let error = app.previewError {
                 Text(error).font(.caption).foregroundStyle(.orange).padding(10)
-                Button("Retry search preview") { app.retryPreview() }.padding(.horizontal, 10)
+                Button("Retry search preview") { app.retryPreview() }.disabled(app.player.snapshot.sourceNeedsUpdate).padding(.horizontal, 10)
             } else if !app.previewLoading && app.previewVideos.isEmpty && app.previewQueries.isEmpty {
                 Text(app.globalQuery.count < 2 ? "Type at least two characters to find videos." : "No matching videos. Try another search.")
                     .font(.caption).foregroundStyle(AppDesign.muted).padding(10)
