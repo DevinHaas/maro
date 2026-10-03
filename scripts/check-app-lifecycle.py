@@ -17,7 +17,8 @@ def main():
         video = {"id": "abcdefghijk", "title": "Lifecycle fixture", "creator": "Test"}
         state.write_text(json.dumps({"schemaVersion": 1, "favorites": [],
             "loadedVideo": {"video": video, "positionSeconds": 5}}))
-        environment = dict(os.environ, MARO_DATA_DIRECTORY=folder, MARO_SKETCHYBAR="/usr/bin/true")
+        environment = dict(os.environ, MARO_DATA_DIRECTORY=folder,
+            MARO_SKETCHYBAR="/usr/bin/true", MARO_KEYCHAIN_SERVICE=f"Maro.Lifecycle.{root.name}")
         has_worker = (build.parent / "Resources/python/bin/python3").is_file()
         socket = root / "maro.sock"
         processes = []

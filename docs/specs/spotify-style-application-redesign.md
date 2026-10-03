@@ -1,6 +1,6 @@
 # Maro application redesign: Spotify-style library, discovery, search, and playlists
 
-Status: Published for review before implementation tickets.
+Status: Implemented on `codex/spotify-redesign`; [PR #7](https://github.com/DevinHaas/maro/pull/7) awaits review and merge.
 Tracker: [GitHub issue #1](https://github.com/DevinHaas/maro/issues/1), labeled `ready-for-agent`.
 Date: 2026-10-03.
 Target: The existing native macOS Maro application.
