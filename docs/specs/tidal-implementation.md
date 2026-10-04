@@ -18,7 +18,7 @@ The approved handoff is preserved in `design/terminal-style/` and `docs/specs/ti
 
 ## Current frontier
 
-#9's [screenshot and HTML review package](tidal-frame-review.md) includes 18 native captures, 18 AX frame reports, responsive threshold observations, a CoreText font metric audit, and an inspected HTML mockup with semantic scene data. Native build/fixture compilation and size/report checks passed. On 4 October 2026, the user accepted screenshots plus an HTML mockup as the required artifact format, replacing editable Figma frames. The package is ready for explicit approval of its application-design version and scope before paint changes, as required by #8 and #9. Native themed font/baseline acceptance remains work for #10–#13.
+#9's [screenshot and HTML review package](tidal-frame-review.md) includes 18 native captures, 18 AX frame reports, responsive threshold observations, a CoreText font metric audit, and an inspected HTML mockup with semantic scene data. Native build/fixture compilation and size/report checks passed. On 4 October 2026, the user accepted screenshots plus an HTML mockup as the required artifact format and then approved application review v1: “I approve the style.” #9's review prerequisite is complete; #10 is ready to implement. Native themed font/baseline acceptance remains work for #10–#13. Issues remain open until the integration PR merges.
 
 Figma team creation and browser sign-in are no longer prerequisites. The earlier Figma destination and sign-in questions are superseded by the user's screenshot/HTML requirement.
 

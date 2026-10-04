@@ -2,7 +2,7 @@
 
 Date: 4 October 2026. Parent spec #8; prerequisite #9. Application paint has not changed.
 
-**Status:** the native screenshot and HTML mockup package is prepared and inspected. On 4 October 2026, the user changed #9 to accept screenshots plus an HTML mockup; editable Figma frames are not required. Approval of this application-design version and scope remains pending before paint tickets start.
+**Status:** the native screenshot and HTML mockup package is prepared, inspected and approved. On 4 October 2026, the user changed #9 to accept screenshots plus an HTML mockup and then approved application review v1: “I approve the style.” #10's shared styling work is unblocked. Editable Figma frames are not required.
 
 ## Review artifact
 
@@ -59,4 +59,4 @@ Native fixture execution requires access to macOS GUI services; sandboxed launch
 
 ## Approval record
 
-Tidal foundations were approved previously. The user approved the screenshot/HTML artifact format on 4 October 2026. Application review v1, available in the linked HTML mockup with the native screenshot evidence and font observations above, is **not yet approved as an application design**. Obtain explicit approval of this version and scope before application paint changes; editable Figma creation and sign-in are no longer required.
+Tidal foundations were approved previously. On 4 October 2026, the user approved the screenshot/HTML artifact format and then approved application review v1 with “I approve the style” while the HTML mockup was open. This approval covers the Home, playlist and search/player styling proposal, its measured layout, and the recorded provisional font limitations. Application paint implementation may now start. Native geometry, font exceptions and behavior still require validation during #10–#13. Editable Figma creation and sign-in are not required.
