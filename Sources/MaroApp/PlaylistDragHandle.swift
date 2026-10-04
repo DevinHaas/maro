@@ -79,7 +79,7 @@ struct PlaylistDragHandle: NSViewRepresentable {
         isDragging = false; sourceScrollView = nil
     }
     override func draw(_ dirtyRect: NSRect) {
-        (enabled ? NSColor.secondaryLabelColor : NSColor.disabledControlTextColor).setFill()
+        NSColor(enabled ? AppDesign.Border.interactive : AppDesign.Text.disabled).setFill()
         for x in [bounds.midX - 3, bounds.midX + 3] {
             for y in [bounds.midY - 5, bounds.midY, bounds.midY + 5] {
                 NSBezierPath(ovalIn: NSRect(x: x - 1, y: y - 1, width: 2, height: 2)).fill()
@@ -143,14 +143,17 @@ struct PlaylistDragHandle: NSViewRepresentable {
     private func dragImage(title: String) -> NSImage {
         let image = NSImage(size: NSSize(width: 300, height: 52))
         image.lockFocus()
-        NSColor(calibratedWhite: 0.16, alpha: 0.96).setFill()
+        NSColor(AppDesign.Surface.raised).setFill()
         NSBezierPath(roundedRect: NSRect(x: 0, y: 0, width: 300, height: 52), xRadius: 6, yRadius: 6).fill()
+        NSColor(AppDesign.Border.decorative).setStroke()
+        let border = NSBezierPath(roundedRect: NSRect(x: 0.5, y: 0.5, width: 299, height: 51), xRadius: 5.5, yRadius: 5.5)
+        border.lineWidth = 1; border.stroke()
         let thumbRect = NSRect(x: 6, y: 6, width: 40, height: 40)
         if let artwork { artwork.draw(in: thumbRect, from: .zero, operation: .sourceOver, fraction: 1) }
         else { NSImage(systemSymbolName: "music.note", accessibilityDescription: nil)?.draw(in: thumbRect) }
         let paragraph = NSMutableParagraphStyle(); paragraph.lineBreakMode = .byTruncatingTail
         (title as NSString).draw(in: NSRect(x: 56, y: 15, width: 236, height: 24), withAttributes: [
-            .font: NSFont.systemFont(ofSize: 13, weight: .medium), .foregroundColor: NSColor.white, .paragraphStyle: paragraph])
+            .font: NSFont.systemFont(ofSize: 13, weight: .medium), .foregroundColor: NSColor(AppDesign.Text.primary), .paragraphStyle: paragraph])
         image.unlockFocus(); return image
     }
 

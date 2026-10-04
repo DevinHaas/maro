@@ -111,18 +111,19 @@ struct AddToPlaylistSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("Add to playlist").font(.title2.bold())
-            Text(library.pendingVideo?.title ?? "").lineLimit(2).foregroundStyle(.secondary)
+            Text(library.pendingVideo?.title ?? "").lineLimit(2).foregroundStyle(AppDesign.Text.secondary)
             if library.connected {
                 Picker("Playlist", selection: $library.destination) { ForEach(library.playlists) { Text($0.title).tag($0.id) } }
                 if library.playlists.isEmpty { Button("Create private playlist…") { library.create() } }
             } else { Text("Connect YouTube from the account menu to add videos to your own playlists.") }
-            Text(library.status).font(.caption).foregroundStyle(.secondary)
+            Text(library.status).font(.caption).foregroundStyle(AppDesign.Text.secondary)
             HStack {
                 Button("Cancel") { library.pendingVideo = nil }.keyboardShortcut(.cancelAction)
                 Spacer()
-                Button("Add") { library.addPending() }.buttonStyle(.borderedProminent)
+                Button("Add") { library.addPending() }.buttonStyle(.borderedProminent).foregroundStyle(AppDesign.Text.onAccent)
                     .disabled(!library.connected || library.destination.isEmpty || library.busy).keyboardShortcut(.defaultAction)
             }
-        }.padding(24).frame(width: 420).background(AppDesign.surface).preferredColorScheme(.dark).tint(AppDesign.green)
+        }.foregroundStyle(AppDesign.Text.primary).padding(24).frame(width: 420)
+            .background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0).preferredColorScheme(.dark).tint(AppDesign.Accent.primary)
     }
 }

@@ -478,7 +478,7 @@ final class PlaylistLibrary: ObservableObject {
     private static func styledAlert() -> NSAlert {
         let alert = NSAlert()
         alert.window.appearance = NSAppearance(named: .darkAqua)
-        alert.window.backgroundColor = MaroAppearance.background
+        alert.window.backgroundColor = NSColor(AppDesign.Surface.raised)
         return alert
     }
 
@@ -487,9 +487,12 @@ final class PlaylistLibrary: ObservableObject {
         alert.messageText = title
         alert.addButton(withTitle: "Save"); alert.addButton(withTitle: "Cancel")
         MaroAppearance.primary(alert.buttons[0])
+        alert.buttons[0].bezelColor = NSColor(AppDesign.Accent.primary)
         let field = NSTextField(string: value)
         field.frame = NSRect(x: 0, y: 0, width: 320, height: 24)
         field.font = .systemFont(ofSize: 13)
+        field.textColor = NSColor(AppDesign.Text.primary)
+        field.backgroundColor = NSColor(AppDesign.Surface.raised)
         field.setAccessibilityLabel("Playlist name")
         alert.accessoryView = field
         alert.window.initialFirstResponder = field
@@ -515,7 +518,7 @@ final class PlaylistLibrary: ObservableObject {
     private static func applySurface(_ alert: NSAlert) {
         alert.layout()
         alert.window.contentView?.wantsLayer = true
-        alert.window.contentView?.layer?.backgroundColor = MaroAppearance.background.cgColor
+        alert.window.contentView?.layer?.backgroundColor = NSColor(AppDesign.Surface.raised).cgColor
     }
 }
 

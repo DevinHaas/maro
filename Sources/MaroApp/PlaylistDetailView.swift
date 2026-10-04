@@ -11,9 +11,11 @@ private struct PlaylistDetailContent: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject var library: PlaylistLibrary
     @ObservedObject var player: PlayerPresentation
-    @State private var artworkColor = Color(red: 0.20, green: 0.23, blue: 0.26)
+    @State private var artworkColor = AppDesign.Surface.raised
     @State private var invokingControl: String?
     @FocusState private var focusedControl: String?
+    @FocusState private var playFocused: Bool
+    @State private var playHovered = false
     private var showsDates: Bool { library.items.contains { $0.addedAt != nil } }
     private var showsDurations: Bool { library.items.contains { $0.video?.durationSeconds != nil } }
 
@@ -30,14 +32,20 @@ private struct PlaylistDetailContent: View {
                         VStack(alignment: .leading, spacing: 18) {
                             HStack(spacing: 18) {
                                 Button { library.play() } label: {
-                                    Image(systemName: "play.fill").font(.system(size: 25)).foregroundStyle(.black)
-                                        .frame(width: 62, height: 62).background(Circle().fill(AppDesign.green))
-                                }.buttonStyle(.plain).disabled(library.items.isEmpty || library.busy)
+                                    Image(systemName: "play.fill").font(.system(size: 25))
+                                        .frame(width: 62, height: 62)
+                                }.buttonStyle(PlaylistPlayButtonStyle(hovered: playHovered)).disabled(library.items.isEmpty || library.busy)
                                     .opacity(library.items.isEmpty || library.busy ? 0.4 : 1)
+                                    .onHover { playHovered = $0 }.focused($playFocused)
+                                    .overlay {
+                                        Circle().inset(by: 2).strokeBorder(playFocused ? AppDesign.Border.focus : .clear, lineWidth: 2)
+                                            .allowsHitTesting(false).accessibilityHidden(true)
+                                    }
                                     .accessibilityLabel("Play \(playlist.title) in saved order")
                                 AppIconButton(title: "Playlist actions for \(playlist.title)", symbol: "ellipsis", enabled: !library.busy) {
                                     invokingControl = "playlist-actions"; library.presentPlaylistActions()
                                 }.focusable().focused($focusedControl, equals: "playlist-actions")
+                                    .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-actions", visible: focusedControl == "playlist-actions")
                                 Spacer()
                                 if library.busy { ProgressView().controlSize(.small) }
                                 Text("Saved order").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
@@ -75,9 +83,9 @@ private struct PlaylistDetailContent: View {
                                     Text("Search for a video and add it to this playlist.").foregroundStyle(AppDesign.muted)
                                 }.frame(maxWidth: .infinity).padding(.vertical, 44)
                             }
-                            if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(.orange) }
+                            if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(AppDesign.Status.warning) }
                             Text(library.status).font(.system(size: 11)).foregroundStyle(AppDesign.muted).textSelection(.enabled)
-                        }.padding(24).background(LinearGradient(colors: [artworkColor.opacity(0.55), AppDesign.surface], startPoint: .top, endPoint: .bottom))
+                        }.padding(24).background(AppDesign.Surface.panel)
                     }
                 }.safeAreaInset(edge: .bottom, spacing: 0) {
                     if library.reorderState != .idle || library.status.hasPrefix("Saved") {
@@ -89,7 +97,7 @@ private struct PlaylistDetailContent: View {
                                     if library.canRetry { library.retryLast() } else { library.refresh() }
                                 }.disabled(library.busy)
                             }
-                        }.padding(14).background(AppDesign.raised)
+                        }.padding(14).background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0)
                     }
                 }
             } else {
@@ -98,7 +106,7 @@ private struct PlaylistDetailContent: View {
                     Button("Back to Home") { app.showHome() }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }.sheet(item: $library.actionContext, onDismiss: {
+        }.foregroundStyle(AppDesign.Text.primary).sheet(item: $library.actionContext, onDismiss: {
             focusedControl = invokingControl; invokingControl = nil
         }) { context in PlaylistActionsSheet(context: context, library: library, player: player) }
     }
@@ -112,7 +120,7 @@ private struct PlaylistDetailContent: View {
             if showsDurations { Image(systemName: "clock").frame(width: 48) }
             Color.clear.frame(width: 38, height: 1)
         }.font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.horizontal, 8).padding(.bottom, 10)
-            .overlay(alignment: .bottom) { Rectangle().fill(Color.white.opacity(0.12)).frame(height: 1) }.accessibilityHidden(true)
+            .overlay(alignment: .bottom) { Rectangle().fill(AppDesign.Border.decorative).frame(height: 1) }.accessibilityHidden(true)
     }
 }
 
@@ -136,20 +144,20 @@ private struct PlaylistCoverHeader: View {
                         .frame(width: bounds.size.width, height: bounds.size.height).clipped()
                 }
             }
-            else { Image(systemName: "music.note.list").font(.system(size: 100)).foregroundStyle(.white.opacity(0.10)).frame(maxWidth: .infinity) }
-            LinearGradient(colors: [.black.opacity(0.05), .black.opacity(0.75)], startPoint: .top, endPoint: .bottom)
-            LinearGradient(colors: [.black.opacity(0.40), .clear], startPoint: .leading, endPoint: .trailing)
+            else { Image(systemName: "music.note.list").font(.system(size: 100)).foregroundStyle(AppDesign.Accent.secondary.opacity(0.10)).frame(maxWidth: .infinity) }
+            LinearGradient(colors: [AppDesign.Surface.canvas.opacity(0.05), AppDesign.Surface.canvas.opacity(0.75)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [AppDesign.Surface.canvas.opacity(0.40), .clear], startPoint: .leading, endPoint: .trailing)
             VStack(alignment: .leading, spacing: 12) {
                 Text(playlist.privacy.map { "\($0.capitalized) playlist" } ?? "Playlist").font(.system(size: 12, weight: .medium))
                 Text(playlist.title).font(.system(size: 54, weight: .heavy)).lineLimit(2).minimumScaleFactor(0.6).accessibilityAddTraits(.isHeader)
                 if let description = playlist.description, !description.isEmpty {
-                    Text(description).font(.system(size: 13)).foregroundStyle(.white.opacity(0.85)).lineLimit(2)
+                    Text(description).font(.system(size: 13)).foregroundStyle(AppDesign.Text.primary).lineLimit(2)
                 }
                 Text([playlist.owner, "\(loadedCount ?? playlist.count) \((loadedCount ?? playlist.count) == 1 ? "video" : "videos")"].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.system(size: 12, weight: .medium)).foregroundStyle(.white.opacity(0.88))
-            }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.system(size: 12, weight: .medium)).foregroundStyle(AppDesign.Text.primary)
+            }.foregroundStyle(AppDesign.Text.primary).padding(28).frame(maxWidth: .infinity, alignment: .leading)
         }.frame(height: 320).clipped().task(id: urls) {
-            artwork = nil; color = Color(red: 0.20, green: 0.23, blue: 0.26)
+            artwork = nil; color = AppDesign.Surface.raised
             for url in urls {
                 guard !Task.isCancelled else { return }
                 do {
@@ -222,7 +230,7 @@ struct PlaylistTrackRow: View {
             LibraryArtwork(url: item.video?.thumbnailURL, localPath: localPath, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
                 .frame(width: 44, height: 44).opacity(item.video == nil ? 0.5 : 1)
             VStack(alignment: .leading, spacing: 5) {
-                Text(item.title).font(.system(size: 14, weight: .medium)).foregroundStyle(active ? AppDesign.green : .white).lineLimit(1)
+                Text(item.title).font(.system(size: 14, weight: .medium)).foregroundStyle(active ? AppDesign.Accent.primary : AppDesign.Text.primary).lineLimit(1)
                 Text(item.video.map { $0.creator.isEmpty ? "Video" : $0.creator } ?? "Unavailable · skipped during playback")
                     .font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
             }.frame(maxWidth: .infinity, alignment: .leading).accessibilityElement(children: .ignore)
@@ -235,7 +243,16 @@ struct PlaylistTrackRow: View {
             AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
                 .focusable().focused(focusedControl, equals: item.id)
         }.padding(.horizontal, 8).padding(.vertical, 7)
-            .background(RoundedRectangle(cornerRadius: 5).fill(hovered || playFocused || focusedControl.wrappedValue == item.id ? Color.white.opacity(0.10) : active ? Color.white.opacity(0.035) : .clear))
+            .background(RoundedRectangle(cornerRadius: 5).fill(hovered || playFocused || focusedControl.wrappedValue == item.id ? AppDesign.Surface.hover : active ? AppDesign.Surface.selected : .clear))
+            .tidalBorder(cornerRadius: 5, focused: playFocused || focusedControl.wrappedValue == item.id, visible: playFocused || focusedControl.wrappedValue == item.id)
             .onHover { hovered = $0 }
+    }
+}
+
+private struct PlaylistPlayButtonStyle: ButtonStyle {
+    let hovered: Bool
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.foregroundStyle(AppDesign.Text.onAccent)
+            .background(Circle().fill(configuration.isPressed ? AppDesign.Accent.pressed : hovered ? AppDesign.Accent.hover : AppDesign.Accent.primary))
     }
 }

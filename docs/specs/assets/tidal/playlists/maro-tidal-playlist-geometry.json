@@ -1,0 +1,115 @@
+{
+  "matchingCaptures": 18,
+  "scrollbarEstimateException": true,
+  "failingCaptures": 0,
+  "reports": [
+    {
+      "capture": "home-1001x900.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1002x900.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1024x768.json",
+      "baselineVisibleElements": 71,
+      "candidateVisibleElements": 71,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1199x900.json",
+      "baselineVisibleElements": 73,
+      "candidateVisibleElements": 73,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1200x900.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1440x900.json",
+      "baselineVisibleElements": 79,
+      "candidateVisibleElements": 79,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "playlist-1024x768.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "playlist-1199x900.json",
+      "baselineVisibleElements": 84,
+      "candidateVisibleElements": 84,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "playlist-1200x900.json",
+      "baselineVisibleElements": 84,
+      "candidateVisibleElements": 84,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "playlist-1440x900.json",
+      "baselineVisibleElements": 83,
+      "candidateVisibleElements": 83,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1024x768.json",
+      "baselineVisibleElements": 95,
+      "candidateVisibleElements": 95,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1199x900.json",
+      "baselineVisibleElements": 97,
+      "candidateVisibleElements": 97,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1200x900.json",
+      "baselineVisibleElements": 96,
+      "candidateVisibleElements": 96,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1440x900.json",
+      "baselineVisibleElements": 104,
+      "candidateVisibleElements": 104,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "results-1024x768.json",
+      "baselineVisibleElements": 71,
+      "candidateVisibleElements": 71,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "results-1440x900.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "rows-1024x768.json",
+      "baselineVisibleElements": 72,
+      "candidateVisibleElements": 72,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "rows-1440x900.json",
+      "baselineVisibleElements": 84,
+      "candidateVisibleElements": 84,
+      "geometryDifferences": []
+    }
+  ]
+}

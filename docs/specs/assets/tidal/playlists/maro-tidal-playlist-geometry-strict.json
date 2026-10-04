@@ -1,0 +1,291 @@
+{
+  "matchingCaptures": 18,
+  "scrollbarEstimateException": false,
+  "failingCaptures": 5,
+  "reports": [
+    {
+      "capture": "home-1001x900.json",
+      "baselineVisibleElements": 76,
+      "candidateVisibleElements": 76,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1002x900.json",
+      "baselineVisibleElements": 76,
+      "candidateVisibleElements": 76,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1024x768.json",
+      "baselineVisibleElements": 75,
+      "candidateVisibleElements": 75,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1199x900.json",
+      "baselineVisibleElements": 77,
+      "candidateVisibleElements": 77,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1200x900.json",
+      "baselineVisibleElements": 76,
+      "candidateVisibleElements": 76,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "home-1440x900.json",
+      "baselineVisibleElements": 83,
+      "candidateVisibleElements": 83,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "playlist-1024x768.json",
+      "baselineVisibleElements": 76,
+      "candidateVisibleElements": 76,
+      "geometryDifferences": [
+        {
+          "element": [
+            "AXButton",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 470,
+            "width": 6,
+            "x": 1007,
+            "y": 195
+          },
+          "candidate": {
+            "height": 468.5,
+            "width": 6,
+            "x": 1007,
+            "y": 196.5
+          }
+        },
+        {
+          "element": [
+            "AXValueIndicator",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 119.5,
+            "width": 6,
+            "x": 1007,
+            "y": 75
+          },
+          "candidate": {
+            "height": 121,
+            "width": 6,
+            "x": 1007,
+            "y": 75
+          }
+        }
+      ]
+    },
+    {
+      "capture": "playlist-1199x900.json",
+      "baselineVisibleElements": 88,
+      "candidateVisibleElements": 88,
+      "geometryDifferences": [
+        {
+          "element": [
+            "AXButton",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 544,
+            "width": 6,
+            "x": 1182,
+            "y": 253
+          },
+          "candidate": {
+            "height": 543.5,
+            "width": 6,
+            "x": 1182,
+            "y": 253.5
+          }
+        },
+        {
+          "element": [
+            "AXValueIndicator",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 177.5,
+            "width": 6,
+            "x": 1182,
+            "y": 75
+          },
+          "candidate": {
+            "height": 178,
+            "width": 6,
+            "x": 1182,
+            "y": 75
+          }
+        }
+      ]
+    },
+    {
+      "capture": "playlist-1200x900.json",
+      "baselineVisibleElements": 88,
+      "candidateVisibleElements": 88,
+      "geometryDifferences": [
+        {
+          "element": [
+            "AXButton",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 544,
+            "width": 6,
+            "x": 1183,
+            "y": 253
+          },
+          "candidate": {
+            "height": 543.5,
+            "width": 6,
+            "x": 1183,
+            "y": 253.5
+          }
+        },
+        {
+          "element": [
+            "AXValueIndicator",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 177.5,
+            "width": 6,
+            "x": 1183,
+            "y": 75
+          },
+          "candidate": {
+            "height": 178,
+            "width": 6,
+            "x": 1183,
+            "y": 75
+          }
+        }
+      ]
+    },
+    {
+      "capture": "playlist-1440x900.json",
+      "baselineVisibleElements": 87,
+      "candidateVisibleElements": 87,
+      "geometryDifferences": [
+        {
+          "element": [
+            "AXButton",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 543,
+            "width": 6,
+            "x": 1423,
+            "y": 254
+          },
+          "candidate": {
+            "height": 542.5,
+            "width": 6,
+            "x": 1423,
+            "y": 254.5
+          }
+        },
+        {
+          "element": [
+            "AXValueIndicator",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 178.5,
+            "width": 6,
+            "x": 1423,
+            "y": 75
+          },
+          "candidate": {
+            "height": 179,
+            "width": 6,
+            "x": 1423,
+            "y": 75
+          }
+        }
+      ]
+    },
+    {
+      "capture": "preview-1024x768.json",
+      "baselineVisibleElements": 101,
+      "candidateVisibleElements": 101,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1199x900.json",
+      "baselineVisibleElements": 103,
+      "candidateVisibleElements": 103,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1200x900.json",
+      "baselineVisibleElements": 102,
+      "candidateVisibleElements": 102,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "preview-1440x900.json",
+      "baselineVisibleElements": 110,
+      "candidateVisibleElements": 110,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "results-1024x768.json",
+      "baselineVisibleElements": 73,
+      "candidateVisibleElements": 73,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "results-1440x900.json",
+      "baselineVisibleElements": 74,
+      "candidateVisibleElements": 74,
+      "geometryDifferences": []
+    },
+    {
+      "capture": "rows-1024x768.json",
+      "baselineVisibleElements": 76,
+      "candidateVisibleElements": 76,
+      "geometryDifferences": [
+        {
+          "element": [
+            "AXButton",
+            "",
+            1
+          ],
+          "baseline": {
+            "height": 472,
+            "width": 6,
+            "x": 1007,
+            "y": 193
+          },
+          "candidate": {
+            "height": 471.5,
+            "width": 6,
+            "x": 1007,
+            "y": 193.5
+          }
+        }
+      ]
+    },
+    {
+      "capture": "rows-1440x900.json",
+      "baselineVisibleElements": 88,
+      "candidateVisibleElements": 88,
+      "geometryDifferences": []
+    }
+  ]
+}
