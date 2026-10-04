@@ -49,7 +49,7 @@ private struct PlaylistDetailContent: View {
                                     invokingControl = "playlist-actions"; library.presentPlaylistActions()
                                 }.focusable().focused($focusedControl, equals: "playlist-actions")
                                     .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-actions", visible: focusedControl == "playlist-actions")
-                                Spacer(minLength: 12)
+                                Spacer(minLength: 8)
                                 if library.busy { ProgressView().controlSize(.small) }
                                 Text("Saved order").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
                                 Image(systemName: "list.bullet").foregroundStyle(AppDesign.muted)
@@ -144,7 +144,8 @@ private struct PlaylistDetailContent: View {
                 }.buttonStyle(.plain).accessibilityLabel("Clear playlist search")
             }
         }
-        .padding(.horizontal, 10).frame(width: 220, height: 34)
+        .padding(.horizontal, 10).frame(minWidth: 96, maxWidth: 260, minHeight: 34, maxHeight: 34)
+        .layoutPriority(1)
         .background(AppDesign.Surface.raised, in: RoundedRectangle(cornerRadius: 7))
         .tidalBorder(cornerRadius: 7)
     }

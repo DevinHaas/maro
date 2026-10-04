@@ -52,6 +52,9 @@ final class PlaylistLibrary: ObservableObject {
     private var unconfirmedPlaylists: Set<String> = []
     private var rejectedMove: (occurrenceID: String, playlistID: String, position: Int, signature: [String])?
     var canReorder: Bool { connected && !busy && selected != nil && unconfirmedPlaylists.isEmpty }
+    func canSaveVideo(to playlistID: String) -> Bool {
+        connected && !busy && unconfirmedPlaylists.isEmpty && playlists.contains(where: { $0.id == playlistID })
+    }
     @Published private(set) var saveScopeID = UUID()
     var saveAccountScope: String { saveScopeID.uuidString }
 

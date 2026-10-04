@@ -91,6 +91,7 @@ private actor ReorderResponses {
     while library.busy { await Task.yield() }
     #expect(library.reorderState == .unconfirmed)
     #expect(!library.canReorder)
+    #expect(!library.canSaveVideo(to: "PLone"))
     library.remove(try #require(library.items.first))
     while library.busy { await Task.yield() }
     #expect(library.reorderState == .unconfirmed)
@@ -100,6 +101,7 @@ private actor ReorderResponses {
     library.retryLast()
     while library.busy { await Task.yield() }
     #expect(library.canReorder)
+    #expect(library.canSaveVideo(to: "PLone"))
     #expect(library.items.map(\.id) == ["a", "b", "c"])
     #expect(await responses.writes.count == 1)
     await controller.shutdown()

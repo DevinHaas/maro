@@ -17,7 +17,7 @@ struct SaveDestinationButton: View {
     @State private var resultDestinationTitle: String?
     @State private var invocationVideoID: String?
     @State private var invocationScope: String?
-    @State private var restoreFocus = false
+    @State private var suppressFocusRestore = false
     @FocusState private var buttonFocused: Bool
 
     init(app: ApplicationModel, video: VideoSummary, sourcePlaylistID: String? = nil, rowHovered: Bool = false) {
@@ -65,14 +65,16 @@ struct SaveDestinationButton: View {
                 .preferredColorScheme(.dark)
                 .tint(AppDesign.green)
                 .onExitCommand {
-                    restoreFocus = true
                     presented = false
                 }
         }
         .onChange(of: presented) { open in
-            if !open && restoreFocus {
-                restoreFocus = false
-                DispatchQueue.main.async { buttonFocused = true }
+            if !open {
+                if suppressFocusRestore {
+                    suppressFocusRestore = false
+                } else {
+                    DispatchQueue.main.async { buttonFocused = true }
+                }
             }
         }
         .onChange(of: video.id) { _ in invalidatePopover() }
@@ -91,7 +93,7 @@ struct SaveDestinationButton: View {
                     Text(video.title).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
                 }
                 Spacer(minLength: 0)
-                Button { restoreFocus = true; presented = false } label: { Image(systemName: "xmark").font(.system(size: 11, weight: .semibold)) }
+                Button { presented = false } label: { Image(systemName: "xmark").font(.system(size: 11, weight: .semibold)) }
                     .buttonStyle(.plain).foregroundStyle(AppDesign.muted).accessibilityLabel("Close save menu")
             }
 
@@ -176,7 +178,7 @@ struct SaveDestinationButton: View {
                             }.padding(.horizontal, 7).padding(.vertical, 5).contentShape(Rectangle())
                                 .background(AppDesign.Surface.raised, in: RoundedRectangle(cornerRadius: 5))
                         }.buttonStyle(.plain)
-                            .disabled(saving || library.busy || !library.connected || !library.playlists.contains(where: { $0.id == playlist.id }))
+                            .disabled(saving || !library.canSaveVideo(to: playlist.id))
                             .accessibilityLabel("Add \(video.title) to \(playlist.title)")
                     }
                 }
@@ -226,6 +228,7 @@ struct SaveDestinationButton: View {
     }
 
     private func invalidatePopover() {
+        suppressFocusRestore = presented
         presented = false
         invocationVideoID = nil
         invocationScope = nil

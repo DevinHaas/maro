@@ -35,6 +35,14 @@ private actor AmbiguousSaveRequests {
     let requests = SaveRequests()
     let library = PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { "fixture" }, send: { await requests.respond($0) }))
     library.playlists = [YouTubePlaylist(id: "PLone", title: "One", count: 0)]
+    library.connected = true
+    #expect(library.canSaveVideo(to: "PLone"))
+    library.busy = true
+    #expect(!library.canSaveVideo(to: "PLone"))
+    library.busy = false
+    library.connected = false
+    #expect(!library.canSaveVideo(to: "PLone"))
+    library.connected = true
     let video = try VideoSummary(id: "abcdefghijk", title: "A song", creator: "An artist")
 
     let result = await library.saveVideo(video, to: "PLone", accountScope: library.saveAccountScope)
