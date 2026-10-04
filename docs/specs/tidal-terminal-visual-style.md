@@ -198,12 +198,14 @@ features to implement in this release.
   theme settings. No future background interface is implemented here.
 
 - **Review sequence.** Before changing application paint, capture a fresh
-  baseline from the pinned production views and prepare representative editable
-  Home, playlist and search/player visual frames using the approved foundations
-  and the measured layout. Carry forward the design workflow's application-
-  mockup review gate; approval of this guide does not imply approval of unseen
-  application frames. Prepare those frames as a complete reviewable result
-  before requesting the required mockup approval. Then implement shared styling
+  baseline from the pinned production views and prepare representative Home,
+  playlist and search/player screenshots and an HTML mockup using the approved
+  foundations and the measured layout. Native screenshots plus the HTML mockup
+  are sufficient review artifacts; editable Figma frames are not required.
+  Carry forward the application-mockup review gate; approval of this guide does
+  not imply approval of unseen application designs. Prepare the screenshot and
+  HTML package as a complete reviewable result before requesting approval of
+  its version and scope. Then implement shared styling
   and migrate all scoped surfaces, inspecting each state against the baseline.
 
 ## Testing Decisions

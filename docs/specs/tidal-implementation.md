@@ -8,8 +8,8 @@ The approved handoff is preserved in `design/terminal-style/` and `docs/specs/ti
 
 | Ticket | Depends on | Work |
 | --- | --- | --- |
-| [#9](https://github.com/DevinHaas/maro/issues/9) | Native baseline | Capture measured production fixture; create and inspect editable Home, playlist and search/player designs; obtain explicit approval of the named version and scope |
-| [#10](https://github.com/DevinHaas/maro/issues/10) | #9 frame approval | Shared semantic theme, native font measurements/exceptions, chrome, Home, library and Favorites |
+| [#9](https://github.com/DevinHaas/maro/issues/9) | Native baseline | Capture measured production fixture; prepare and inspect Home, playlist and search/player screenshots plus an HTML mockup; obtain explicit approval of the named version and scope |
+| [#10](https://github.com/DevinHaas/maro/issues/10) | #9 screenshot/HTML approval | Shared semantic theme, native font measurements/exceptions, chrome, Home, library and Favorites |
 | [#11](https://github.com/DevinHaas/maro/issues/11) | #9, #10 | Playlist header, occurrence rows, drag feedback and native action dialogs |
 | [#12](https://github.com/DevinHaas/maro/issues/12) | #9, #10 | Global search, preview/results and fixed bottom player |
 | [#13](https://github.com/DevinHaas/maro/issues/13) | #10, #11, #12 | Exact native geometry and behavior acceptance, code review and integration delivery |
@@ -18,9 +18,9 @@ The approved handoff is preserved in `design/terminal-style/` and `docs/specs/ti
 
 ## Current frontier
 
-#9 is in progress. Its [preparation checkpoint](tidal-frame-review.md) now includes 18 native captures, 18 AX frame reports, responsive threshold observations, a CoreText font metric audit, and an inspected local editable proposal with Figma-ready scene data. Native build/fixture compilation and size/report checks passed. Editable Figma composition and exact font inspection remain pending. Application paint changes require explicit approval of those application designs, as required by #8 and #9; approval of the foundation guide does not satisfy that gate.
+#9's [screenshot and HTML review package](tidal-frame-review.md) includes 18 native captures, 18 AX frame reports, responsive threshold observations, a CoreText font metric audit, and an inspected HTML mockup with semantic scene data. Native build/fixture compilation and size/report checks passed. On 4 October 2026, the user accepted screenshots plus an HTML mockup as the required artifact format, replacing editable Figma frames. The package is ready for explicit approval of its application-design version and scope before paint changes, as required by #8 and #9. Native themed font/baseline acceptance remains work for #10–#13.
 
-The user requested a new destination, interpreted as a new Maro Figma team. The connector can create files in existing teams but does not expose team creation. Browser sign-in was blocked by automatic approval review pending explicit authorization for the identified account; that request remains pending. No existing team has been selected arbitrarily.
+Figma team creation and browser sign-in are no longer prerequisites. The earlier Figma destination and sign-in questions are superseded by the user's screenshot/HTML requirement.
 
 ## Validation contract
 
