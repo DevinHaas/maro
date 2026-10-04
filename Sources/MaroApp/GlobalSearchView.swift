@@ -4,16 +4,18 @@ import SwiftUI
 struct GlobalSearchView: View {
     @ObservedObject var app: ApplicationModel
     @FocusState private var focusedRow: Int?
+    @State private var fieldFocused = false
     @StateObject private var geometry = SearchPreviewGeometry()
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass").font(.system(size: 19)).foregroundStyle(AppDesign.muted)
-            GlobalSearchField(app: app, geometry: geometry).frame(height: 28)
+            GlobalSearchField(app: app, geometry: geometry, focused: $fieldFocused).frame(height: 28)
             if !app.globalQuery.isEmpty {
                 Button { app.globalQuery = ""; app.focusSearch() } label: { Image(systemName: "xmark") }
                     .buttonStyle(.plain).accessibilityLabel("Clear global search")
             }
         }.padding(.horizontal, 18).frame(height: 44).background(AppDesign.raised).clipShape(Capsule())
+            .tidalCapsuleBorder(focused: fieldFocused, interactive: true)
             .overlay(alignment: .top) { if app.previewOpen { preview.padding(.top, 52) } }
             .onChange(of: app.previewFocusedIndex) { focusedRow = $0 }
     }
@@ -34,7 +36,8 @@ struct GlobalSearchView: View {
                         Image(systemName: "arrow.up.left").foregroundStyle(AppDesign.muted)
                     }.padding(10).contentShape(Rectangle())
                 }.buttonStyle(.plain).focusable().focused($focusedRow, equals: index)
-                    .background(focusedRow == index ? AppDesign.raised : Color.clear).clipShape(RoundedRectangle(cornerRadius: 5))
+                    .background(focusedRow == index ? AppDesign.Surface.selected : Color.clear).clipShape(RoundedRectangle(cornerRadius: 5))
+                    .tidalBorder(cornerRadius: 5, focused: focusedRow == index, visible: focusedRow == index)
                     .accessibilityLabel("Search for \(query)")
             }
             if !app.previewVideos.isEmpty {
@@ -56,13 +59,15 @@ struct GlobalSearchView: View {
                             .accessibilityLabel("Play \(video.title) by \(video.creator)")
                         AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }
                         AppIconButton(title: "Add \(video.title) to playlist", symbol: "plus") { app.offerAdd(video) }
-                    }.background(focusedRow == app.previewQueries.count + index ? AppDesign.raised : Color.clear)
+                    }.background(focusedRow == app.previewQueries.count + index ? AppDesign.Surface.selected : Color.clear)
                         .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .tidalBorder(cornerRadius: 5, focused: focusedRow == app.previewQueries.count + index,
+                                     visible: focusedRow == app.previewQueries.count + index)
                 }
             }
             if app.previewLoading { HStack { ProgressView().controlSize(.small); Text("Searching YouTube…").font(.caption) }.padding(10) }
             if let error = app.previewError {
-                Text(error).font(.caption).foregroundStyle(.orange).padding(10)
+                Text(error).font(.caption).foregroundStyle(AppDesign.Status.error).padding(10)
                 Button("Retry search preview") { app.retryPreview() }.disabled(app.player.snapshot.sourceNeedsUpdate).padding(.horizontal, 10)
             } else if !app.previewLoading && app.previewVideos.isEmpty && app.previewQueries.isEmpty {
                 Text(app.globalQuery.count < 2 ? "Type at least two characters to find videos." : "No matching videos. Try another search.")
@@ -76,7 +81,7 @@ struct GlobalSearchView: View {
         }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
         }.frame(height: min(CGFloat(app.previewQueries.count * 45 + app.previewVideos.count * 64 + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
             .background(AppDesign.raised)
-            .clipShape(RoundedRectangle(cornerRadius: 8)).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.12)))
+            .clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
             .shadow(color: .black.opacity(0.7), radius: 18, y: 8)
             .background(SearchPreviewBounds(geometry: geometry))
             .onChange(of: focusedRow) { app.previewFocusedIndex = $0 }
@@ -86,11 +91,14 @@ struct GlobalSearchView: View {
 private struct GlobalSearchField: NSViewRepresentable {
     @ObservedObject var app: ApplicationModel
     let geometry: SearchPreviewGeometry
-    func makeCoordinator() -> Coordinator { Coordinator(app: app, geometry: geometry) }
+    @Binding var focused: Bool
+    func makeCoordinator() -> Coordinator { Coordinator(app: app, geometry: geometry, focused: $focused) }
     func makeNSView(context: Context) -> NSTextField {
         let field = NSTextField()
         field.isBordered = false; field.drawsBackground = false; field.focusRingType = .none
-        field.placeholderString = "What do you want to play?"; field.textColor = .white
+        field.placeholderAttributedString = NSAttributedString(string: "What do you want to play?",
+            attributes: [.foregroundColor: NSColor(AppDesign.Text.secondary)])
+        field.textColor = NSColor(AppDesign.Text.primary)
         field.font = .systemFont(ofSize: 14); field.delegate = context.coordinator
         field.setAccessibilityLabel("Search YouTube")
         context.coordinator.field = field; context.coordinator.installMonitor()
@@ -107,11 +115,21 @@ private struct GlobalSearchField: NSViewRepresentable {
         weak var field: NSTextField?
         var monitor: Any?
         var suppressNextFocus = false
-        init(app: ApplicationModel, geometry: SearchPreviewGeometry) { self.app = app; self.geometry = geometry }
+        let focused: Binding<Bool>
+        init(app: ApplicationModel, geometry: SearchPreviewGeometry, focused: Binding<Bool>) {
+            self.app = app; self.geometry = geometry; self.focused = focused
+        }
         func controlTextDidBeginEditing(_ notification: Notification) {
+            focused.wrappedValue = true
+            if let editor = field?.currentEditor() as? NSTextView {
+                editor.insertionPointColor = NSColor(AppDesign.Border.focus)
+                editor.selectedTextAttributes = [.backgroundColor: NSColor(AppDesign.Surface.selected),
+                                                 .foregroundColor: NSColor(AppDesign.Text.primary)]
+            }
             if suppressNextFocus { suppressNextFocus = false; return }
             app.focusSearch()
         }
+        func controlTextDidEndEditing(_ notification: Notification) { focused.wrappedValue = false }
         func controlTextDidChange(_ notification: Notification) { if let field { app.globalQuery = field.stringValue } }
         func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
             if selector == #selector(NSResponder.insertNewline(_:)) { app.submitSearch(); return true }

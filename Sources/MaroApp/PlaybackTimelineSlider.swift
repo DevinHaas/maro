@@ -132,16 +132,16 @@ private final class TimelineCell: NSSliderCell {
         let inset = knobRect(flipped: flipped).width / 2
         let track = NSRect(x: rect.minX + inset, y: rect.midY - 1.5,
                            width: max(0, rect.width - inset * 2), height: 3)
-        NSColor.white.withAlphaComponent(0.25).setFill()
+        NSColor(AppDesign.Border.interactive).setFill()
         NSBezierPath(roundedRect: track, xRadius: 1.5, yRadius: 1.5).fill()
         let fraction = maxValue > minValue ? (doubleValue - minValue) / (maxValue - minValue) : 0
-        NSColor(red: 0.66, green: 0.85, blue: 0.58, alpha: isEnabled ? 1 : 0.4).setFill()
+        NSColor(isEnabled ? AppDesign.Accent.primary : AppDesign.Text.disabled).setFill()
         NSBezierPath(roundedRect: NSRect(x: track.minX, y: track.minY,
             width: track.width * min(1, max(0, fraction)), height: 3), xRadius: 1.5, yRadius: 1.5).fill()
     }
     override func drawKnob(_ rect: NSRect) {
         guard isEnabled else { return }
-        NSColor(red: 0.66, green: 0.85, blue: 0.58, alpha: 1).setFill()
+        NSColor(AppDesign.Accent.primary).setFill()
         NSBezierPath(ovalIn: NSRect(x: rect.midX - 3, y: rect.midY - 3, width: 6, height: 6)).fill()
     }
 }
