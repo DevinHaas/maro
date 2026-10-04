@@ -116,7 +116,6 @@ private struct HomeVideoCard: View {
     @ObservedObject var app: ApplicationModel
     let video: VideoSummary
     @State private var hovered = false
-    private var saved: Bool { app.player.snapshot.favorites.contains { $0.id == video.id } }
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button { app.play(video) } label: {
@@ -134,13 +133,8 @@ private struct HomeVideoCard: View {
                         .font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain).accessibilityLabel("Play \(video.title) by \(video.creator)")
-            Menu {
-                Button(saved ? "Remove from Favorites" : "Add to Favorites") { app.toggleFavorite(video) }
-                Button("Add to playlist…") { app.offerAdd(video) }
-            } label: {
-                Label(saved ? "Saved" : "Save", systemImage: saved ? "heart.fill" : "plus.circle")
-                    .font(.system(size: 12)).foregroundStyle(saved ? AppDesign.green : AppDesign.muted)
-            }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Save actions for \(video.title)")
+            HStack { Spacer(minLength: 0); SaveDestinationButton(app: app, video: video) }
+                .frame(height: 34)
         }.padding(10).frame(width: 196, alignment: .leading)
             .background(hovered ? AppDesign.Surface.hover : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
             .tidalBorder(cornerRadius: 8)

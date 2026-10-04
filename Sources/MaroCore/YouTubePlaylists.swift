@@ -138,9 +138,12 @@ public final class YouTubePlaylists {
             let snippet = $0["snippet"] as? [String: Any]
             return (snippet?["resourceId"] as? [String: Any])?["videoId"] as? String == video.id
         }) else { throw YouTubeAccountError("This video is already in this playlist.") }
-        _ = try await request("playlistItems", method: "POST", query: ["part": "snippet"],
-            body: ["snippet": ["playlistId": playlist,
-                "resourceId": ["kind": "youtube#video", "videoId": video.id]]])
+        do {
+            _ = try await request("playlistItems", method: "POST", query: ["part": "snippet"],
+                body: ["snippet": ["playlistId": playlist,
+                    "resourceId": ["kind": "youtube#video", "videoId": video.id]]], classifyWrite: true)
+        } catch let error as YouTubeWriteError { throw error }
+        catch { throw YouTubeWriteError(outcome: .rejected, message: error.localizedDescription) }
     }
 
     public func remove(_ item: YouTubePlaylistItem) async throws {

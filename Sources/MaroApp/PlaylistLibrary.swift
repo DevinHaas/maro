@@ -4,6 +4,17 @@ import UniformTypeIdentifiers
 import MaroCore
 
 @MainActor
+enum PlaylistSaveResult: Equatable {
+    case added
+    case alreadyInPlaylist
+    case unavailable(String)
+    case busy
+    case failed(String)
+    case uncertain(String)
+    case savedRefreshUnavailable(String)
+}
+
+@MainActor
 final class PlaylistLibrary: ObservableObject {
     @Published var playlists: [YouTubePlaylist] = []
     @Published var items: [YouTubePlaylistItem] = []
@@ -41,6 +52,8 @@ final class PlaylistLibrary: ObservableObject {
     private var unconfirmedPlaylists: Set<String> = []
     private var rejectedMove: (occurrenceID: String, playlistID: String, position: Int, signature: [String])?
     var canReorder: Bool { connected && !busy && selected != nil && unconfirmedPlaylists.isEmpty }
+    @Published private(set) var saveScopeID = UUID()
+    var saveAccountScope: String { saveScopeID.uuidString }
 
     init(controller: MaroController, api: YouTubePlaylists? = nil, now: @escaping () -> Date = Date.init) {
         self.controller = controller
@@ -59,6 +72,7 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func importCredentials() {
+        guard !busy else { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.json]
         panel.allowsMultipleSelection = false
@@ -72,7 +86,8 @@ final class PlaylistLibrary: ObservableObject {
             self.account = account
             api = YouTubePlaylists(token: { try await account.accessToken() })
             configured = true; connected = false
-            accountRevision += 1
+            self.accountRevision += 1
+            self.saveScopeID = UUID()
             playlists = []; items = []; selected = nil; clearLoadedEvidence()
             retry = nil; canRetry = false; stale = false
             status = "Credentials imported. Connect YouTube to continue."
@@ -80,12 +95,15 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func connect() {
+        guard !busy else { return }
         guard let account else { return }
         run {
             self.signingIn = true
             defer { self.signingIn = false }
             self.status = "Finish Google sign-in in your browser."
             try await account.connect { NSWorkspace.shared.open($0) }
+            self.accountRevision += 1
+            self.saveScopeID = UUID()
             self.connected = true
             self.playlists = []; self.items = []; self.selected = nil; self.clearLoadedEvidence()
             try await self.reload()
@@ -95,9 +113,11 @@ final class PlaylistLibrary: ObservableObject {
     func cancelSignIn() { operation?.cancel(); account?.cancelSignIn() }
 
     func disconnect() {
+        guard !busy else { return }
         do {
             try account?.disconnect()
             accountRevision += 1
+            saveScopeID = UUID()
             connected = false; playlists = []; items = []; selected = nil; clearLoadedEvidence()
             pendingVideo = nil; retry = nil; canRetry = false; stale = false
             status = "Disconnected on this Mac. Your YouTube playlists are unchanged."
@@ -206,6 +226,69 @@ final class PlaylistLibrary: ObservableObject {
     func add(_ video: VideoSummary, to playlistID: String) {
         guard playlists.contains(where: { $0.id == playlistID }), let api else { return }
         mutate { try await api.add(video, to: playlistID) }
+    }
+
+    /// Saves one explicit video occurrence to one currently listed account playlist.
+    /// The captured account revision prevents stale popovers from writing after a switch.
+    func saveVideo(_ video: VideoSummary, to playlistID: String, accountScope: String) async -> PlaylistSaveResult {
+        guard accountScope == saveAccountScope else { return .unavailable("This YouTube account changed. Reopen the save menu.") }
+        guard connected, let api else { return .unavailable("Connect YouTube to save to your playlists.") }
+        guard playlists.contains(where: { $0.id == playlistID }) else {
+            return .unavailable("This playlist is no longer available. Refresh the list and reopen the save menu.")
+        }
+        guard !busy else { return .busy }
+        guard unconfirmedPlaylists.isEmpty else {
+            return .unavailable("A previous playlist edit has an unconfirmed result. Refresh YouTube before another edit.")
+        }
+        do { try video.validate() }
+        catch { return .unavailable(error.localizedDescription) }
+
+        let revision = accountRevision
+        busy = true
+        canRetry = false
+        defer { busy = false }
+        do {
+            try await api.add(video, to: playlistID)
+        } catch {
+            guard revision == accountRevision, connected else {
+                return .unavailable("The YouTube account changed while saving. Reopen the save menu.")
+            }
+            if error.localizedDescription.localizedCaseInsensitiveContains("already in this playlist") {
+                return .alreadyInPlaylist
+            }
+            if let writeError = error as? YouTubeWriteError, writeError.outcome == .ambiguous {
+                unconfirmedPlaylists.insert(playlistID)
+                retry = { try await self.reload() }
+                canRetry = true
+                let message = "Save outcome is unconfirmed. Refresh YouTube before trying again; Maro will not repeat this save."
+                announce(message)
+                return .uncertain(message)
+            }
+            return .failed(error.localizedDescription)
+        }
+        guard revision == accountRevision, connected else {
+            return .unavailable("The YouTube account changed while saving. Reopen the save menu.")
+        }
+
+        // The POST was confirmed. Keep a useful local count even if the subsequent refresh fails.
+        if let index = playlists.firstIndex(where: { $0.id == playlistID }) {
+            let old = playlists[index]
+            playlists[index] = YouTubePlaylist(id: old.id, title: old.title, count: old.count + 1,
+                thumbnailURL: old.thumbnailURL, description: old.description, owner: old.owner, privacy: old.privacy)
+        }
+        retry = { try await self.reload() }
+        do {
+            try await reload()
+            return .added
+        } catch {
+            guard revision == accountRevision, connected else {
+                return .unavailable("The YouTube account changed after saving. Reopen the save menu.")
+            }
+            let message = "Saved on YouTube, but refresh failed. Retry refresh to see the updated playlist."
+            canRetry = true
+            announce(message)
+            return .savedRefreshUnavailable(message)
+        }
     }
 
     func toggleFavorite(_ video: VideoSummary) {
