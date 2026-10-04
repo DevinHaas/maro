@@ -1,0 +1,1517 @@
+{
+  "accessibility" : [
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 768,
+        "width" : 1024,
+        "x" : 0,
+        "y" : 0
+      },
+      "path" : "content",
+      "role" : "AXGroup",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 28,
+        "width" : 60,
+        "x" : 20,
+        "y" : 18
+      },
+      "path" : "content.0",
+      "role" : "AXStaticText",
+      "text" : "maro"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 92,
+        "y" : 13
+      },
+      "path" : "content.1",
+      "role" : "AXButton",
+      "text" : "Back"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 142,
+        "y" : 13
+      },
+      "path" : "content.2",
+      "role" : "AXButton",
+      "text" : "Hide library"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 287,
+        "y" : 13
+      },
+      "path" : "content.3",
+      "role" : "AXButton",
+      "text" : "Home"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 18.5,
+        "width" : 18.5,
+        "x" : 357,
+        "y" : 23
+      },
+      "path" : "content.4",
+      "role" : "AXImage",
+      "text" : "Search"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 17,
+        "width" : 449.5,
+        "x" : 389.5,
+        "y" : 23.5
+      },
+      "path" : "content.5",
+      "role" : "AXTextField",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 15,
+        "width" : 34,
+        "x" : 967,
+        "y" : 24.5
+      },
+      "path" : "content.6",
+      "role" : "AXMenuButton",
+      "text" : "YouTube account"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 19,
+        "width" : 119.5,
+        "x" : 22,
+        "y" : 89.534423828125
+      },
+      "path" : "content.7",
+      "role" : "AXStaticText",
+      "text" : "Your Library"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 192,
+        "y" : 80
+      },
+      "path" : "content.8",
+      "role" : "AXButton",
+      "text" : "Create playlist"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 238,
+        "y" : 80
+      },
+      "path" : "content.9",
+      "role" : "AXButton",
+      "text" : "Refresh library"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 13,
+        "width" : 12.5,
+        "x" : 31.5,
+        "y" : 141.5
+      },
+      "path" : "content.10",
+      "role" : "AXImage",
+      "text" : "Search"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 212.5,
+        "x" : 53.5,
+        "y" : 140
+      },
+      "path" : "content.11",
+      "role" : "AXTextField",
+      "text" : "Filter your library"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 420,
+        "width" : 280,
+        "x" : 8,
+        "y" : 178
+      },
+      "path" : "content.12",
+      "role" : "AXScrollArea",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 678,
+        "width" : 268,
+        "x" : 14,
+        "y" : 178
+      },
+      "path" : "content.12.0",
+      "role" : "AXOpaqueProviderGroup",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 178
+      },
+      "path" : "content.12.0.0",
+      "role" : "AXButton",
+      "text" : "Favorites, Saved on this Mac"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 246
+      },
+      "path" : "content.12.0.1",
+      "role" : "AXButton",
+      "text" : "Late night jazz, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 314
+      },
+      "path" : "content.12.0.2",
+      "role" : "AXButton",
+      "text" : "Lofi focus, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 382
+      },
+      "path" : "content.12.0.3",
+      "role" : "AXButton",
+      "text" : "Electronic discoveries, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 450
+      },
+      "path" : "content.12.0.4",
+      "role" : "AXButton",
+      "text" : "Quiet afternoons, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 518
+      },
+      "path" : "content.12.0.5",
+      "role" : "AXButton",
+      "text" : "Piano favourites, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 586
+      },
+      "path" : "content.12.0.6",
+      "role" : "AXButton",
+      "text" : "Ambient journeys, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 654
+      },
+      "path" : "content.12.0.7",
+      "role" : "AXButton",
+      "text" : "Weekend listening, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 722
+      },
+      "path" : "content.12.0.8",
+      "role" : "AXButton",
+      "text" : "Café classics, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 66,
+        "width" : 268,
+        "x" : 14,
+        "y" : 790
+      },
+      "path" : "content.12.0.9",
+      "role" : "AXButton",
+      "text" : "Long names remain readable in the library, Playlist · Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 422,
+        "width" : 19,
+        "x" : 270,
+        "y" : 177
+      },
+      "path" : "content.12.1",
+      "role" : "AXScrollBar",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 256,
+        "width" : 6,
+        "x" : 279,
+        "y" : 181
+      },
+      "path" : "content.12.1.0",
+      "role" : "AXValueIndicator",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 0,
+        "x" : 271,
+        "y" : 178
+      },
+      "path" : "content.12.1.1",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 0,
+        "x" : 271,
+        "y" : 178
+      },
+      "path" : "content.12.1.2",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 157.5,
+        "width" : 6,
+        "x" : 279,
+        "y" : 437.5
+      },
+      "path" : "content.12.1.3",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 6,
+        "x" : 279,
+        "y" : 181
+      },
+      "path" : "content.12.1.4",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 26,
+        "width" : 234,
+        "x" : 24,
+        "y" : 626
+      },
+      "path" : "content.13",
+      "role" : "AXStaticText",
+      "text" : "Playing in saved order. Edits apply the next time you play this playlist."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 596,
+        "width" : 720,
+        "x" : 296,
+        "y" : 72
+      },
+      "path" : "content.14",
+      "role" : "AXScrollArea",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 15,
+        "width" : 85.5,
+        "x" : 324,
+        "y" : 219
+      },
+      "path" : "content.14.0",
+      "role" : "AXStaticText",
+      "text" : "Private playlist"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 63,
+        "width" : 373,
+        "x" : 324,
+        "y" : 246
+      },
+      "path" : "content.14.1",
+      "role" : "AXHeading",
+      "text" : "Late night jazz"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 212,
+        "x" : 324,
+        "y" : 321
+      },
+      "path" : "content.14.2",
+      "role" : "AXStaticText",
+      "text" : "A collection for unhurried listening."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 15,
+        "width" : 210,
+        "x" : 324,
+        "y" : 349
+      },
+      "path" : "content.14.3",
+      "role" : "AXStaticText",
+      "text" : "Local acceptance fixture · 40 videos"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 62,
+        "width" : 62,
+        "x" : 320,
+        "y" : 416
+      },
+      "path" : "content.14.4",
+      "role" : "AXButton",
+      "text" : "Play Late night jazz in saved order"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 400,
+        "y" : 428
+      },
+      "path" : "content.14.5",
+      "role" : "AXButton",
+      "text" : "Playlist actions for Late night jazz"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 15,
+        "width" : 68.5,
+        "x" : 889.5,
+        "y" : 439.5
+      },
+      "path" : "content.14.6",
+      "role" : "AXStaticText",
+      "text" : "Saved order"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 9.5,
+        "width" : 13,
+        "x" : 977.5,
+        "y" : 442.5
+      },
+      "path" : "content.14.7",
+      "role" : "AXImage",
+      "text" : "List"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 372,
+        "x" : 320,
+        "y" : 496
+      },
+      "path" : "content.14.8",
+      "role" : "AXStaticText",
+      "text" : "Playing a captured queue. Playlist edits apply the next time you start it."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 720,
+        "width" : 720,
+        "x" : 296,
+        "y" : -128
+      },
+      "path" : "content.14.9",
+      "role" : "AXImage",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 718,
+        "width" : 672,
+        "x" : 320,
+        "y" : 570
+      },
+      "path" : "content.14.10",
+      "role" : "AXOpaqueProviderGroup",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 577
+      },
+      "path" : "content.14.10.0",
+      "role" : "AXImage",
+      "text" : "Reorder 1. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 579
+      },
+      "path" : "content.14.10.1",
+      "role" : "AXButton",
+      "text" : "Play 1. Midnight jazz sessions — a long title to test row layout from position 1"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 361,
+        "x" : 454,
+        "y" : 581
+      },
+      "path" : "content.14.10.2",
+      "role" : "AXUnknown",
+      "text" : "1. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 1"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 592
+      },
+      "path" : "content.14.10.3",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 580
+      },
+      "path" : "content.14.10.4",
+      "role" : "AXButton",
+      "text" : "Actions for 1. Midnight jazz sessions — a long title to test row layout, position 1"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 637
+      },
+      "path" : "content.14.10.5",
+      "role" : "AXImage",
+      "text" : "Reorder 2. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 639
+      },
+      "path" : "content.14.10.6",
+      "role" : "AXButton",
+      "text" : "Play 2. Midnight jazz sessions — a long title to test row layout from position 2"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363,
+        "x" : 454,
+        "y" : 641
+      },
+      "path" : "content.14.10.7",
+      "role" : "AXUnknown",
+      "text" : "2. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 2, paused"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 652
+      },
+      "path" : "content.14.10.8",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 640
+      },
+      "path" : "content.14.10.9",
+      "role" : "AXButton",
+      "text" : "Actions for 2. Midnight jazz sessions — a long title to test row layout, position 2"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 697
+      },
+      "path" : "content.14.10.10",
+      "role" : "AXImage",
+      "text" : "Reorder 3. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 699
+      },
+      "path" : "content.14.10.11",
+      "role" : "AXButton",
+      "text" : "Play 3. Midnight jazz sessions — a long title to test row layout from position 3"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363,
+        "x" : 454,
+        "y" : 701
+      },
+      "path" : "content.14.10.12",
+      "role" : "AXUnknown",
+      "text" : "3. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 3"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 712
+      },
+      "path" : "content.14.10.13",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 700
+      },
+      "path" : "content.14.10.14",
+      "role" : "AXButton",
+      "text" : "Actions for 3. Midnight jazz sessions — a long title to test row layout, position 3"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 757
+      },
+      "path" : "content.14.10.15",
+      "role" : "AXImage",
+      "text" : "Reorder Deleted video. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 759
+      },
+      "path" : "content.14.10.16",
+      "role" : "AXButton",
+      "text" : "Play Deleted video from position 4"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 198.5,
+        "x" : 454,
+        "y" : 761
+      },
+      "path" : "content.14.10.17",
+      "role" : "AXUnknown",
+      "text" : "Deleted video, Unavailable, position 4"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 772
+      },
+      "path" : "content.14.10.18",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 760
+      },
+      "path" : "content.14.10.19",
+      "role" : "AXButton",
+      "text" : "Actions for Deleted video, position 4"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 817
+      },
+      "path" : "content.14.10.20",
+      "role" : "AXImage",
+      "text" : "Reorder 5. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 819
+      },
+      "path" : "content.14.10.21",
+      "role" : "AXButton",
+      "text" : "Play 5. Midnight jazz sessions — a long title to test row layout from position 5"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363,
+        "x" : 454,
+        "y" : 821
+      },
+      "path" : "content.14.10.22",
+      "role" : "AXUnknown",
+      "text" : "5. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 5"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 832
+      },
+      "path" : "content.14.10.23",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 820
+      },
+      "path" : "content.14.10.24",
+      "role" : "AXButton",
+      "text" : "Actions for 5. Midnight jazz sessions — a long title to test row layout, position 5"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 877
+      },
+      "path" : "content.14.10.25",
+      "role" : "AXImage",
+      "text" : "Reorder 6. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 879
+      },
+      "path" : "content.14.10.26",
+      "role" : "AXButton",
+      "text" : "Play 6. Midnight jazz sessions — a long title to test row layout from position 6"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363.5,
+        "x" : 454,
+        "y" : 881
+      },
+      "path" : "content.14.10.27",
+      "role" : "AXUnknown",
+      "text" : "6. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 6"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 892
+      },
+      "path" : "content.14.10.28",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 880
+      },
+      "path" : "content.14.10.29",
+      "role" : "AXButton",
+      "text" : "Actions for 6. Midnight jazz sessions — a long title to test row layout, position 6"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 937
+      },
+      "path" : "content.14.10.30",
+      "role" : "AXImage",
+      "text" : "Reorder 7. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 939
+      },
+      "path" : "content.14.10.31",
+      "role" : "AXButton",
+      "text" : "Play 7. Midnight jazz sessions — a long title to test row layout from position 7"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 361.5,
+        "x" : 454,
+        "y" : 941
+      },
+      "path" : "content.14.10.32",
+      "role" : "AXUnknown",
+      "text" : "7. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 7"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 952
+      },
+      "path" : "content.14.10.33",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 940
+      },
+      "path" : "content.14.10.34",
+      "role" : "AXButton",
+      "text" : "Actions for 7. Midnight jazz sessions — a long title to test row layout, position 7"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 997
+      },
+      "path" : "content.14.10.35",
+      "role" : "AXImage",
+      "text" : "Reorder 8. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 999
+      },
+      "path" : "content.14.10.36",
+      "role" : "AXButton",
+      "text" : "Play 8. Midnight jazz sessions — a long title to test row layout from position 8"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363.5,
+        "x" : 454,
+        "y" : 1001
+      },
+      "path" : "content.14.10.37",
+      "role" : "AXUnknown",
+      "text" : "8. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 8"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 1012
+      },
+      "path" : "content.14.10.38",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 1000
+      },
+      "path" : "content.14.10.39",
+      "role" : "AXButton",
+      "text" : "Actions for 8. Midnight jazz sessions — a long title to test row layout, position 8"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 1057
+      },
+      "path" : "content.14.10.40",
+      "role" : "AXImage",
+      "text" : "Reorder 9. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 1059
+      },
+      "path" : "content.14.10.41",
+      "role" : "AXButton",
+      "text" : "Play 9. Midnight jazz sessions — a long title to test row layout from position 9"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 363.5,
+        "x" : 454,
+        "y" : 1061
+      },
+      "path" : "content.14.10.42",
+      "role" : "AXUnknown",
+      "text" : "9. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 9"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 1072
+      },
+      "path" : "content.14.10.43",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 1060
+      },
+      "path" : "content.14.10.44",
+      "role" : "AXButton",
+      "text" : "Actions for 9. Midnight jazz sessions — a long title to test row layout, position 9"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 1117
+      },
+      "path" : "content.14.10.45",
+      "role" : "AXImage",
+      "text" : "Reorder 10. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 1119
+      },
+      "path" : "content.14.10.46",
+      "role" : "AXButton",
+      "text" : "Play 10. Midnight jazz sessions — a long title to test row layout from position 10"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 362.5,
+        "x" : 454,
+        "y" : 1121
+      },
+      "path" : "content.14.10.47",
+      "role" : "AXUnknown",
+      "text" : "10. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 10"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 1132
+      },
+      "path" : "content.14.10.48",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 1120
+      },
+      "path" : "content.14.10.49",
+      "role" : "AXButton",
+      "text" : "Actions for 10. Midnight jazz sessions — a long title to test row layout, position 10"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 1177
+      },
+      "path" : "content.14.10.50",
+      "role" : "AXImage",
+      "text" : "Reorder 11. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 1179
+      },
+      "path" : "content.14.10.51",
+      "role" : "AXButton",
+      "text" : "Play 11. Midnight jazz sessions — a long title to test row layout from position 11"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 360.5,
+        "x" : 454,
+        "y" : 1181
+      },
+      "path" : "content.14.10.52",
+      "role" : "AXUnknown",
+      "text" : "11. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 11"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 1192
+      },
+      "path" : "content.14.10.53",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 1180
+      },
+      "path" : "content.14.10.54",
+      "role" : "AXButton",
+      "text" : "Actions for 11. Midnight jazz sessions — a long title to test row layout, position 11"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 44,
+        "width" : 16,
+        "x" : 328,
+        "y" : 1237
+      },
+      "path" : "content.14.10.55",
+      "role" : "AXImage",
+      "text" : "Reorder 12. Midnight jazz sessions — a long title to test row layout. Use Actions to move to a position with the keyboard."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 40,
+        "width" : 24,
+        "x" : 358,
+        "y" : 1239
+      },
+      "path" : "content.14.10.56",
+      "role" : "AXButton",
+      "text" : "Play 12. Midnight jazz sessions — a long title to test row layout from position 12"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 36,
+        "width" : 362.5,
+        "x" : 454,
+        "y" : 1241
+      },
+      "path" : "content.14.10.57",
+      "role" : "AXUnknown",
+      "text" : "12. Midnight jazz sessions — a long title to test row layout, Jazz collective, position 12"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 58,
+        "x" : 832,
+        "y" : 1252
+      },
+      "path" : "content.14.10.58",
+      "role" : "AXStaticText",
+      "text" : "1 Oct 2026"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 946,
+        "y" : 1240
+      },
+      "path" : "content.14.10.59",
+      "role" : "AXButton",
+      "text" : "Actions for 12. Midnight jazz sessions — a long title to test row layout, position 12"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 14,
+        "width" : 363.5,
+        "x" : 320,
+        "y" : 3014
+      },
+      "path" : "content.14.11",
+      "role" : "AXStaticText",
+      "text" : "Playing in saved order. Edits apply the next time you play this playlist."
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 598,
+        "width" : 19,
+        "x" : 998,
+        "y" : 71
+      },
+      "path" : "content.14.12",
+      "role" : "AXScrollBar",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 118,
+        "width" : 6,
+        "x" : 1007,
+        "y" : 75
+      },
+      "path" : "content.14.12.0",
+      "role" : "AXValueIndicator",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 0,
+        "x" : 999,
+        "y" : 72
+      },
+      "path" : "content.14.12.1",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 0,
+        "x" : 999,
+        "y" : 72
+      },
+      "path" : "content.14.12.2",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 472,
+        "width" : 6,
+        "x" : 1007,
+        "y" : 193
+      },
+      "path" : "content.14.12.3",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 0,
+        "width" : 6,
+        "x" : 1007,
+        "y" : 75
+      },
+      "path" : "content.14.12.4",
+      "role" : "AXButton",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 56,
+        "width" : 56,
+        "x" : 20,
+        "y" : 692
+      },
+      "path" : "content.15",
+      "role" : "AXImage",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 15,
+        "width" : 193.5,
+        "x" : 88,
+        "y" : 703.5
+      },
+      "path" : "content.16",
+      "role" : "AXStaticText",
+      "text" : "2. Midnight jazz sessions — a long title to test row layout"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 13,
+        "width" : 71.5,
+        "x" : 88,
+        "y" : 723.5
+      },
+      "path" : "content.17",
+      "role" : "AXStaticText",
+      "text" : "Jazz collective"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 294,
+        "y" : 701
+      },
+      "path" : "content.18",
+      "role" : "AXButton",
+      "text" : "Toggle favorite"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 441,
+        "y" : 692
+      },
+      "path" : "content.19",
+      "role" : "AXButton",
+      "text" : "Previous"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 493,
+        "y" : 692
+      },
+      "path" : "content.20",
+      "role" : "AXButton",
+      "text" : "Play"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 545,
+        "y" : 692
+      },
+      "path" : "content.21",
+      "role" : "AXButton",
+      "text" : "Next"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 38,
+        "width" : 38,
+        "x" : 837.5,
+        "y" : 701
+      },
+      "path" : "content.22",
+      "role" : "AXButton",
+      "text" : "Add to playlist"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 90,
+        "x" : 914,
+        "y" : 712
+      },
+      "path" : "content.23",
+      "role" : "AXSlider",
+      "text" : "Playback volume"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 20,
+        "x" : 914,
+        "y" : 712
+      },
+      "path" : "content.23.0",
+      "role" : "AXValueIndicator",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 13,
+        "width" : 25,
+        "x" : 363.5,
+        "y" : 732.5
+      },
+      "path" : "content.24",
+      "role" : "AXStaticText",
+      "text" : "0:00"
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 216,
+        "x" : 404,
+        "y" : 731
+      },
+      "path" : "content.25",
+      "role" : "AXSlider",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 16,
+        "width" : 20,
+        "x" : 404,
+        "y" : 731
+      },
+      "path" : "content.25.0",
+      "role" : "AXValueIndicator",
+      "text" : ""
+    },
+    {
+      "enabled" : false,
+      "frame" : {
+        "height" : 13,
+        "width" : 25,
+        "x" : 635.5,
+        "y" : 732.5
+      },
+      "path" : "content.26",
+      "role" : "AXStaticText",
+      "text" : "5:00"
+    }
+  ],
+  "backingScale" : 2,
+  "contentSize" : {
+    "height" : 768,
+    "width" : 1024
+  },
+  "coordinateSpace" : "logical content points, origin top-left",
+  "limits" : "AX frames expose controls and combined text, not every SwiftUI glyph baseline. Source-resolved geometry is separately recorded; no inferred frame is labeled native-measured.",
+  "pixelSize" : {
+    "height" : 1536,
+    "width" : 2048
+  },
+  "productionRevision" : "ce978cf",
+  "route" : "rows"
+}
