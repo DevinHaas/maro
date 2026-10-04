@@ -31,7 +31,8 @@ struct PlaylistActionsSheet: View {
                 Spacer()
                 if library.busy { ProgressView().controlSize(.small) }
             }
-        }.padding(24).frame(width: 460).background(AppDesign.surface).preferredColorScheme(.dark).tint(AppDesign.green)
+        }.foregroundStyle(AppDesign.Text.primary).padding(24).frame(width: 460)
+            .background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0).preferredColorScheme(.dark).tint(AppDesign.Accent.primary)
             .onAppear {
                 name = context.playlist.title; destination = destinations.first?.id ?? ""
                 position = (library.items.firstIndex { $0.id == context.item?.id } ?? 0) + 1
@@ -43,7 +44,7 @@ struct PlaylistActionsSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             Button { library.play(occurrenceID: item.id, in: context.playlist.id); library.dismissActions() } label: {
                 Label("Play from here", systemImage: "play.fill").frame(maxWidth: .infinity, alignment: .leading)
-            }.buttonStyle(.borderedProminent).disabled(item.video == nil || library.busy)
+            }.buttonStyle(.borderedProminent).foregroundStyle(AppDesign.Text.onAccent).disabled(item.video == nil || library.busy)
             if let video = item.video {
                 Button { library.toggleFavorite(video) } label: {
                     Label(isFavorite ? "Remove from Favorites" : "Add to Favorites", systemImage: isFavorite ? "heart.fill" : "heart")
