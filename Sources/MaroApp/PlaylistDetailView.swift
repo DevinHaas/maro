@@ -64,7 +64,7 @@ private struct PlaylistDetailContent: View {
                                 ForEach(filteredItems) { result in
                                     let index = result.originalIndex
                                     let item = result.item
-                                    let row = PlaylistTrackRow(item: item, position: index + 1,
+                                    let row = PlaylistTrackRow(app: app, item: item, position: index + 1,
                                         active: player.snapshot.originPlaylistID == playlist.id && player.snapshot.activePlaylistItemID == item.id,
                                         playback: player.snapshot.playback, showsDates: showsDates, showsDurations: showsDurations,
                                         busy: library.busy, localPath: item.video.flatMap { player.snapshot.localThumbnailPaths?[$0.id] }, focusedControl: $focusedControl,
@@ -156,7 +156,7 @@ private struct PlaylistDetailContent: View {
             Text("Title").frame(maxWidth: .infinity, alignment: .leading)
             if showsDates { Text("Date added").frame(width: 100, alignment: .leading) }
             if showsDurations { Image(systemName: "clock").frame(width: 48) }
-            Color.clear.frame(width: 38, height: 1)
+            Color.clear.frame(width: 72, height: 1)
         }.font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.horizontal, 8).padding(.bottom, 10)
             .overlay(alignment: .bottom) { Rectangle().fill(AppDesign.Border.decorative).frame(height: 1) }.accessibilityHidden(true)
     }
@@ -235,6 +235,7 @@ private struct PlaylistCoverHeader: View {
 
 /// Playback, drag and action controls retain separate native hit regions.
 struct PlaylistTrackRow: View {
+    let app: ApplicationModel
     let item: YouTubePlaylistItem
     let position: Int
     let active: Bool
@@ -280,6 +281,11 @@ struct PlaylistTrackRow: View {
             if showsDurations { Text(item.video?.durationSeconds.map { seconds in
                 let duration = Int(seconds); return "\(duration / 60):\(String(format: "%02d", duration % 60))"
             } ?? "").monospacedDigit().font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: 48) }
+            if let video = item.video {
+                SaveDestinationButton(app: app, video: video, sourcePlaylistID: playlistID, rowHovered: hovered)
+            } else {
+                Color.clear.frame(width: 34, height: 34).accessibilityHidden(true)
+            }
             AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
                 .focusable().focused(focusedControl, equals: item.id)
         }.padding(.horizontal, 8).padding(.vertical, 7)
