@@ -113,9 +113,27 @@ import Foundation
                 if CommandLine.arguments.count > 2 && CommandLine.arguments[1] == "--capture" {
                     let output = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: true)
                     try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
-                    for size in [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)] {
+                    if CommandLine.arguments.contains("--tidal-baseline") {
+                        try artworkData.write(to: output.appendingPathComponent("fixture-artwork.png"))
+                    }
+                    // Tidal baseline mode adds both responsive boundaries without
+                    // changing the production views or the original acceptance run.
+                    let tidalBaseline = CommandLine.arguments.contains("--tidal-baseline")
+                    let sizes = tidalBaseline
+                        ? [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768),
+                           NSSize(width: 1199, height: 900), NSSize(width: 1200, height: 900),
+                           NSSize(width: 1001, height: 900), NSSize(width: 1002, height: 900)]
+                        : [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)]
+                    for size in sizes {
                         window.setContentSize(size)
-                        for route in ["home", "preview", "playlist", "rows", "fallback", "favorites", "results", "empty", "error", "filter"] {
+                        let routes = tidalBaseline
+                            ? (size.width < 1024 ? ["home"]
+                               : size.width == 1440 || size.width == 1024 ? ["home", "preview", "playlist", "rows", "results"]
+                               : ["home", "preview", "playlist"])
+                            : ["home", "preview", "playlist", "rows", "fallback", "favorites", "results", "empty", "error", "filter"]
+                        for route in routes {
+                            print("Preparing \(route) at \(Int(size.width))×\(Int(size.height))")
+                            fflush(stdout)
                             model.libraryFilter = ""
                             switch route {
                             case "playlist", "rows", "fallback":
@@ -154,7 +172,22 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
+                            if tidalBaseline {
+                                let observations = Self.accessibilityObservations(hosting: hosting, window: window)
+                                let report: [String: Any] = [
+                                    "productionRevision": "ce978cf", "route": route,
+                                    "coordinateSpace": "logical content points, origin top-left",
+                                    "contentSize": ["width": size.width, "height": size.height],
+                                    "backingScale": window.backingScaleFactor,
+                                    "pixelSize": ["width": bitmap.pixelsWide, "height": bitmap.pixelsHigh],
+                                    "accessibility": observations,
+                                    "limits": "AX frames expose controls and combined text, not every SwiftUI glyph baseline. Source-resolved geometry is separately recorded; no inferred frame is labeled native-measured."
+                                ]
+                                let json = try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys])
+                                try json.write(to: output.appendingPathComponent(name.replacingOccurrences(of: ".png", with: ".json")))
+                            }
                             print("Captured \(name): logical content \(hosting.bounds.size), pixels \(bitmap.pixelsWide)×\(bitmap.pixelsHigh), window \(window.frame.size)")
+                            fflush(stdout)
                         }
                     }
                     await controller.shutdown()
@@ -165,6 +198,38 @@ import Foundation
                 NSApplication.shared.terminate(nil)
             }
         }
+    }
+
+    private static func accessibilityObservations(hosting: NSView, window: NSWindow) -> [[String: Any]] {
+        let contentScreen = window.convertToScreen(hosting.convert(hosting.bounds, to: nil))
+        var observations: [[String: Any]] = []
+        var visited = Set<ObjectIdentifier>()
+        func visit(_ object: AnyObject, path: String, depth: Int) {
+            guard depth < 40, visited.insert(ObjectIdentifier(object)).inserted,
+                  let element = object as? NSObject else { return }
+            // SwiftUI virtual accessibility objects implement the selectors but
+            // do not all declare NSAccessibilityProtocol conformance. KVC boxes
+            // NSRect safely; selector guards avoid undefined-key exceptions.
+            func value(_ key: String) -> Any? {
+                element.responds(to: NSSelectorFromString(key)) ? element.value(forKey: key) : nil
+            }
+            let frame = (value("accessibilityFrame") as? NSValue)?.rectValue ?? .zero
+            let text = (value("accessibilityLabel") as? String) ?? (value("accessibilityTitle") as? String) ??
+                (value("accessibilityValue") as? String) ?? ""
+            let row: [String: Any] = [
+                "path": path, "role": (value("accessibilityRole") as? String) ?? "unknown",
+                "text": text, "enabled": (value("accessibilityEnabled") as? Bool) ?? false,
+                "frame": ["x": frame.minX - contentScreen.minX,
+                          "y": contentScreen.maxY - frame.maxY,
+                          "width": frame.width, "height": frame.height]
+            ]
+            observations.append(row)
+            for (index, child) in ((value("accessibilityChildren") as? [Any]) ?? []).enumerated() {
+                visit(child as AnyObject, path: path + "." + String(index), depth: depth + 1)
+            }
+        }
+        visit(hosting, path: "content", depth: 0)
+        return observations
     }
 
     private static func silentAudio(in directory: URL) throws -> URL {
