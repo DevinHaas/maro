@@ -37,7 +37,7 @@ struct HomeView: View {
                         }
                         Spacer(minLength: 0)
                         Button("Retry") { home.retry() }.disabled(home.isLoading)
-                    }.padding(16).background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 8))
+                    }.padding(16).background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                 }
                 ForEach(home.sections) { section in
                     VStack(alignment: .leading, spacing: 14) {
@@ -47,7 +47,7 @@ struct HomeView: View {
                                 Text(section.title).font(.system(size: 23, weight: .bold)).lineLimit(1)
                             }
                             Spacer()
-                            if section.isOutdated { Text("Outdated").font(.system(size: 11)).foregroundStyle(.orange) }
+                            if section.isOutdated { Text("Outdated").font(.system(size: 11)).foregroundStyle(AppDesign.Status.warning) }
                             Button("Explore") { app.submitSearch(section.query) }.buttonStyle(.plain)
                                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(AppDesign.muted)
                                 .accessibilityLabel("Search \(section.query)")
@@ -89,11 +89,11 @@ struct HomeView: View {
                     } label: {
                         Text(playlist == nil ? "Explore suggestions" : "Open playlist")
                             .font(.system(size: 13, weight: .bold)).padding(.horizontal, 18).padding(.vertical, 11)
-                            .foregroundStyle(.black).background(AppDesign.green).clipShape(Capsule())
+                            .foregroundStyle(AppDesign.Text.onAccent).background(AppDesign.green).clipShape(Capsule())
                     }.buttonStyle(.plain)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
-            }.background(LinearGradient(colors: [Color(red: 0.18, green: 0.28, blue: 0.22), AppDesign.surface], startPoint: .top, endPoint: .bottom))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }.background(LinearGradient(colors: [AppDesign.Surface.raised, AppDesign.surface], startPoint: .top, endPoint: .bottom))
+                .clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
         }.frame(height: 260)
     }
 
@@ -125,7 +125,7 @@ private struct HomeVideoCard: View {
                         .frame(width: 176, height: 176)
                         .overlay(alignment: .bottomTrailing) {
                             Image(systemName: "play.fill").font(.system(size: 20))
-                                .foregroundStyle(.black).frame(width: 44, height: 44)
+                                .foregroundStyle(AppDesign.Text.onAccent).frame(width: 44, height: 44)
                                 .background(AppDesign.green).clipShape(Circle()).padding(10).opacity(hovered ? 1 : 0)
                         }
                     Text(video.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
@@ -142,7 +142,8 @@ private struct HomeVideoCard: View {
                     .font(.system(size: 12)).foregroundStyle(saved ? AppDesign.green : AppDesign.muted)
             }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Save actions for \(video.title)")
         }.padding(10).frame(width: 196, alignment: .leading)
-            .background(hovered ? AppDesign.raised : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
+            .background(hovered ? AppDesign.Surface.hover : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
+            .tidalBorder(cornerRadius: 8)
             .onHover { hovered = $0 }
     }
 }

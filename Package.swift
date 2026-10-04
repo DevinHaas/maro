@@ -10,7 +10,7 @@ let package = Package(
     targets: [
         .target(name: "MaroCore"),
         .executableTarget(name: "MaroCLI", dependencies: ["MaroCore"]),
-        .executableTarget(name: "MaroApp", dependencies: ["MaroCore"]),
+        .executableTarget(name: "MaroApp", dependencies: ["MaroCore"], resources: [.copy("Resources/Fonts")]),
         .testTarget(name: "MaroCoreTests", dependencies: ["MaroCore"]),
         .testTarget(name: "MaroAppTests", dependencies: ["MaroApp", "MaroCore"])
     ]

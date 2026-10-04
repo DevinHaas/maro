@@ -52,7 +52,7 @@ struct FavoritesView: View {
                 ForEach(player.snapshot.favorites, id: \.id) { video in
                     SearchVideoRow(app: app, player: player, video: video)
                 }
-                if let error = app.actionError { Text(error).foregroundStyle(.orange) }
+                if let error = app.actionError { Text(error).foregroundStyle(AppDesign.Status.error) }
             }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
         }
     }
