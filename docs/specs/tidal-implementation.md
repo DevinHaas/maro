@@ -18,9 +18,9 @@ The approved handoff is preserved in `design/terminal-style/` and `docs/specs/ti
 
 ## Current frontier
 
-#9 is in progress. Native captures and font metric research precede editable-frame review. Application paint changes require explicit approval of those application designs, as required by #8 and #9; approval of the foundation guide does not satisfy that gate.
+#9 is in progress. Its [preparation checkpoint](tidal-frame-review.md) now includes 18 native captures, 18 AX frame reports, responsive threshold observations, a CoreText font metric audit, and an inspected local editable proposal with Figma-ready scene data. Native build/fixture compilation and size/report checks passed. Editable Figma composition and exact font inspection remain pending. Application paint changes require explicit approval of those application designs, as required by #8 and #9; approval of the foundation guide does not satisfy that gate.
 
-The Figma file-creation skill requires choosing a team when the connected account exposes multiple plans. Team selection has been requested while independent baseline work continues.
+The user requested a new destination, interpreted as a new Maro Figma team. The connector can create files in existing teams but does not expose team creation. Browser sign-in was blocked by automatic approval review pending explicit authorization for the identified account; that request remains pending. No existing team has been selected arbitrarily.
 
 ## Validation contract
 
