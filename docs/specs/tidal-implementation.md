@@ -18,7 +18,9 @@ The approved handoff is preserved in `design/terminal-style/` and `docs/specs/ti
 
 ## Current frontier
 
-#9's screenshot/HTML package was approved on 4 October 2026: “I approve the style.” #10 is implemented and merged; its [native shared-theme report](tidal-shared-theme.md) records the palette, bundled font loading, explicit SF retentions, 135 passing existing tests and 18 capture comparisons. Stable application frames match; the pinned original binary independently reproduces the documented native scrollbar estimate variability and arithmetic ULP differences. #11 playlist/dialog work and #12 search/player work can now proceed in parallel. #13 owns complete merged native acceptance and code review. Issues remain open until the integration PR merges.
+#9's screenshot/HTML package was approved on 4 October 2026: “I approve the style.” #10 is implemented and merged; its [native shared-theme report](tidal-shared-theme.md) records the palette, bundled font loading, explicit SF retentions, 135 passing existing tests and 18 capture comparisons. Stable application frames match; the pinned original binary independently reproduces the documented native scrollbar estimate variability and arithmetic ULP differences.
+
+The user stopped further redesign work on 4 October 2026: “it looks good already lets stop here and commit what we have.” Current #11 playlist/dialog styling and #12 search/player styling are committed as checkpoints. Their scoped existing regressions passed (30 playlist tests and 33 search/player tests). Playlist captures and strict numeric observations are saved under `assets/tidal/playlists/`; final search recapture and font-probe reporting were interrupted. Full merged #13 native acceptance, shared focus-stroke correction and standards/spec code review remain unfinished. The integration PR stays a draft; no ticket is claimed closed. Resume only at the user's request.
 
 Figma team creation and browser sign-in are no longer prerequisites. The earlier Figma destination and sign-in questions are superseded by the user's screenshot/HTML requirement.
 
