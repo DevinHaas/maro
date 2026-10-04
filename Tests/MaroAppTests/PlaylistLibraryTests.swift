@@ -16,6 +16,25 @@ private actor LibraryResponses {
     }
 }
 
+@Test func playlistSearchMatchesTitleAndCreatorWithoutLosingOccurrencePositions() throws {
+    let beyonce = try VideoSummary(id: "abcdefghijk", title: "Halo", creator: "Beyoncé")
+    let other = try VideoSummary(id: "bcdefghijkl", title: "Other", creator: "Else")
+    let items = [
+        YouTubePlaylistItem(id: "first", video: beyonce, title: "Halo"),
+        YouTubePlaylistItem(id: "middle", video: other, title: "Other"),
+        YouTubePlaylistItem(id: "duplicate", video: beyonce, title: "Halo")
+    ]
+
+    let creatorMatches = PlaylistSearchProjection(items: items, query: "  BEYONCE  ")
+    #expect(creatorMatches.map(\.originalIndex) == [0, 2])
+    #expect(creatorMatches.map(\.item.id) == ["first", "duplicate"])
+
+    let titleMatches = PlaylistSearchProjection(items: items, query: "hÁLo")
+    #expect(titleMatches.map(\.originalIndex) == [0, 2])
+    #expect(PlaylistSearchProjection(items: items, query: "missing").isEmpty)
+    #expect(PlaylistSearchProjection(items: items, query: " ").map(\.item.id) == items.map(\.id))
+}
+
 @Test @MainActor func staleModalCannotRemoveAnotherPlaylistOccurrenceAndCancelDoesNotWrite() async throws {
     let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     defer { try? FileManager.default.removeItem(at: file) }
