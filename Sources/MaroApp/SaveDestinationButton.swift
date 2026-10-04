@@ -7,6 +7,7 @@ struct SaveDestinationButton: View {
     @ObservedObject private var library: PlaylistLibrary
     let video: VideoSummary
     var sourcePlaylistID: String? = nil
+    var rowHovered = false
     @State private var presented = false
     @State private var hovered = false
     @State private var saving = false
@@ -19,16 +20,17 @@ struct SaveDestinationButton: View {
     @State private var restoreFocus = false
     @FocusState private var buttonFocused: Bool
 
-    init(app: ApplicationModel, video: VideoSummary, sourcePlaylistID: String? = nil) {
+    init(app: ApplicationModel, video: VideoSummary, sourcePlaylistID: String? = nil, rowHovered: Bool = false) {
         self.app = app
         self.video = video
         self.sourcePlaylistID = sourcePlaylistID
+        self.rowHovered = rowHovered
         library = app.library
     }
 
     private var isFavorite: Bool { app.player.snapshot.favorites.contains { $0.id == video.id } }
     private var canAddFavorite: Bool { isFavorite || app.player.snapshot.favorites.count < 20 }
-    private var visible: Bool { hovered || buttonFocused || presented }
+    private var visible: Bool { rowHovered || hovered || buttonFocused || presented }
     private var destinations: [YouTubePlaylist] {
         library.playlists.filter { $0.id != sourcePlaylistID }
     }
