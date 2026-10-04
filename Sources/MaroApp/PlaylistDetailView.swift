@@ -13,11 +13,14 @@ private struct PlaylistDetailContent: View {
     @ObservedObject var player: PlayerPresentation
     @State private var artworkColor = AppDesign.Surface.raised
     @State private var invokingControl: String?
+    @State private var searchQuery = ""
     @FocusState private var focusedControl: String?
     @FocusState private var playFocused: Bool
     @State private var playHovered = false
     private var showsDates: Bool { library.items.contains { $0.addedAt != nil } }
     private var showsDurations: Bool { library.items.contains { $0.video?.durationSeconds != nil } }
+    private var hasActiveSearch: Bool { !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    private var filteredItems: [PlaylistSearchResult] { PlaylistSearchProjection(items: library.items, query: searchQuery) }
 
     var body: some View {
         Group {
@@ -46,10 +49,11 @@ private struct PlaylistDetailContent: View {
                                     invokingControl = "playlist-actions"; library.presentPlaylistActions()
                                 }.focusable().focused($focusedControl, equals: "playlist-actions")
                                     .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-actions", visible: focusedControl == "playlist-actions")
-                                Spacer()
+                                Spacer(minLength: 12)
                                 if library.busy { ProgressView().controlSize(.small) }
                                 Text("Saved order").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
                                 Image(systemName: "list.bullet").foregroundStyle(AppDesign.muted)
+                                playlistSearch
                             }
                             if player.snapshot.originPlaylistID == playlist.id {
                                 Text("Playing a captured queue. Playlist edits apply the next time you start it.")
@@ -57,30 +61,44 @@ private struct PlaylistDetailContent: View {
                             }
                             rowHeadings
                             LazyVStack(spacing: 2) {
-                                ForEach(Array(library.items.enumerated()), id: \.element.id) { index, item in
-                                    PlaylistTrackRow(item: item, position: index + 1,
+                                ForEach(filteredItems) { result in
+                                    let index = result.originalIndex
+                                    let item = result.item
+                                    let row = PlaylistTrackRow(item: item, position: index + 1,
                                         active: player.snapshot.originPlaylistID == playlist.id && player.snapshot.activePlaylistItemID == item.id,
                                         playback: player.snapshot.playback, showsDates: showsDates, showsDurations: showsDurations,
                                         busy: library.busy, localPath: item.video.flatMap { player.snapshot.localThumbnailPaths?[$0.id] }, focusedControl: $focusedControl,
-                                        reorderLibrary: library, playlistID: playlist.id,
+                                        reorderLibrary: hasActiveSearch ? nil : library, playlistID: playlist.id,
                                         play: { library.play(occurrenceID: item.id, in: playlist.id) },
                                         actions: { invokingControl = item.id; library.presentItemActions(occurrenceID: item.id, playlistID: playlist.id) })
-                                        .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: index, splitRow: true))
+                                    if !hasActiveSearch {
+                                        row.onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: index, splitRow: true))
+                                            .overlay(alignment: .top) {
+                                                if library.dragInsertion == index { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
+                                            }
+                                    } else {
+                                        row
+                                    }
+                                }
+                                if !hasActiveSearch {
+                                    Color.clear.frame(height: 18).contentShape(Rectangle())
+                                        .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: library.items.count))
                                         .overlay(alignment: .top) {
-                                            if library.dragInsertion == index { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
+                                            if library.dragInsertion == library.items.count { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
                                         }
                                 }
-                                Color.clear.frame(height: 18).contentShape(Rectangle())
-                                    .onDrop(of: [PlaylistDragPayload.typeIdentifier], delegate: PlaylistInsertionDrop(library: library, playlistID: playlist.id, insertionIndex: library.items.count))
-                                    .overlay(alignment: .top) {
-                                        if library.dragInsertion == library.items.count { Rectangle().fill(AppDesign.green).frame(height: 2).allowsHitTesting(false) }
-                                    }
                             }
                             if library.items.isEmpty && !library.busy {
                                 VStack(spacing: 10) {
                                     Image(systemName: "music.note.list").font(.system(size: 32))
                                     Text("Your playlist starts here").font(.title3.bold())
                                     Text("Search for a video and add it to this playlist.").foregroundStyle(AppDesign.muted)
+                                }.frame(maxWidth: .infinity).padding(.vertical, 44)
+                            } else if filteredItems.isEmpty && !library.busy {
+                                VStack(spacing: 10) {
+                                    Image(systemName: "magnifyingglass").font(.system(size: 28))
+                                    Text("No matching videos").font(.title3.bold())
+                                    Text("Try a different title or creator.").foregroundStyle(AppDesign.muted)
                                 }.frame(maxWidth: .infinity).padding(.vertical, 44)
                             }
                             if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(AppDesign.Status.warning) }
@@ -106,9 +124,29 @@ private struct PlaylistDetailContent: View {
                     Button("Back to Home") { app.showHome() }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-        }.foregroundStyle(AppDesign.Text.primary).sheet(item: $library.actionContext, onDismiss: {
+        }.foregroundStyle(AppDesign.Text.primary)
+        .onChange(of: searchQuery) { _ in library.cancelDrag() }
+        .onChange(of: library.selected?.id) { _ in searchQuery = "" }
+        .sheet(item: $library.actionContext, onDismiss: {
             focusedControl = invokingControl; invokingControl = nil
         }) { context in PlaylistActionsSheet(context: context, library: library, player: player) }
+    }
+
+    private var playlistSearch: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "magnifyingglass").foregroundStyle(AppDesign.muted)
+            TextField("Search playlist", text: $searchQuery)
+                .textFieldStyle(.plain)
+                .accessibilityLabel("Search this playlist by title or creator")
+            if !searchQuery.isEmpty {
+                Button { searchQuery = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(AppDesign.muted)
+                }.buttonStyle(.plain).accessibilityLabel("Clear playlist search")
+            }
+        }
+        .padding(.horizontal, 10).frame(width: 220, height: 34)
+        .background(AppDesign.Surface.raised, in: RoundedRectangle(cornerRadius: 7))
+        .tidalBorder(cornerRadius: 7)
     }
 
     private var rowHeadings: some View {
@@ -218,6 +256,8 @@ struct PlaylistTrackRow: View {
             if let reorderLibrary {
                 PlaylistDragHandle(item: item, playlistID: playlistID, localPath: localPath, library: reorderLibrary)
                     .frame(width: 16, height: 44)
+            } else {
+                Color.clear.frame(width: 16, height: 44).accessibilityHidden(true)
             }
             Button(action: play) {
                 ZStack {
