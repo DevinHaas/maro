@@ -11,17 +11,17 @@ struct SearchResultsView: View {
                 Text(app.searchState.query.isEmpty ? "Search" : "Results for “\(app.searchState.query)”").font(.system(size: 28, weight: .bold))
                 if app.searchState.isSearching { ProgressView("Searching YouTube…") }
                 if let error = app.searchState.error {
-                    Text(error).foregroundStyle(.orange)
+                    Text(error).foregroundStyle(AppDesign.Status.error)
                     Button("Retry search") { app.retrySearch() }.disabled(player.snapshot.sourceNeedsUpdate)
                 }
-                if let error = app.actionError { Text(error).foregroundStyle(.orange) }
+                if let error = app.actionError { Text(error).foregroundStyle(AppDesign.Status.error) }
                 if !app.searchState.isSearching && app.searchState.error == nil && app.searchState.results.isEmpty {
                     Text(app.searchState.query.isEmpty ? "Search YouTube to find your next video." : "No videos found. Try another search.").foregroundStyle(AppDesign.muted)
                 }
                 HStack {
                     Text("TITLE"); Spacer(); Text("DURATION").padding(.trailing, 106)
                 }.font(.system(size: 10, weight: .semibold)).foregroundStyle(AppDesign.muted).padding(.horizontal, 12)
-                Divider()
+                Divider().overlay(AppDesign.Border.decorative).accessibilityHidden(true)
                 LazyVStack(spacing: 4) {
                     ForEach(app.searchState.results, id: \.id) { video in
                         SearchVideoRow(app: app, player: player, video: video)
@@ -73,12 +73,12 @@ struct SearchVideoRow: View {
     var body: some View {
         HStack(spacing: 12) {
             AppIconButton(title: "Play \(video.title)", symbol: "play.fill", enabled: !player.snapshot.sourceNeedsUpdate,
-                          prominent: hovered) { app.play(video) }.opacity(hovered || current ? 1 : 0.6)
+                          prominent: hovered) { app.play(video) }.opacity(hovered || current || player.snapshot.sourceNeedsUpdate ? 1 : 0.6)
             Button { app.play(video) } label: {
                 HStack(spacing: 12) {
                     LibraryArtwork(url: video.thumbnailURL, localPath: player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note").frame(width: 52, height: 52)
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(video.title).font(.system(size: 14, weight: .medium)).foregroundStyle(current ? AppDesign.green : .white).lineLimit(1)
+                        Text(video.title).font(.system(size: 14, weight: .medium)).foregroundStyle(current ? AppDesign.green : AppDesign.Text.primary).lineLimit(1)
                         Text(video.creator).font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)
                     }
                     Spacer(minLength: 0)
@@ -93,7 +93,7 @@ struct SearchVideoRow: View {
             } label: { Image(systemName: "ellipsis").frame(width: 30, height: 38) }
                 .menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Actions for \(video.title)")
         }.padding(.horizontal, 8).padding(.vertical, 6).frame(maxWidth: .infinity)
-            .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.raised : current ? AppDesign.green.opacity(0.05) : .clear))
+            .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.Surface.hover : current ? AppDesign.Surface.selected : .clear))
             .onHover { hovered = $0 }
     }
 }

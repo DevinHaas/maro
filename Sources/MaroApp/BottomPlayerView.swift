@@ -43,14 +43,14 @@ struct BottomPlayerView: View {
                     Text((snapshot.timeline?.duration ?? video?.durationSeconds).map(clock) ?? "--:--").frame(width: 40)
                 }.font(.system(size: 10, design: .monospaced)).foregroundStyle(AppDesign.muted)
                 if let error = app.actionError ?? snapshot.error ?? snapshot.persistenceError {
-                    Text(error).font(.system(size: 10)).foregroundStyle(.orange).lineLimit(1).help(error)
+                    Text(error).font(.system(size: 10)).foregroundStyle(AppDesign.Status.error).lineLimit(1).help(error)
                 }
             }.frame(maxWidth: 520)
             HStack(spacing: 10) {
                 AppIconButton(title: "Add to playlist", symbol: "text.badge.plus", enabled: video != nil) { if let video { app.offerAdd(video) } }
                 Image(systemName: "speaker.wave.2.fill").foregroundStyle(AppDesign.muted).accessibilityHidden(true)
                 Slider(value: Binding(get: { snapshot.volume ?? 1 }, set: { app.controller.setVolume($0); app.render() }), in: 0...1)
-                    .frame(width: 90).accessibilityLabel("Playback volume")
+                    .tint(AppDesign.Accent.primary).frame(width: 90).accessibilityLabel("Playback volume")
             }.frame(maxWidth: .infinity, alignment: .trailing)
         }.padding(.horizontal, 12)
     }
