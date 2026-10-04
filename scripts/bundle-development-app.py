@@ -52,6 +52,12 @@ def main():
     macos.mkdir(parents=True)
     resources = app / "Contents" / "Resources"
     resources.mkdir()
+    # AppTypography resolves packaged resources here before the SwiftPM build-tree fallback.
+    # Keep license/provenance in the resource bundle for both development and standalone builds.
+    font_bundle = build / "Maro_MaroApp.bundle"
+    if not font_bundle.is_dir():
+        parser.error("Missing native font resource bundle; rebuild Maro with swift build.")
+    shutil.copytree(font_bundle, resources / font_bundle.name)
     nested = []
     if args.standalone:
         for name in ["yt-dlp_macos", "node", *[notice["file"] for notice in notices]]:

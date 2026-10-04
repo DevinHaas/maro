@@ -12,7 +12,7 @@ struct AppShellView: View {
                 HStack(spacing: 8) {
                     if !app.libraryCollapsed {
                         LibrarySidebar(app: app, library: library).frame(width: geometry.size.width < 1200 ? 280 : 320)
-                            .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8))
+                            .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                     }
                     ZStack {
                         HomeView(app: app).opacity(app.route == .home ? 1 : 0).allowsHitTesting(app.route == .home).accessibilityHidden(app.route != .home)
@@ -20,11 +20,11 @@ struct AppShellView: View {
                         if app.route == .favorites { FavoritesView(app: app) }
                         if case .playlist = app.route { PlaylistDetailView(app: app) }
                     }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8))
+                        .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                 }.frame(maxHeight: .infinity)
                 BottomPlayerView(app: app, presentation: app.player).frame(height: 88)
             }.padding(.horizontal, 8).padding(.bottom, 4).background(AppDesign.chrome)
-                .preferredColorScheme(.dark).tint(AppDesign.green)
+                .foregroundStyle(AppDesign.Text.primary).preferredColorScheme(.dark).tint(AppDesign.green)
         }.sheet(isPresented: Binding(get: { library.pendingVideo != nil }, set: { if !$0 { library.pendingVideo = nil } })) {
             AddToPlaylistSheet(library: library)
         }
@@ -54,6 +54,7 @@ struct AppShellView: View {
 struct LibrarySidebar: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject var library: PlaylistLibrary
+    @FocusState private var filterFocused: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -64,12 +65,12 @@ struct LibrarySidebar: View {
             }.padding(.horizontal, 12).padding(.top, 8)
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass").foregroundStyle(AppDesign.muted)
-                TextField("Search your library", text: $app.libraryFilter).textFieldStyle(.plain).accessibilityLabel("Filter your library")
+                TextField("Search your library", text: $app.libraryFilter).textFieldStyle(.plain).focused($filterFocused).accessibilityLabel("Filter your library")
                 if !app.libraryFilter.isEmpty {
                     Button { app.libraryFilter = "" } label: { Image(systemName: "xmark.circle.fill") }
                         .buttonStyle(.plain).accessibilityLabel("Clear library filter")
                 }
-            }.padding(10).background(AppDesign.raised).clipShape(Capsule()).padding(.horizontal, 12)
+            }.padding(10).background(AppDesign.raised).clipShape(Capsule()).tidalCapsuleBorder(focused: filterFocused, interactive: true).padding(.horizontal, 12)
             ScrollView {
                 LazyVStack(spacing: 2) {
                     if app.favoritesVisible {
@@ -96,7 +97,7 @@ struct LibrarySidebar: View {
                     }.buttonStyle(.borderedProminent).disabled(library.busy)
                 }
                 if library.busy { HStack { ProgressView().controlSize(.small); Text(library.signingIn ? "Finish sign-in in your browser…" : "Updating library…").font(.caption) } }
-                if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(.orange) }
+                if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(AppDesign.Status.warning) }
                 Text(library.status).font(.system(size: 10)).foregroundStyle(AppDesign.muted).lineLimit(3).textSelection(.enabled)
                 if library.signingIn { Button("Cancel sign-in") { library.cancelSignIn() } }
                 if library.canRetry { Button("Retry refresh") { library.retryLast() }.disabled(library.busy) }

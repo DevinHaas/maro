@@ -1,0 +1,37 @@
+{
+  "baselineRevision": "ce978cf",
+  "themedSource": "#10 shared-theme commit",
+  "fixtureMetadataLimit": "productionRevision currently names the layout baseline, not the themed source",
+  "captureCount": 18,
+  "logicalViewports": [[1440,900],[1024,768],[1199,900],[1200,900],[1001,900],[1002,900]],
+  "normalization": "Only 8 relative IEEE-754 double machine epsilons for screen-to-content subtraction; no layout point allowance",
+  "namedApplicationControlAndTextGeometryDifferences": [],
+  "opaqueProviderGroupGeometryDifferences": [],
+  "nativeScrollbarEstimateObservations": [
+    {"capture":"playlist-1024x768","role":"AXButton trailing page","baseline":[1007,195,6,470],"theme":[1007,194.5,6,470.5]},
+    {"capture":"playlist-1024x768","role":"AXValueIndicator thumb","baseline":[1007,75,6,119.5],"theme":[1007,75,6,119]},
+    {"capture":"playlist-1199x900","role":"AXButton trailing page","baseline":[1182,253,6,544],"theme":[1182,252,6,545]},
+    {"capture":"playlist-1199x900","role":"AXValueIndicator thumb","baseline":[1182,75,6,177.5],"theme":[1182,75,6,176.5]},
+    {"capture":"playlist-1200x900","role":"AXButton trailing page","baseline":[1183,253,6,544],"theme":[1183,252,6,545]},
+    {"capture":"playlist-1200x900","role":"AXValueIndicator thumb","baseline":[1183,75,6,177.5],"theme":[1183,75,6,176.5]},
+    {"capture":"rows-1024x768","role":"AXValueIndicator thumb","baseline":[1007,75,6,118],"theme":[1007,75,6,117.5]}
+  ],
+  "originalPinnedBinaryReplay": {
+    "captureCount":18,
+    "namedApplicationControlAndTextGeometryDifferences":[],
+    "observations":[
+      {"capture":"playlist-1440x900","role":"AXButton trailing page","original":[1423,254,6,543],"replay":[1423,254.5,6,542.5]},
+      {"capture":"playlist-1440x900","role":"AXValueIndicator thumb","original":[1423,75,6,178.5],"replay":[1423,75,6,179]},
+      {"capture":"rows-1024x768","role":"AXButton trailing page","original":[1007,193,6,472],"replay":[1007,193.5,6,471.5]}
+    ]
+  },
+  "interpretation":"Only pre-existing native lazy-scroll thumb/page estimates vary. Full track, named application controls, text, opaque groups and structural bounds stay fixed. No theme geometry exception is authorized.",
+  "fixedHomeCardTitleFontProbe": {
+    "text":"Quiet sessions 10", "pointSize":14, "fixedTitleContainerHeight":36,
+    "sf":{"resolvedWidth":118.5,"resolvedHeight":17,"firstBaseline":14},
+    "jetbrains":{"resolvedWidth":143,"resolvedHeight":18,"firstBaseline":14},
+    "result":"retain original SF semibold; candidate text bounds fail despite identical outer frame and baseline"
+  },
+  "suite":"135 existing tests pass with --no-parallel and local-socket/macOS service access",
+  "enabledAttributeLimit":"Old fixture enabled:false fallback is unverified; not used as behavior evidence"
+}
