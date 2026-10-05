@@ -127,7 +127,7 @@ struct PlaybackTimelineSlider: NSViewRepresentable {
     }
 }
 
-private final class TimelineCell: NSSliderCell {
+class PlaybackSliderCell: NSSliderCell {
     override func drawBar(inside rect: NSRect, flipped: Bool) {
         let inset = knobRect(flipped: flipped).width / 2
         let track = NSRect(x: rect.minX + inset, y: rect.midY - 1.5,
@@ -139,6 +139,9 @@ private final class TimelineCell: NSSliderCell {
         NSBezierPath(roundedRect: NSRect(x: track.minX, y: track.minY,
             width: track.width * min(1, max(0, fraction)), height: 3), xRadius: 1.5, yRadius: 1.5).fill()
     }
+}
+
+private final class TimelineCell: PlaybackSliderCell {
     override func drawKnob(_ rect: NSRect) {
         guard isEnabled else { return }
         NSColor(AppDesign.Accent.primary).setFill()

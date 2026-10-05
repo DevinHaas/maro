@@ -269,8 +269,8 @@ struct PlayerCard: View {
             Image(systemName: "speaker.wave.2.fill")
                 .font(.system(size: 12))
                 .foregroundStyle(AppDesign.muted).accessibilityHidden(true)
-            Slider(value: Binding(get: { snapshot.volume ?? 1 }, set: { setVolume($0) }), in: 0...1)
-                .frame(width: 78).controlSize(.small)
+            PlaybackVolumeSlider(value: Binding(get: { snapshot.volume ?? 1 }, set: { setVolume($0) }))
+                .frame(width: 78, height: 16)
                 .accessibilityLabel("Playback volume").accessibilityIdentifier("playback-volume")
         }
         .help("Playback volume: \(Int(((snapshot.volume ?? 1) * 100).rounded()))%")

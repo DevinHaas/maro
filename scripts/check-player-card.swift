@@ -148,6 +148,16 @@ struct CardCheck {
                 }
                 let slider = findSlider(view)!
                 precondition(!slider.isVertical && slider.minValue == 0 && slider.maxValue == 1)
+                precondition(!window.isKeyWindow, "Volume appearance check must render an unfocused card")
+                let bitmap = slider.bitmapImageRepForCachingDisplay(in: slider.bounds)!
+                slider.cacheDisplay(in: slider.bounds, to: bitmap)
+                let hasAccent = (0..<bitmap.pixelsHigh).contains { y in
+                    (0..<bitmap.pixelsWide).contains { x in
+                        guard let color = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { return false }
+                        return color.greenComponent > color.redComponent + 0.1 && color.greenComponent > 0.5
+                    }
+                }
+                precondition(hasAccent, "Unfocused volume slider must retain its accent-colored track")
                 slider.doubleValue = 0.25
                 slider.sendAction(slider.action, to: slider.target)
                 precondition(volumeUpdates == [0.25], "Native volume slider must forward changes")

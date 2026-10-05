@@ -89,8 +89,8 @@ struct BottomPlayerView: View {
                 AppIconButton(title: "Add to playlist", symbol: "plus", enabled: false) {}
             }
             Image(systemName: "speaker.wave.2.fill").foregroundStyle(AppDesign.muted).accessibilityHidden(true)
-            Slider(value: Binding(get: { snapshot.volume ?? 1 }, set: { app.controller.setVolume($0); app.render() }), in: 0...1)
-                .tint(AppDesign.Accent.primary).frame(width: 90).accessibilityLabel("Playback volume")
+            PlaybackVolumeSlider(value: Binding(get: { snapshot.volume ?? 1 }, set: { app.controller.setVolume($0); app.render() }))
+                .frame(width: 90, height: 16).accessibilityLabel("Playback volume")
         }
     }
     private func clock(_ value: Double) -> String {
