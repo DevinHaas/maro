@@ -22,20 +22,15 @@ private func video(_ index: Int) throws -> VideoSummary {
     try state.validate()
 }
 
-@Test func searchRevealsFiveAtATimeAndDeduplicates() throws {
+@Test func searchShowsTwentyFiveAndDeduplicatesContinuationPages() throws {
     let results = try (0..<25).map(video)
-    var session = try SearchSession(query: "test", results: [results[0]] + results)
-    #expect(session.visibleResults.count == 5)
-    for count in [10, 15, 20] {
-        #expect(session.hasMore)
-        session.revealMore()
-        #expect(session.visibleResults.count == count)
-    }
-    session.revealMore()
+    var session = try SearchSession(query: "test", results: results, continuation: "25")
+    #expect(session.visibleResults.count == 25)
+    #expect(session.hasMore)
+    try session.append(SearchPage(videos: [results[0]] + results, continuation: "50"))
     #expect(!session.hasMore)
-    #expect(session.visibleResults.count == 20)
-    var short = try SearchSession(query: "short", results: Array(results.prefix(3)))
-    short.revealMore()
+    #expect(session.visibleResults.count == 25)
+    let short = try SearchSession(query: "short", results: Array(results.prefix(3)))
     #expect(short.visibleResults.count == 3)
     #expect(!short.hasMore)
     #expect(try SearchSession(query: "empty", results: []).visibleResults.isEmpty)

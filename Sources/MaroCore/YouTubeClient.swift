@@ -54,8 +54,17 @@ public struct YouTubeClient: Sendable {
     }
 
     public func search(_ query: String) async throws -> [VideoSummary] {
+        try await searchPage(query).videos
+    }
+
+    public func searchPage(_ query: String, continuation: String? = nil) async throws -> SearchPage {
         _ = try YouTubeSource.searchArguments(query: query, nodeExecutable: nodeExecutable)
-        return try YouTubeSource.decodeSearch(await invoke("search", value: query.trimmingCharacters(in: .whitespacesAndNewlines)))
+        let offset = continuation.flatMap(Int.init) ?? 0
+        guard continuation == nil || (offset > 0 && offset < YouTubeSource.maximumSearchResults) else {
+            throw SourceFailure.invalidQuery
+        }
+        let request = try JSONSerialization.data(withJSONObject: ["query": query.trimmingCharacters(in: .whitespacesAndNewlines), "offset": offset], options: [.sortedKeys])
+        return try YouTubeSource.decodeSearchPage(await invoke("search", value: String(decoding: request, as: UTF8.self)))
     }
 
     public func resolve(videoID: String) async throws -> ResolvedAudio {

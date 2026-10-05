@@ -22,7 +22,7 @@ private func resolution(_ formats: [[String: Any]], headers: [String: String] = 
 @Test func extractorArgumentsKeepUserInputLiteralAndBoundRequests() throws {
     let query = "  --exec $(touch /tmp/nope); music  "
     let args = try YouTubeSource.searchArguments(query: query, nodeExecutable: node)
-    #expect(args.suffix(2) == ["--", "ytsearch20:--exec $(touch /tmp/nope); music"])
+    #expect(args.suffix(2) == ["--", "ytsearch25:--exec $(touch /tmp/nope); music"])
     #expect(args.contains("node:/example path/node"))
     #expect(args.contains("--ignore-config"))
     #expect(args.contains("--skip-download"))
@@ -40,7 +40,7 @@ private func resolution(_ formats: [[String: Any]], headers: [String: String] = 
     }
     entries[1] = entries[0]
     let videos = try YouTubeSource.decodeSearch(json(["entries": entries]))
-    #expect(videos.count == 19)
+    #expect(videos.count == 24)
     #expect(videos.first?.creator == "Creator")
     #expect(videos.allSatisfy { $0.thumbnailURL == nil })
     #expect(try YouTubeSource.decodeSearch(json(["entries": []])).isEmpty)

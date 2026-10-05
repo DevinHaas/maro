@@ -38,7 +38,7 @@ import Testing
         library: PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { throw CancellationError() })),
         previewDelay: { duration in await clock.wait(duration) })
     app.submitSearch("original")
-    await waitUntil { app.searchState.results.count == 5 }
+    await waitUntil { app.searchState.results.count == 12 }
     app.revealMore()
     app.focusSearch()
     app.globalQuery = "draft"
@@ -46,7 +46,7 @@ import Testing
     #expect(await probe.count("draft") == 0)
     #expect(await clock.lastDuration() == .milliseconds(300))
     #expect(app.searchState.query == "original")
-    #expect(app.searchState.results.count == 10)
+    #expect(app.searchState.results.count == 12)
     await clock.advance()
     await waitUntil { !app.previewLoading }
     #expect(app.previewVideos.first?.title == "draft 0")
@@ -55,7 +55,7 @@ import Testing
     app.submitSearch() // Field Enter submits draft regardless of highlighted row.
     await waitUntil { app.searchState.query == "draft" && !app.searchState.isSearching }
     #expect(app.route == .search)
-    #expect(app.searchState.results.count == 5)
+    #expect(app.searchState.results.count == 12)
     #expect(await probe.count("draft") == 1)
     #expect(app.libraryFilter.isEmpty)
     await controller.shutdown()
@@ -71,7 +71,7 @@ import Testing
     let app = ApplicationModel(controller: controller,
         library: PlaylistLibrary(controller: controller, api: YouTubePlaylists(token: { throw CancellationError() })), previewDelay: { _ in })
     app.submitSearch("saved page")
-    await waitUntil { app.searchState.results.count == 5 }
+    await waitUntil { app.searchState.results.count == 24 }
     app.focusSearch(); app.globalQuery = "broken"
     await waitUntil { app.previewError != nil }
     #expect(app.previewVideos.isEmpty)
@@ -84,8 +84,7 @@ import Testing
     #expect(app.previewVideos.first?.title == "broken 0")
     app.submitSearch()
     await waitUntil { app.searchState.query == "broken" && !app.searchState.isSearching }
-    while app.searchState.hasMore { app.revealMore() }
-    #expect(app.searchState.results.count == 20)
+    #expect(app.searchState.results.count == 24)
     #expect(await probe.count("broken") == 2)
     await controller.shutdown()
 }

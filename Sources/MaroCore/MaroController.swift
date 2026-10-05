@@ -21,6 +21,13 @@ public struct PlayerSnapshot: Codable, Sendable {
     public var seekTarget: Double? = nil
     public var activePlaylistItemID: String? = nil
     public var originPlaylistID: String? = nil
+
+    func commandResponseSnapshot() -> PlayerSnapshot {
+        var response = self
+        let allowedArtworkIDs = Set(favorites.map(\.id) + (loadedVideo.map { [$0.video.id] } ?? []))
+        response.localThumbnailPaths = localThumbnailPaths?.filter { allowedArtworkIDs.contains($0.key) }
+        return response
+    }
 }
 
 public struct SearchViewState: Sendable {
@@ -29,6 +36,8 @@ public struct SearchViewState: Sendable {
     public let isSearching: Bool
     public let hasMore: Bool
     public let error: String?
+    public var isLoadingMore: Bool = false
+    public var loadMoreError: String? = nil
 }
 
 @MainActor
@@ -57,6 +66,9 @@ public final class MaroController {
     private var query = ""
     private var searching = false
     private var searchError: String?
+    private var loadingMore = false
+    private var loadMoreError: String?
+    private var pageTask: Task<Void, Never>?
     private var session: SearchSession?
     private var playlistQueue: [YouTubePlaylistItem] = []
     private var playlistIndex: Int?
@@ -96,7 +108,8 @@ public final class MaroController {
     }
     public var searchState: SearchViewState {
         SearchViewState(query: query, results: session?.visibleResults ?? [], isSearching: searching,
-                        hasMore: session?.hasMore ?? false, error: searchError)
+                        hasMore: session?.hasMore ?? false, error: searchError,
+                        isLoadingMore: loadingMore, loadMoreError: loadMoreError)
     }
 
     public static func open(store: StateStore, source: YouTubeClient,
@@ -106,6 +119,7 @@ public final class MaroController {
         let loaded = try await store.load()
         let controller = try MaroController(loaded: loaded, store: store, engine: engine, sourceBuild: sourceBuild, artworkCache: artworkCache,
             search: { try await source.search($0) },
+            searchPage: { try await source.searchPage($0, continuation: $1) },
             prepare: { video, position in
                 try await engine.prepare(source.resolve(videoID: video.id), positionSeconds: position)
             })
@@ -118,12 +132,13 @@ public final class MaroController {
          artworkCache: ArtworkCache? = nil,
          searchNow: @escaping () -> ContinuousClock.Instant = { ContinuousClock().now },
          search: @escaping @Sendable (String) async throws -> [VideoSummary],
+         searchPage: (@Sendable (String, String?) async throws -> SearchPage)? = nil,
          prepare: @escaping @MainActor (VideoSummary, Double) async throws -> PreparedPlayback) throws {
         try loaded.document.validate()
         guard !sourceBuild.isEmpty, sourceBuild.utf8.count <= 128 else { throw StateError.invalidSourceBuild }
         self.sourceBuild = sourceBuild
         self.artworkCache = artworkCache
-        metadataRequests = MetadataSearchRequests(source: search, now: searchNow)
+        metadataRequests = MetadataSearchRequests(source: searchPage ?? { query, _ in SearchPage(videos: try await search(query)) }, now: searchNow)
         state = loaded.document
         needsUpdate = state.sourceDisabledBuild == sourceBuild
         if !needsUpdate { state.sourceDisabledBuild = nil }
@@ -146,6 +161,7 @@ public final class MaroController {
         artworkTask?.cancel()
         selectionTask?.cancel()
         searchTask?.cancel()
+        pageTask?.cancel()
         queueTask?.cancel()
     }
 
@@ -158,6 +174,7 @@ public final class MaroController {
             return
         }
         searchTask?.cancel()
+        pageTask?.cancel(); pageTask = nil; loadingMore = false; loadMoreError = nil
         searchID = UUID()
         let id = searchID
         self.query = query
@@ -168,10 +185,10 @@ public final class MaroController {
         publish()
         let task = Task { @MainActor in
             do {
-                let results = try await metadataSearch(query, intent: .foreground)
+                let page = try await metadataSearchPage(query, intent: .foreground)
                 try Task.checkCancellation()
                 guard searchID == id else { return }
-                let fresh = try SearchSession(query: query, results: results)
+                let fresh = try SearchSession(query: query, results: page.videos, continuation: page.continuation)
                 session = fresh
             } catch {
                 guard searchID == id else { return }
@@ -191,15 +208,19 @@ public final class MaroController {
     public var metadataProviderVersion: String { sourceBuild }
     public func cancelForegroundMetadataSearch() { metadataRequests.cancelForeground() }
     public func metadataSearch(_ query: String, intent: MetadataSearchIntent = .foreground) async throws -> [VideoSummary] {
+        try await metadataSearchPage(query, intent: intent).videos
+    }
+    private func metadataSearchPage(_ query: String, continuation: String? = nil, intent: MetadataSearchIntent) async throws -> SearchPage {
         guard !isShutDown else { throw ControllerFailure.shutDown }
         guard !needsUpdate else { throw ExtractorFailure.sourceNeedsUpdate }
         if intent == .discovery, selecting || metadataRequests.foregroundActive { throw CancellationError() }
         do {
-            let videos = try await metadataRequests.request(query, intent: intent)
+            let page = try await metadataRequests.request(query, continuation: continuation, intent: intent)
+            let videos = page.videos
             var seen = Set<String>()
             metadataArtworkVideos = Array((videos + metadataArtworkVideos).filter { seen.insert($0.id).inserted }.prefix(60))
             refreshArtwork()
-            return videos
+            return page
         }
         catch {
             if error as? ExtractorFailure == .sourceNeedsUpdate { disableSource() }
@@ -207,9 +228,27 @@ public final class MaroController {
         }
     }
 
-    public func revealMoreResults() {
-        guard !isShutDown else { return }
-        session?.revealMore(); publish()
+    public func loadMoreResults(retry: Bool = false) async {
+        guard !isShutDown, !needsUpdate, !searching, !loadingMore,
+              retry || loadMoreError == nil, let cursor = session?.continuation else { return }
+        let id = searchID, query = self.query
+        loadingMore = true; loadMoreError = nil; publish()
+        let task = Task { @MainActor in
+            do {
+                let page = try await metadataSearchPage(query, continuation: cursor, intent: .foreground)
+                try Task.checkCancellation()
+                guard searchID == id, session?.continuation == cursor else { return }
+                _ = try session?.append(page)
+            } catch {
+                guard searchID == id else { return }
+                loadMoreError = error is CancellationError ? "Loading was interrupted. Try again." : message(error)
+                if error as? ExtractorFailure == .sourceNeedsUpdate { disableSource() }
+            }
+            guard searchID == id else { return }
+            loadingMore = false; pageTask = nil; publish()
+        }
+        pageTask = task
+        await withTaskCancellationHandler { await task.value } onCancel: { task.cancel() }
     }
 
     public func setVolume(_ volume: Double) {
@@ -536,7 +575,7 @@ public final class MaroController {
             case .favoriteRemove:
                 if let id = request.videoID { removeFavorite(id: id) }
             }
-            return CommandResponse(id: request.id, snapshot: snapshot)
+            return CommandResponse(id: request.id, snapshot: snapshot.commandResponseSnapshot())
         } catch {
             let code: CommandError.Code
             switch error {
@@ -590,6 +629,7 @@ public final class MaroController {
         searchID = UUID()
         selectionTask?.cancel()
         searchTask?.cancel()
+        pageTask?.cancel(); pageTask = nil; loadingMore = false; loadMoreError = nil
         selectionTask = nil
         searchTask = nil
         selecting = false
@@ -696,6 +736,7 @@ public final class MaroController {
         state.sourceDisabledBuild = sourceBuild
         searchID = UUID()
         searchTask?.cancel()
+        pageTask?.cancel(); pageTask = nil; loadingMore = false; loadMoreError = nil
         searching = false
         searchError = ExtractorFailure.sourceNeedsUpdate.message
         selectionID = UUID()

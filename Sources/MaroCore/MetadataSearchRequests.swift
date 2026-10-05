@@ -9,15 +9,15 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
         let query: String
         var intent: MetadataSearchIntent
         var consumers: Set<UUID>
-        let task: Task<[VideoSummary], Error>
+        let task: Task<SearchPage, Error>
     }
     private var active: Active?
-    private var tail: Task<[VideoSummary], Error>?
-    private var cache: [String: (videos: [VideoSummary], expires: ContinuousClock.Instant, used: ContinuousClock.Instant)] = [:]
-    private let source: @Sendable (String) async throws -> [VideoSummary]
+    private var tail: Task<SearchPage, Error>?
+    private var cache: [String: (page: SearchPage, expires: ContinuousClock.Instant, used: ContinuousClock.Instant)] = [:]
+    private let source: @Sendable (String, String?) async throws -> SearchPage
     private let now: () -> ContinuousClock.Instant
     var onChange: (@MainActor () -> Void)?
-    init(source: @escaping @Sendable (String) async throws -> [VideoSummary], now: @escaping () -> ContinuousClock.Instant) {
+    init(source: @escaping @Sendable (String, String?) async throws -> SearchPage, now: @escaping () -> ContinuousClock.Instant) {
         self.source = source; self.now = now
     }
     var foregroundActive: Bool { active?.intent == .foreground }
@@ -30,20 +30,21 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
         active = current
         if current.consumers.isEmpty { cancelActive() }
     }
-    func request(_ query: String, intent: MetadataSearchIntent) async throws -> [VideoSummary] {
+    func request(_ query: String, continuation: String? = nil, intent: MetadataSearchIntent) async throws -> SearchPage {
         try Task.checkCancellation()
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return [] }
+        guard !query.isEmpty else { return SearchPage(videos: []) }
+        let key = query + "\u{0}" + (continuation ?? "")
         if intent == .discovery, foregroundActive { throw CancellationError() }
         let time = now()
         cache = cache.filter { $0.value.expires > time }
-        if var cached = cache[query] {
-            cached.used = time; cache[query] = cached
-            return cached.videos
+        if var cached = cache[key] {
+            cached.used = time; cache[key] = cached
+            return cached.page
         }
         let request: Active
         let consumer = UUID()
-        if var current = active, current.query == query, !current.task.isCancelled {
+        if var current = active, current.query == key, !current.task.isCancelled {
             current.consumers.insert(consumer)
             if intent == .foreground { current.intent = .foreground }
             active = current; onChange?()
@@ -55,11 +56,11 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
                 // A cancelled provider must finish before its successor can occupy the interpreter.
                 if let previous { _ = await previous.result }
                 try Task.checkCancellation()
-                let videos = try await source(query)
+                let page = try await source(query, continuation)
                 try Task.checkCancellation()
-                return try SearchSession(query: query, results: videos).allResults
+                return SearchPage(videos: try SearchSession(query: query, results: page.videos).allResults, continuation: page.continuation)
             }
-            request = Active(id: UUID(), query: query, intent: intent, consumers: [consumer], task: task)
+            request = Active(id: UUID(), query: key, intent: intent, consumers: [consumer], task: task)
             active = request; tail = task
             onChange?()
         }
@@ -69,12 +70,12 @@ public enum MetadataSearchIntent: Sendable { case foreground, discovery }
             }
             try Task.checkCancellation()
             guard active?.id == request.id else {
-                if let cached = cache[query] { return cached.videos }
+                if let cached = cache[key] { return cached.page }
                 throw CancellationError()
             }
             let fetched = now()
             if cache.count >= 8, let oldest = cache.min(by: { $0.value.used < $1.value.used })?.key { cache.removeValue(forKey: oldest) }
-            cache[query] = (videos, fetched.advanced(by: .seconds(60)), fetched)
+            cache[key] = (videos, fetched.advanced(by: .seconds(60)), fetched)
             active = nil
             onChange?()
             return videos

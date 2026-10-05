@@ -36,6 +36,8 @@ public struct ResolvedAudio: Sendable {
 /// Subprocess lifetime and AVFoundation readiness are separate responsibilities.
 public enum YouTubeSource {
     public static let maximumOutputBytes = 8 * 1024 * 1024
+    public static let searchPageSize = 25
+    public static let maximumSearchResults = 500
 
     public static func searchArguments(query: String, nodeExecutable: URL) throws -> [String] {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -43,7 +45,7 @@ public enum YouTubeSource {
               !query.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) })
         else { throw SourceFailure.invalidQuery }
         return baseArguments(nodeExecutable: nodeExecutable)
-            + ["--flat-playlist", "--playlist-end", "20", "--", "ytsearch20:\(query)"]
+            + ["--flat-playlist", "--playlist-end", "25", "--", "ytsearch25:\(query)"]
     }
 
     public static func resolveArguments(videoID: String, nodeExecutable: URL) throws -> [String] {
@@ -65,12 +67,22 @@ public enum YouTubeSource {
         let response: RawSearch = try decode(data)
         var results: [VideoSummary] = []
         var ids = Set<String>()
-        for record in response.entries.prefix(20) {
+        for record in response.entries.prefix(searchPageSize) {
             guard let record, let video = try? record.summary() else { continue }
             if ids.insert(video.id).inserted { results.append(video) }
         }
         if !response.entries.isEmpty && results.isEmpty { throw SourceFailure.malformedResponse }
         return results
+    }
+
+    public static func decodeSearchPage(_ data: Data) throws -> SearchPage {
+        let response: RawSearch = try decode(data)
+        if let cursor = response.continuation {
+            guard let offset = Int(cursor), offset > 0, offset < maximumSearchResults else {
+                throw SourceFailure.malformedResponse
+            }
+        }
+        return SearchPage(videos: try decodeSearch(data), continuation: response.continuation)
     }
 
     public static func decodeResolution(_ data: Data, expectedVideoID: String) throws -> ResolvedAudio {
@@ -133,7 +145,15 @@ public enum YouTubeSource {
     }
 }
 
-private struct RawSearch: Decodable { let entries: [RawVideo?] }
+public struct SearchPage: Sendable {
+    public let videos: [VideoSummary]
+    public let continuation: String?
+    public init(videos: [VideoSummary], continuation: String? = nil) {
+        self.videos = videos; self.continuation = continuation
+    }
+}
+
+private struct RawSearch: Decodable { let entries: [RawVideo?]; let continuation: String? }
 
 private struct RawVideo: Decodable {
     let id: String?

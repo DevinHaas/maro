@@ -101,32 +101,38 @@ public struct StateDocument: Codable, Equatable, Sendable {
     }
 }
 
-/// An ephemeral result batch; revealing more performs no source request.
+/// Ephemeral, validated pages. The controller owns asynchronous continuation requests.
 public struct SearchSession: Sendable {
     public let query: String
-    private let results: [VideoSummary]
-    private var visibleCount = 5
+    private var results: [VideoSummary] = []
+    public private(set) var continuation: String?
 
-    public init(query: String, results: [VideoSummary]) throws {
+    public init(query: String, results: [VideoSummary], continuation: String? = nil) throws {
         self.query = query
-        var ids = Set<String>()
-        var unique: [VideoSummary] = []
-        for video in results {
-            try video.validate()
-            if ids.insert(video.id).inserted { unique.append(video) }
-            if unique.count == 20 { break }
-        }
-        self.results = unique
+        _ = try append(SearchPage(videos: results, continuation: continuation))
     }
 
-    public var visibleResults: [VideoSummary] { Array(results.prefix(visibleCount)) }
+    @discardableResult public mutating func append(_ page: SearchPage) throws -> Int {
+        var ids = Set(results.map(\.id))
+        var unique: [VideoSummary] = []
+        for video in page.videos.prefix(YouTubeSource.searchPageSize) {
+            try video.validate()
+            if ids.insert(video.id).inserted { unique.append(video) }
+        }
+        let count = min(unique.count, YouTubeSource.maximumSearchResults - results.count)
+        results += unique.prefix(count)
+        // An empty/repeated page must not drive an endless automatic fetch loop.
+        continuation = count > 0 && results.count < YouTubeSource.maximumSearchResults && page.continuation != continuation ? page.continuation : nil
+        return count
+    }
+
+    public var visibleResults: [VideoSummary] { results }
     public var allResults: [VideoSummary] { results }
-    public var hasMore: Bool { visibleCount < results.count }
+    public var hasMore: Bool { continuation != nil }
     public func neighbor(of id: String, offset: Int) -> VideoSummary? {
         guard offset == -1 || offset == 1,
               let index = results.firstIndex(where: { $0.id == id }),
               results.indices.contains(index + offset) else { return nil }
         return results[index + offset]
     }
-    public mutating func revealMore() { visibleCount = min(visibleCount + 5, results.count) }
 }

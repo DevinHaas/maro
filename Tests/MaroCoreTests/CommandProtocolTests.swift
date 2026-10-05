@@ -81,3 +81,22 @@ import Testing
         }
     }
 }
+
+@Test func commandResponseFiltersArtworkForUnrelatedDiscoveredVideos() throws {
+    let loaded = try VideoSummary(id: "abcdefghijk", title: "Loaded", creator: "Creator")
+    let favorite = try VideoSummary(id: "lmnopqrstuv", title: "Favorite", creator: "Creator")
+    let discovered = "zyxwvutsrqp"
+    let snapshot = PlayerSnapshot(loadedVideo: try LoadedVideo(video: loaded, positionSeconds: 0),
+        favorites: [favorite], playback: .paused, isSelecting: false, sourceNeedsUpdate: false,
+        error: nil, persistenceError: nil,
+        localThumbnailPaths: [loaded.id: "/tmp/\(loaded.id).jpg", favorite.id: "/tmp/\(favorite.id).jpg",
+                             discovered: "/tmp/\(discovered).jpg"])
+
+    let responseSnapshot = snapshot.commandResponseSnapshot()
+    #expect(snapshot.localThumbnailPaths?[discovered] == "/tmp/\(discovered).jpg")
+    #expect(responseSnapshot.localThumbnailPaths?.keys.sorted() == [loaded.id, favorite.id].sorted())
+
+    let frame = try CommandWire.encode(CommandResponse(id: "42", snapshot: responseSnapshot))
+    let response = try CommandWire.response(frame, expectedID: "42")
+    #expect(response.snapshot?.localThumbnailPaths?.keys.sorted() == [loaded.id, favorite.id].sorted())
+}

@@ -13,6 +13,82 @@ from yt_dlp.globals import plugin_dirs
 
 plugin_dirs.value = []
 MAX_OUTPUT = 8 * 1024 * 1024
+PAGE_SIZE = 25
+MAX_RESULTS = 500
+search_sessions = {}
+
+
+def close_search(query):
+    session = search_sessions.pop(query, None)
+    if session:
+        session["extractor"].close()
+
+
+def search_page(value, options):
+    request = json.loads(value)
+    query, offset = request.get("query"), request.get("offset", 0)
+    if (not isinstance(query, str) or not query.strip() or len(query.encode()) > 512
+            or any(ord(c) < 32 or ord(c) == 127 for c in query)
+            or type(offset) is not int or not 0 <= offset < MAX_RESULTS):
+        raise ValueError("Invalid query")
+    query = query.strip()
+    session = search_sessions.get(query)
+    # Offsets make continuations reconstructable if playback preempts the worker.
+    if session and session["offset"] != offset:
+        close_search(query)
+        session = None
+    if not session:
+        if len(search_sessions) >= 8:
+            close_search(next(iter(search_sessions)))
+        extractor = yt_dlp.YoutubeDL(options)
+        try:
+            # Do not sanitize/materialize the playlist generator: yt-dlp lazily
+            # follows YouTube's continuation tokens as entries are consumed.
+            info = extractor.extract_info("ytsearch500:" + query, download=False, process=False)
+            session = {"extractor": extractor, "entries": iter(info["entries"]), "offset": 0, "seen": set()}
+            search_sessions[query] = session
+            for _ in range(offset):
+                try:
+                    skipped = next(session["entries"])
+                except StopIteration:
+                    close_search(query)
+                    return {"entries": [], "continuation": None}
+                if isinstance(skipped, dict) and isinstance(skipped.get("id"), str):
+                    session["seen"].add(skipped["id"])
+                session["offset"] += 1
+        except Exception:
+            extractor.close()
+            search_sessions.pop(query, None)
+            raise
+    entries = []
+    exhausted = False
+    try:
+        # Fill 25 usable tracks, with a strict scanning budget for malformed or
+        # duplicate source records. The cursor counts consumed source records.
+        for _ in range(min(PAGE_SIZE * 4, MAX_RESULTS - offset)):
+            if len(entries) == PAGE_SIZE:
+                break
+            try:
+                entry = next(session["entries"])
+            except StopIteration:
+                exhausted = True
+                break
+            session["offset"] += 1
+            if (not isinstance(entry, dict) or not isinstance(entry.get("id"), str)
+                    or not re.fullmatch(r"[A-Za-z0-9_-]{11}", entry["id"])
+                    or not isinstance(entry.get("title"), str) or not entry["title"].strip()):
+                continue
+            if entry["id"] in session["seen"]:
+                continue
+            session["seen"].add(entry["id"])
+            entries.append(session["extractor"].sanitize_info(entry))
+        continuation = str(session["offset"]) if not exhausted and session["offset"] < MAX_RESULTS and entries else None
+        if continuation is None:
+            close_search(query)
+        return {"entries": entries, "continuation": continuation}
+    except Exception:
+        close_search(query)
+        raise
 
 
 class QuietLogger:
@@ -44,9 +120,7 @@ def extract(request, node):
     if not isinstance(value, str):
         raise ValueError("Invalid input")
     if operation == "search":
-        if not value.strip() or len(value.encode()) > 512 or any(ord(c) < 32 or ord(c) == 127 for c in value):
-            raise ValueError("Invalid query")
-        url = "ytsearch20:" + value.strip()
+        url = None
     elif operation == "resolve" and re.fullmatch(r"[A-Za-z0-9_-]{11}", value):
         url = "https://www.youtube.com/watch?v=" + value
     else:
@@ -57,7 +131,9 @@ def extract(request, node):
                    retries=0, extractor_retries=0, js_runtimes={"node": {"path": node}},
                    remote_components=set(), proxy="", noplaylist=True,
                    extract_flat="in_playlist" if operation == "search" else False,
-                   playlistend=20)
+                   playlistend=MAX_RESULTS if operation == "search" else None)
+    if operation == "search":
+        return search_page(value, options)
     with yt_dlp.YoutubeDL(options) as extractor:
         return extractor.sanitize_info(extractor.extract_info(url, download=False))
 

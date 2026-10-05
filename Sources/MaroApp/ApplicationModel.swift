@@ -186,7 +186,13 @@ enum ApplicationRoute: Equatable {
             }
         }
     }
-    func revealMore() { controller.revealMoreResults(); render() }
+    func revealMore() {
+        guard route == .search else { return }
+        Task { await controller.loadMoreResults(); render() }
+    }
+    func retryMoreResults() {
+        Task { await controller.loadMoreResults(retry: true); render() }
+    }
     func play(_ video: VideoSummary) {
         selectionTask?.cancel(); actionError = nil
         selectionTask = Task {

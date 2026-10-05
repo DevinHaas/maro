@@ -24,8 +24,8 @@ struct SearchTiming {
                 await controller.search(query)
                 let first = seconds(start)
                 let visible = controller.searchState.results.count
-                while controller.searchState.hasMore { controller.revealMoreResults() }
-                print("query=\(query) attempt=\(attempt) first_five_seconds=\(first) visible=\(visible) full_list_seconds=\(seconds(start)) total=\(controller.searchState.results.count) error=\(controller.searchState.error != nil)")
+                if controller.searchState.hasMore { await controller.loadMoreResults() }
+                print("query=\(query) attempt=\(attempt) first_page_seconds=\(first) visible=\(visible) next_page_seconds=\(seconds(start) - first) total=\(controller.searchState.results.count) error=\(controller.searchState.error != nil || controller.searchState.loadMoreError != nil)")
                 fflush(stdout)
             }
         }

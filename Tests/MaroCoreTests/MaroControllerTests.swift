@@ -50,12 +50,10 @@ private actor SearchCallProbe {
             return videos
         }, prepare: { _, _ in throw SourceFailure.noCompatibleAudio })
     await controller.search("fixture")
-    controller.revealMoreResults()
-    #expect(controller.searchState.results.count == 10)
+    #expect(controller.searchState.results.count == 20)
     await controller.search("fixture")
     #expect(await probe.count("fixture") == 1, "A repeated search should reuse its fresh metadata batch")
-    #expect(controller.searchState.results.count == 5)
-    while controller.searchState.hasMore { controller.revealMoreResults() }
+    #expect(controller.searchState.results.count == 20)
     #expect(controller.searchState.results == videos)
     await controller.shutdown()
 }
@@ -281,8 +279,8 @@ private func track(_ id: Int) throws -> VideoSummary {
         #expect(controller.snapshot.playback == .paused)
         #expect(!engine.isPlaying)
     }
-    // Navigation includes fetched results beyond the five currently revealed rows.
-    #expect(controller.searchState.results.count == 5)
+    // Navigation includes the full fetched page.
+    #expect(controller.searchState.results.count == 7)
     let failed = try await controller.execute(CommandRequest(command: .next), openSearch: {})
     #expect(!failed.ok)
     #expect(controller.snapshot.loadedVideo?.video == videos[5])
