@@ -18,10 +18,6 @@ struct HomeView: View {
                             open: { app.openPlaylist(playlist) }, play: { library.play(playlist) })
                     }
                 }
-                if home.isLoading {
-                    HStack(spacing: 10) { ProgressView().controlSize(.small); Text("Finding suggestions…").foregroundStyle(AppDesign.muted) }
-                        .font(.system(size: 12)).accessibilityElement(children: .combine)
-                }
                 if home.isPaused && !home.isLoading {
                     HStack {
                         Text("Some suggestions paused for search or playback.").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
@@ -58,7 +54,9 @@ struct HomeView: View {
                                     ForEach(section.videos, id: \.id) { video in HomeVideoCard(app: app, video: video) }
                                 }.padding(.bottom, 4)
                             }
-                        } else if !home.isLoading {
+                        } else if home.isLoading {
+                            TrackCardsSkeleton(label: "Loading \(section.title) suggestions")
+                        } else {
                             Text(home.error == nil ? "No suggestions found. Try a search or another theme." : "Try again when you’re connected.")
                                 .font(.system(size: 13)).foregroundStyle(AppDesign.muted).padding(.vertical, 12)
                         }
@@ -116,25 +114,29 @@ private struct HomeVideoCard: View {
     @ObservedObject var app: ApplicationModel
     let video: VideoSummary
     @State private var hovered = false
+    @FocusState private var playFocused: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button { app.play(video) } label: {
                 VStack(alignment: .leading, spacing: 10) {
                     LibraryArtwork(url: video.thumbnailURL, localPath: app.player.snapshot.localThumbnailPaths?[video.id], symbol: "play.rectangle")
                         .frame(width: 176, height: 176)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
                         .overlay(alignment: .bottomTrailing) {
                             Image(systemName: "play.fill").font(.system(size: 20))
                                 .foregroundStyle(AppDesign.Text.onAccent).frame(width: 44, height: 44)
-                                .background(AppDesign.green).clipShape(Circle()).padding(10).opacity(hovered ? 1 : 0)
+                                .background(AppDesign.green).clipShape(Circle()).padding(10).opacity(hovered || playFocused ? 1 : 0)
                         }
                     Text(video.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
                         .frame(height: 36, alignment: .topLeading).frame(maxWidth: .infinity, alignment: .leading)
-                    Text(video.creator.isEmpty ? "Creator unavailable" : video.creator)
-                        .font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)
                 }.contentShape(Rectangle())
-            }.buttonStyle(.plain).accessibilityLabel("Play \(video.title) by \(video.creator)")
-            HStack { Spacer(minLength: 0); SaveDestinationButton(app: app, video: video) }
-                .frame(height: 34)
+            }.buttonStyle(.plain).focused($playFocused).accessibilityLabel("Play \(video.title) by \(video.creator)")
+            HStack(spacing: 6) {
+                Text(video.creator.isEmpty ? "Creator unavailable" : video.creator)
+                    .font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                SaveDestinationButton(app: app, video: video, rowHovered: hovered, diameter: 28)
+            }.frame(height: 28)
         }.padding(10).frame(width: 196, alignment: .leading)
             .background(hovered ? AppDesign.Surface.hover : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
             .tidalBorder(cornerRadius: 8)

@@ -39,7 +39,12 @@ import Foundation
                 let audio = try Self.silentAudio(in: directory)
                 let engine = PlaybackEngine()
                 engine.volume = 0
-                let artworkData = Self.fixtureArtwork()
+                let artworkData: Data
+                if let index = CommandLine.arguments.firstIndex(of: "--artwork"), CommandLine.arguments.indices.contains(index + 1) {
+                    artworkData = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[index + 1]))
+                } else {
+                    artworkData = Self.fixtureArtwork()
+                }
                 let artwork = ArtworkCache(directory: directory.appendingPathComponent("artwork"), fetch: { _ in artworkData })
                 let videos = try (0..<20).map { index in
                     try VideoSummary(id: String(format: "fixture%04d", index),
@@ -51,7 +56,7 @@ import Foundation
                     _ = await artwork.image(for: video)
                     if let url = video.thumbnailURL {
                         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil,
-                            headerFields: ["Content-Type": "image/png", "Cache-Control": "public, max-age=3600"])!
+                            headerFields: ["Content-Type": CommandLine.arguments.contains("--artwork") ? "image/jpeg" : "image/png", "Cache-Control": "public, max-age=3600"])!
                         URLCache.shared.storeCachedResponse(CachedURLResponse(response: response, data: artworkData), for: URLRequest(url: url))
                     }
                 }
@@ -74,6 +79,7 @@ import Foundation
                 let responses = RedesignFixtureResponses()
                 let api = YouTubePlaylists(token: { "disposable-local-fixture" }, send: { try await responses.respond($0) })
                 let library = PlaylistLibrary(controller: controller, api: api)
+                if CommandLine.arguments.contains("--playlist-cleanup") { library.configured = true }
                 library.refresh()
                 while library.busy { await Task.yield() }
                 let search = SearchWindow(controller: controller, cacheDirectory: directory, playlistLibrary: library)
@@ -119,14 +125,19 @@ import Foundation
                     // Tidal baseline mode adds both responsive boundaries without
                     // changing the production views or the original acceptance run.
                     let tidalBaseline = CommandLine.arguments.contains("--tidal-baseline")
-                    let sizes = tidalBaseline
+                    let improvements = CommandLine.arguments.contains("--improvements")
+                    let playlistCleanup = CommandLine.arguments.contains("--playlist-cleanup")
+                    let sizes = improvements || playlistCleanup
+                        ? [NSSize(width: 760, height: 720), NSSize(width: 1024, height: 768), NSSize(width: 1440, height: 900)]
+                        : tidalBaseline
                         ? [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768),
                            NSSize(width: 1199, height: 900), NSSize(width: 1200, height: 900),
                            NSSize(width: 1001, height: 900), NSSize(width: 1002, height: 900)]
                         : [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)]
                     for size in sizes {
                         window.setContentSize(size)
-                        let routes = tidalBaseline
+                        let routes = playlistCleanup ? ["playlist", "playlist-rows", "playlist-hovered", "playlist-rail", "playlist-rail-hovered", "playlist-stale"]
+                            : improvements ? ["home", "home-rail", "results", "results-rail"] : tidalBaseline
                             ? (size.width < 1024 ? ["home"]
                                : size.width == 1440 || size.width == 1024 ? ["home", "preview", "playlist", "rows", "results"]
                                : ["home", "preview", "playlist"])
@@ -135,7 +146,10 @@ import Foundation
                             print("Preparing \(route) at \(Int(size.width))×\(Int(size.height))")
                             fflush(stdout)
                             model.libraryFilter = ""
-                            switch route {
+                            library.stale = false
+                            model.libraryCollapsed = route.contains("-rail")
+                            let destination = route.replacingOccurrences(of: "-rail", with: "").replacingOccurrences(of: "-stale", with: "").replacingOccurrences(of: "-hovered", with: "").replacingOccurrences(of: "-rows", with: "")
+                            switch destination {
                             case "playlist", "rows", "fallback":
                                 if let playlist = route == "fallback" ? library.playlists.last : library.playlists.first {
                                     model.openPlaylist(playlist)
@@ -146,15 +160,19 @@ import Foundation
                                         controller.pause()
                                     }
                                 }
+                                if route.hasSuffix("-stale") {
+                                    library.stale = true
+                                    library.status = "Your YouTube library may be out of date."
+                                }
                             case "favorites": model.showFavorites()
                             case "results", "empty", "error":
-                                await controller.search(route == "results" ? "jazz" : route)
+                                await controller.search(destination == "results" ? "jazz" : destination)
                                 model.render(); model.navigate(.search)
                             case "preview": model.showHome(); model.globalQuery = ""; model.focusSearch()
                             case "filter": model.showHome(); model.libraryFilter = "no matching collection"
                             default: model.showHome()
                             }
-                            if route == "home" {
+                            if destination == "home" {
                                 for _ in 0..<80 {
                                     if !model.home.isLoading { break }
                                     try await Task.sleep(for: .milliseconds(50))
@@ -165,6 +183,13 @@ import Foundation
                             // rendered content explicitly for repeatable viewport checks.
                             hosting.setFrameSize(size)
                             hosting.layoutSubtreeIfNeeded()
+                            if playlistCleanup {
+                                Self.scrollFixturePlaylist(in: hosting, sidebarWidth: model.libraryCollapsed ? 72 : size.width < 1200 ? 280 : 320,
+                                                           offset: route.hasSuffix("-rows") ? 360 : 0)
+                                Self.setFixtureSidebarHover(in: hosting, hovered: route.hasSuffix("-hovered"))
+                                try await Task.sleep(for: .milliseconds(80))
+                                hosting.layoutSubtreeIfNeeded()
+                            }
                             guard let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds),
                                   let data = { () -> Data? in
                                       hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
@@ -172,15 +197,18 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
-                            if tidalBaseline {
+                            if tidalBaseline || improvements || playlistCleanup {
                                 let observations = Self.accessibilityObservations(hosting: hosting, window: window)
                                 let report: [String: Any] = [
-                                    "productionRevision": "ce978cf", "route": route,
+                                    "productionRevision": "working-tree", "route": route,
                                     "coordinateSpace": "logical content points, origin top-left",
                                     "contentSize": ["width": size.width, "height": size.height],
                                     "backingScale": window.backingScaleFactor,
                                     "pixelSize": ["width": bitmap.pixelsWide, "height": bitmap.pixelsHigh],
                                     "accessibility": observations,
+                                    "playlistDatedItems": library.items.filter { $0.addedAt != nil }.count,
+                                    "nativeScrollers": Self.scrollerObservations(in: hosting, sidebarWidth: model.libraryCollapsed ? 72 : size.width < 1200 ? 280 : 320,
+                                                                                 expectedSidebarHover: playlistCleanup ? route.hasSuffix("-hovered") : nil),
                                     "limits": "AX frames expose controls and combined text, not every SwiftUI glyph baseline. Source-resolved geometry is separately recorded; no inferred frame is labeled native-measured."
                                 ]
                                 let json = try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys])
@@ -188,6 +216,21 @@ import Foundation
                             }
                             print("Captured \(name): logical content \(hosting.bounds.size), pixels \(bitmap.pixelsWide)×\(bitmap.pixelsHigh), window \(window.frame.size)")
                             fflush(stdout)
+                        }
+                    }
+                    if playlistCleanup {
+                        for (name, alert) in [("rename-playlist-dialog", PlaylistDialogs.name(title: "Rename playlist", value: "Late night jazz").0),
+                                               ("remove-playlist-dialog", PlaylistDialogs.deletion(title: "Late night jazz"))] {
+                            alert.layout()
+                            alert.window.makeKeyAndOrderFront(nil)
+                            try await Task.sleep(for: .milliseconds(100))
+                            if let content = alert.window.contentView,
+                               let bitmap = content.bitmapImageRepForCachingDisplay(in: content.bounds) {
+                                content.cacheDisplay(in: content.bounds, to: bitmap)
+                                try bitmap.representation(using: .png, properties: [:])!.write(to: output.appendingPathComponent(name + ".png"))
+                                print("Captured \(name) without invoking an account action")
+                            }
+                            alert.window.orderOut(nil)
                         }
                     }
                     await controller.shutdown()
@@ -198,6 +241,52 @@ import Foundation
                 NSApplication.shared.terminate(nil)
             }
         }
+    }
+
+    private static func setFixtureSidebarHover(in view: NSView, hovered: Bool) {
+        if let anchor = view as? ScrollbarStyleAnchor {
+            anchor.sidebarHovered = hovered
+            anchor.scheduleUpdate()
+        }
+        for child in view.subviews { setFixtureSidebarHover(in: child, hovered: hovered) }
+    }
+
+    private static func scrollFixturePlaylist(in hosting: NSView, sidebarWidth: CGFloat, offset: CGFloat) {
+        var candidates: [NSScrollView] = []
+        func visit(_ view: NSView) {
+            if let scroll = view as? NSScrollView {
+                let frame = scroll.convert(scroll.bounds, to: hosting)
+                if frame.midX > 8 + sidebarWidth && frame.height > 200 { candidates.append(scroll) }
+            }
+            for child in view.subviews { visit(child) }
+        }
+        visit(hosting)
+        guard let scroll = candidates.last, let document = scroll.documentView else { return }
+        let maximum = max(0, document.bounds.height - scroll.contentView.bounds.height)
+        let y = document.isFlipped ? min(offset, maximum) : max(0, maximum - offset)
+        scroll.contentView.scroll(to: NSPoint(x: 0, y: y))
+        scroll.reflectScrolledClipView(scroll.contentView)
+    }
+
+    private static func scrollerObservations(in hosting: NSView, sidebarWidth: CGFloat, expectedSidebarHover: Bool?) -> [[String: Any]] {
+        var observations: [[String: Any]] = []
+        func visit(_ view: NSView) {
+            if let scroll = view as? NSScrollView {
+                let frame = scroll.convert(scroll.bounds, to: hosting)
+                let sidebar = frame.midX < 8 + sidebarWidth
+                if let expectedSidebarHover {
+                    precondition(scroll.scrollerStyle == .overlay, "Scroller must not reserve a gutter")
+                    if sidebar { precondition(scroll.hasVerticalScroller == expectedSidebarHover, "Sidebar scroller hover visibility mismatch") }
+                }
+                observations.append(["sidebar": sidebar, "overlay": scroll.scrollerStyle == .overlay,
+                    "verticalVisible": scroll.hasVerticalScroller, "autoHides": scroll.autohidesScrollers,
+                    "verticalClass": scroll.verticalScroller.map { String(describing: type(of: $0)) } ?? "none",
+                    "frame": ["x": frame.minX, "width": frame.width]])
+            }
+            for child in view.subviews { visit(child) }
+        }
+        visit(hosting)
+        return observations
     }
 
     private static func accessibilityObservations(hosting: NSView, window: NSWindow) -> [[String: Any]] {

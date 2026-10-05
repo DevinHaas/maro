@@ -140,6 +140,7 @@ struct LibraryRow: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 LibraryArtwork(url: url, favorites: favorites).frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
                 VStack(alignment: .leading, spacing: 5) {
                     Text(title).font(.system(size: 14, weight: .medium)).foregroundStyle(selected ? AppDesign.green : AppDesign.Text.primary).lineLimit(1)
                     Text(subtitle).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)

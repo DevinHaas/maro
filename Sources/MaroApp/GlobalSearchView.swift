@@ -65,7 +65,9 @@ struct GlobalSearchView: View {
                                      visible: focusedRow == app.previewQueries.count + index)
                 }
             }
-            if app.previewLoading { HStack { ProgressView().controlSize(.small); Text("Searching YouTube…").font(.caption) }.padding(10) }
+            if app.previewLoading {
+                TrackListSkeleton(count: 3, layout: .preview, label: "Loading search suggestions", identifier: "search-preview-loading")
+            }
             if let error = app.previewError {
                 Text(error).font(.caption).foregroundStyle(AppDesign.Status.error).padding(10)
                 Button("Retry search preview") { app.retryPreview() }.disabled(app.player.snapshot.sourceNeedsUpdate).padding(.horizontal, 10)
@@ -79,7 +81,7 @@ struct GlobalSearchView: View {
                 }.buttonStyle(.plain).foregroundStyle(AppDesign.muted)
             }
         }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
-        }.frame(height: min(CGFloat(app.previewQueries.count * 45 + app.previewVideos.count * 64 + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
+        }.frame(height: min(CGFloat(app.previewQueries.count * 45 + app.previewVideos.count * 64 + (app.previewLoading ? 192 : 0) + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
             .background(AppDesign.raised)
             .clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
             .shadow(color: .black.opacity(0.7), radius: 18, y: 8)

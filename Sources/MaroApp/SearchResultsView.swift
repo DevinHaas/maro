@@ -4,12 +4,14 @@ import SwiftUI
 struct SearchResultsView: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject private var player: PlayerPresentation
+    @State private var bottomVisible = false
+    @State private var bottomRequestCount: Int?
     init(app: ApplicationModel) { self.app = app; player = app.player }
     var body: some View {
+        GeometryReader { viewport in
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 Text(app.searchState.query.isEmpty ? "Search" : "Results for “\(app.searchState.query)”").font(.system(size: 28, weight: .bold))
-                if app.searchState.isSearching { ProgressView("Searching YouTube…") }
                 if let error = app.searchState.error {
                     Text(error).foregroundStyle(AppDesign.Status.error)
                     Button("Retry search") { app.retrySearch() }.disabled(player.snapshot.sourceNeedsUpdate)
@@ -27,10 +29,46 @@ struct SearchResultsView: View {
                         SearchVideoRow(app: app, player: player, video: video)
                     }
                 }
-                if app.searchState.hasMore { Button("Load 5 more") { app.revealMore() }.disabled(app.searchState.isSearching) }
+                if app.searchState.isSearching {
+                    TrackListSkeleton(label: "Loading search results", identifier: "search-results-loading")
+                }
+                if app.searchState.isLoadingMore {
+                    TrackListSkeleton(count: 3, label: "Loading more tracks", identifier: "search-more-loading")
+                } else if let error = app.searchState.loadMoreError {
+                    Text(error).foregroundStyle(AppDesign.Status.error)
+                    Button("Retry loading more") { app.retryMoreResults() }.disabled(player.snapshot.sourceNeedsUpdate)
+                } else if !app.searchState.isSearching && !app.searchState.results.isEmpty && !app.searchState.hasMore {
+                    Text("All results loaded").font(.caption).foregroundStyle(AppDesign.muted).frame(maxWidth: .infinity)
+                }
+                Color.clear.frame(height: 1)
+                    .background(GeometryReader { geometry in
+                        Color.clear.preference(key: SearchBottomPreference.self, value: geometry.frame(in: .named("searchScroll")).minY)
+                    }).accessibilityHidden(true)
             }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
         }
+        .coordinateSpace(name: "searchScroll")
+        .onPreferenceChange(SearchBottomPreference.self) { y in
+                let visible = y >= 0 && y <= viewport.size.height
+                if !visible { bottomRequestCount = nil }
+                bottomVisible = visible
+                loadVisiblePageIfNeeded()
+        }
+        .onChange(of: app.searchState.query) { _ in bottomRequestCount = nil; bottomVisible = false }
+        }
     }
+
+    private func loadVisiblePageIfNeeded() {
+        guard bottomVisible, !app.searchState.isSearching, !app.searchState.isLoadingMore,
+              app.searchState.loadMoreError == nil, app.searchState.hasMore,
+              bottomRequestCount != app.searchState.results.count else { return }
+        bottomRequestCount = app.searchState.results.count
+        app.revealMore()
+    }
+}
+
+private struct SearchBottomPreference: PreferenceKey {
+    static let defaultValue: CGFloat = .infinity
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
 struct FavoritesView: View {
@@ -76,22 +114,28 @@ struct SearchVideoRow: View {
                           prominent: hovered) { app.play(video) }.opacity(hovered || current || player.snapshot.sourceNeedsUpdate ? 1 : 0.6)
             Button { app.play(video) } label: {
                 HStack(spacing: 12) {
-                    LibraryArtwork(url: video.thumbnailURL, localPath: player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note").frame(width: 52, height: 52)
+                    LibraryArtwork(url: video.thumbnailURL, localPath: player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note")
+                        .frame(width: 52, height: 52).clipShape(RoundedRectangle(cornerRadius: 6))
+                        .fixedSize()
                     VStack(alignment: .leading, spacing: 6) {
                         Text(video.title).font(.system(size: 14, weight: .medium)).foregroundStyle(current ? AppDesign.green : AppDesign.Text.primary).lineLimit(1)
                         Text(video.creator).font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .layoutPriority(1)
                     Spacer(minLength: 0)
                 }.contentShape(Rectangle())
-            }.buttonStyle(.plain).disabled(player.snapshot.sourceNeedsUpdate).accessibilityLabel("Play \(video.title) by \(video.creator)")
+            }.buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
+                .disabled(player.snapshot.sourceNeedsUpdate).accessibilityLabel("Play \(video.title) by \(video.creator)")
             Text(duration).font(.system(size: 12)).monospacedDigit().foregroundStyle(AppDesign.muted).frame(width: 60, alignment: .trailing)
             AppIconButton(title: saved ? "Remove \(video.title) from Favorites" : "Save \(video.title) to Favorites", symbol: saved ? "heart.fill" : "heart") { app.toggleFavorite(video) }
             Menu {
                 Button("Play") { app.play(video) }.disabled(player.snapshot.sourceNeedsUpdate)
                 Button(saved ? "Remove from Favorites" : "Save to Favorites") { app.toggleFavorite(video) }
                 Button("Add to playlist…") { app.offerAdd(video) }
-            } label: { Image(systemName: "ellipsis").frame(width: 30, height: 38) }
-                .menuStyle(.borderlessButton).fixedSize().accessibilityLabel("Actions for \(video.title)")
+            } label: { Text("⋮").font(.system(size: 22, weight: .semibold)).frame(width: 30, height: 38) }
+                .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                .help("Actions for \(video.title)").accessibilityLabel("Actions for \(video.title)")
         }.padding(.horizontal, 8).padding(.vertical, 6).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.Surface.hover : current ? AppDesign.Surface.selected : .clear))
             .onHover { hovered = $0 }

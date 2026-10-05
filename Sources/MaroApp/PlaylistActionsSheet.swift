@@ -18,6 +18,7 @@ struct PlaylistActionsSheet: View {
             HStack(spacing: 14) {
                 LibraryArtwork(url: context.item?.video?.thumbnailURL ?? context.playlist.thumbnailURL,
                     localPath: context.item?.video.flatMap { player.snapshot.localThumbnailPaths?[$0.id] }).frame(width: 64, height: 64)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
                 VStack(alignment: .leading, spacing: 6) {
                     Text(context.item?.title ?? context.playlist.title).font(.system(size: 20, weight: .bold)).lineLimit(2)
                     Text(context.item == nil ? "Playlist actions" : context.playlist.title).font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)

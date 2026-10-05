@@ -2,6 +2,18 @@ import AppKit
 import MaroCore
 import SwiftUI
 
+/// The header and rows use the same fixed columns around their flexible title cell.
+enum PlaylistTrackColumns {
+    static let gap: CGFloat = 18
+    static let inset: CGFloat = 12
+    static let position: CGFloat = 24
+    static let artwork: CGFloat = 44
+    static let date: CGFloat = 100
+    static let duration: CGFloat = 48
+    static let actions: CGFloat = 82
+    static let handle: CGFloat = 16
+}
+
 struct PlaylistDetailView: View {
     @ObservedObject var app: ApplicationModel
     var body: some View { PlaylistDetailContent(app: app, library: app.library, player: app.player) }
@@ -17,12 +29,19 @@ private struct PlaylistDetailContent: View {
     @FocusState private var focusedControl: String?
     @FocusState private var playFocused: Bool
     @State private var playHovered = false
-    private var showsDates: Bool { library.items.contains { $0.addedAt != nil } }
-    private var showsDurations: Bool { library.items.contains { $0.video?.durationSeconds != nil } }
     private var hasActiveSearch: Bool { !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     private var filteredItems: [PlaylistSearchResult] { PlaylistSearchProjection(items: library.items, query: searchQuery) }
 
     var body: some View {
+        GeometryReader { viewport in
+            // Read the viewport directly so metadata visibility is correct on the first layout.
+            let tableWidth = max(0, viewport.size.width - 48)
+            content(showsDates: tableWidth >= 600 && library.items.contains { $0.addedAt != nil },
+                showsDurations: tableWidth >= 520 && library.items.contains { $0.video?.durationSeconds != nil })
+        }
+    }
+
+    private func content(showsDates: Bool, showsDurations: Bool) -> some View {
         Group {
             if let playlist = library.selected {
                 ScrollView {
@@ -31,7 +50,8 @@ private struct PlaylistDetailContent: View {
                             fallbackURL: library.items.compactMap { item in
                                 guard let video = item.video else { return nil as URL? }
                                 return player.snapshot.localThumbnailPaths?[video.id].map { URL(fileURLWithPath: $0) } ?? video.thumbnailURL
-                            }.first, color: $artworkColor)
+                            }.first, color: $artworkColor,
+                            renameEnabled: library.canReorder, rename: { library.rename() })
                         VStack(alignment: .leading, spacing: 18) {
                             HStack(spacing: 18) {
                                 Button { library.play() } label: {
@@ -45,10 +65,12 @@ private struct PlaylistDetailContent: View {
                                             .allowsHitTesting(false).accessibilityHidden(true)
                                     }
                                     .accessibilityLabel("Play \(playlist.title) in saved order")
-                                AppIconButton(title: "Playlist actions for \(playlist.title)", symbol: "ellipsis", enabled: !library.busy) {
-                                    invokingControl = "playlist-actions"; library.presentPlaylistActions()
-                                }.focusable().focused($focusedControl, equals: "playlist-actions")
-                                    .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-actions", visible: focusedControl == "playlist-actions")
+                                AppIconButton(title: "Remove playlist \(playlist.title)", symbol: "xmark", enabled: library.canReorder) {
+                                    library.confirmDelete()
+                                }.background(Circle().fill(AppDesign.Surface.raised))
+                                    .focusable().focused($focusedControl, equals: "playlist-delete")
+                                    .accessibilityIdentifier("playlist-delete")
+                                    .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-delete", visible: focusedControl == "playlist-delete")
                                 Spacer(minLength: 8)
                                 if library.busy { ProgressView().controlSize(.small) }
                                 Text("Saved order").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
@@ -59,7 +81,11 @@ private struct PlaylistDetailContent: View {
                                 Text("Playing a captured queue. Playlist edits apply the next time you start it.")
                                     .font(.system(size: 11)).foregroundStyle(AppDesign.muted)
                             }
-                            rowHeadings
+                            rowHeadings(showsDates: showsDates, showsDurations: showsDurations)
+                            if library.loadingTracks && library.items.isEmpty {
+                                TrackListSkeleton(layout: .playlist, showsDates: showsDates, showsDurations: showsDurations,
+                                    label: "Loading playlist tracks", identifier: "playlist-tracks-loading")
+                            }
                             LazyVStack(spacing: 2) {
                                 ForEach(filteredItems) { result in
                                     let index = result.originalIndex
@@ -101,19 +127,25 @@ private struct PlaylistDetailContent: View {
                                     Text("Try a different title or creator.").foregroundStyle(AppDesign.muted)
                                 }.frame(maxWidth: .infinity).padding(.vertical, 44)
                             }
-                            if library.stale { Text("Previously loaded data · may be outdated").font(.caption).foregroundStyle(AppDesign.Status.warning) }
-                            Text(library.status).font(.system(size: 11)).foregroundStyle(AppDesign.muted).textSelection(.enabled)
                         }.padding(24).background(AppDesign.Surface.panel)
                     }
                 }.safeAreaInset(edge: .bottom, spacing: 0) {
-                    if library.reorderState != .idle || library.status.hasPrefix("Saved") {
+                    if library.reorderState != .idle || library.stale || library.canRetry || !library.connected {
                         HStack(spacing: 12) {
                             if library.busy { ProgressView().controlSize(.small) }
-                            Text(library.status).font(.system(size: 12)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .leading, spacing: 4) {
+                                if library.stale {
+                                    Text("Previously loaded data · may be outdated").foregroundStyle(AppDesign.Status.warning)
+                                }
+                                Text(library.status).textSelection(.enabled)
+                            }.font(.system(size: 12)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
                             if library.canRetry || library.reorderState == .unconfirmed || library.reorderState == .savedRefreshUnavailable {
                                 Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") {
                                     if library.canRetry { library.retryLast() } else { library.refresh() }
                                 }.disabled(library.busy)
+                            }
+                            if library.configured && (library.stale || library.canRetry || !library.connected) {
+                                Button("Reconnect YouTube") { library.connect() }.disabled(library.busy)
                             }
                         }.padding(14).background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0)
                     }
@@ -150,15 +182,19 @@ private struct PlaylistDetailContent: View {
         .tidalBorder(cornerRadius: 7)
     }
 
-    private var rowHeadings: some View {
-        HStack(spacing: 14) {
-            Color.clear.frame(width: 16, height: 1)
-            Text("#").frame(width: 24)
-            Text("Title").frame(maxWidth: .infinity, alignment: .leading)
-            if showsDates { Text("Date added").frame(width: 100, alignment: .leading) }
-            if showsDurations { Image(systemName: "clock").frame(width: 48) }
-            Color.clear.frame(width: 72, height: 1)
-        }.font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.horizontal, 8).padding(.bottom, 10)
+    private func rowHeadings(showsDates: Bool, showsDurations: Bool) -> some View {
+        HStack(spacing: PlaylistTrackColumns.gap) {
+            Text("#").frame(width: PlaylistTrackColumns.position)
+            HStack(spacing: PlaylistTrackColumns.gap) {
+                Color.clear.frame(width: PlaylistTrackColumns.artwork, height: 1)
+                Text("Title").frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("playlist-title-column")
+            }.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            if showsDates { Text("Date added").frame(width: PlaylistTrackColumns.date, alignment: .leading) }
+            if showsDurations { Image(systemName: "clock").frame(width: PlaylistTrackColumns.duration) }
+            Color.clear.frame(width: PlaylistTrackColumns.actions, height: 1)
+            Color.clear.frame(width: PlaylistTrackColumns.handle, height: 1)
+        }.font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.horizontal, PlaylistTrackColumns.inset).padding(.bottom, 10)
             .overlay(alignment: .bottom) { Rectangle().fill(AppDesign.Border.decorative).frame(height: 1) }.accessibilityHidden(true)
     }
 }
@@ -168,6 +204,8 @@ private struct PlaylistCoverHeader: View {
     let loadedCount: Int?
     let fallbackURL: URL?
     @Binding var color: Color
+    var renameEnabled = true
+    let rename: () -> Void
     @State private var artwork: NSImage?
     private var urls: [URL] {
         var seen = Set<URL>()
@@ -188,7 +226,12 @@ private struct PlaylistCoverHeader: View {
             LinearGradient(colors: [AppDesign.Surface.canvas.opacity(0.40), .clear], startPoint: .leading, endPoint: .trailing)
             VStack(alignment: .leading, spacing: 12) {
                 Text(playlist.privacy.map { "\($0.capitalized) playlist" } ?? "Playlist").font(.system(size: 12, weight: .medium))
-                Text(playlist.title).font(.system(size: 54, weight: .heavy)).lineLimit(2).minimumScaleFactor(0.6).accessibilityAddTraits(.isHeader)
+                Button(action: rename) {
+                    Text(playlist.title).font(.system(size: 54, weight: .heavy)).lineLimit(2).minimumScaleFactor(0.6)
+                        .multilineTextAlignment(.leading).contentShape(Rectangle())
+                }.buttonStyle(.plain).disabled(!renameEnabled)
+                    .help("Rename playlist").accessibilityLabel("Rename playlist \(playlist.title)")
+                    .accessibilityIdentifier("playlist-rename-title").accessibilityAddTraits(.isHeader)
                 if let description = playlist.description, !description.isEmpty {
                     Text(description).font(.system(size: 13)).foregroundStyle(AppDesign.Text.primary).lineLimit(2)
                 }
@@ -254,42 +297,49 @@ struct PlaylistTrackRow: View {
     @FocusState private var playFocused: Bool
 
     var body: some View {
-        HStack(spacing: 14) {
-            if let reorderLibrary {
-                PlaylistDragHandle(item: item, playlistID: playlistID, localPath: localPath, library: reorderLibrary)
-                    .frame(width: 16, height: 44)
-            } else {
-                Color.clear.frame(width: 16, height: 44).accessibilityHidden(true)
-            }
+        HStack(spacing: PlaylistTrackColumns.gap) {
             Button(action: play) {
                 ZStack {
                     if hovered || playFocused { Image(systemName: "play.fill") }
                     else if active { Image(systemName: playback == .paused || playback == .ended ? "pause.fill" : "waveform") }
                     else { Text("\(position)").monospacedDigit() }
-                }.frame(width: 24, height: 40).contentShape(Rectangle())
+                }.frame(width: PlaylistTrackColumns.position, height: 44).contentShape(Rectangle())
             }.buttonStyle(.plain).disabled(item.video == nil || busy).focused($playFocused)
                 .foregroundStyle(active ? AppDesign.green : AppDesign.muted).accessibilityLabel("Play \(item.title) from position \(position)")
-            LibraryArtwork(url: item.video?.thumbnailURL, localPath: localPath, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
-                .frame(width: 44, height: 44).opacity(item.video == nil ? 0.5 : 1)
-            VStack(alignment: .leading, spacing: 5) {
-                Text(item.title).font(.system(size: 14, weight: .medium)).foregroundStyle(active ? AppDesign.Accent.primary : AppDesign.Text.primary).lineLimit(1)
-                Text(item.video.map { $0.creator.isEmpty ? "Video" : $0.creator } ?? "Unavailable · skipped during playback")
-                    .font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
-            }.frame(maxWidth: .infinity, alignment: .leading).accessibilityElement(children: .ignore)
-                .accessibilityLabel("\(item.title), \(item.video?.creator ?? "Unavailable"), position \(position)\(active ? ", \(playback.rawValue)" : "")")
+            HStack(spacing: PlaylistTrackColumns.gap) {
+                LibraryArtwork(url: item.video?.thumbnailURL, localPath: localPath, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
+                    .frame(width: PlaylistTrackColumns.artwork, height: PlaylistTrackColumns.artwork)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                    .opacity(item.video == nil ? 0.5 : 1)
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(item.title).font(.system(size: 14, weight: .medium)).foregroundStyle(active ? AppDesign.Accent.primary : AppDesign.Text.primary).lineLimit(1)
+                    Text(item.video.map { $0.creator.isEmpty ? "Video" : $0.creator } ?? "Unavailable · skipped during playback")
+                        .font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
+                }.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading).accessibilityElement(children: .ignore)
+                    .accessibilityIdentifier("playlist-track-title-\(item.id)")
+                    .accessibilityLabel("\(item.title), \(item.video?.creator ?? "Unavailable"), position \(position)\(active ? ", \(playback.rawValue)" : "")")
+            }.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
             if showsDates { Text(item.addedAt.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "")
-                .font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: 100, alignment: .leading) }
+                .font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: PlaylistTrackColumns.date, alignment: .leading) }
             if showsDurations { Text(item.video?.durationSeconds.map { seconds in
                 let duration = Int(seconds); return "\(duration / 60):\(String(format: "%02d", duration % 60))"
-            } ?? "").monospacedDigit().font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: 48) }
-            if let video = item.video {
-                SaveDestinationButton(app: app, video: video, sourcePlaylistID: playlistID, rowHovered: hovered)
+            } ?? "").monospacedDigit().font(.system(size: 11)).foregroundStyle(AppDesign.muted).frame(width: PlaylistTrackColumns.duration) }
+            HStack(spacing: 10) {
+                if let video = item.video {
+                    SaveDestinationButton(app: app, video: video, sourcePlaylistID: playlistID, rowHovered: hovered)
+                } else {
+                    Color.clear.frame(width: 34, height: 34).accessibilityHidden(true)
+                }
+                AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
+                    .focusable().focused(focusedControl, equals: item.id)
+            }.frame(width: PlaylistTrackColumns.actions)
+            if let reorderLibrary {
+                PlaylistDragHandle(item: item, playlistID: playlistID, localPath: localPath, library: reorderLibrary)
+                    .frame(width: PlaylistTrackColumns.handle, height: 44)
             } else {
-                Color.clear.frame(width: 34, height: 34).accessibilityHidden(true)
+                Color.clear.frame(width: PlaylistTrackColumns.handle, height: 44).accessibilityHidden(true)
             }
-            AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
-                .focusable().focused(focusedControl, equals: item.id)
-        }.padding(.horizontal, 8).padding(.vertical, 7)
+        }.padding(.horizontal, PlaylistTrackColumns.inset).padding(.vertical, 9)
             .background(RoundedRectangle(cornerRadius: 5).fill(hovered || playFocused || focusedControl.wrappedValue == item.id ? AppDesign.Surface.hover : active ? AppDesign.Surface.selected : .clear))
             .tidalBorder(cornerRadius: 5, focused: playFocused || focusedControl.wrappedValue == item.id, visible: playFocused || focusedControl.wrappedValue == item.id)
             .onHover { hovered = $0 }
