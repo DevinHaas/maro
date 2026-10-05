@@ -72,12 +72,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let defaultBar = ["/opt/homebrew/bin/sketchybar", "/usr/local/bin/sketchybar"]
                 .first { FileManager.default.isExecutableFile(atPath: $0) } ?? "/opt/homebrew/bin/sketchybar"
             barNotifier = BarNotifier(executable: try Self.location("MARO_SKETCHYBAR", fallback: URL(fileURLWithPath: defaultBar)))
-            searchWindow = SearchWindow(controller: controller, cacheDirectory: cacheDirectory)
-            playerWindow = PlayerWindow(controller: controller, openSearch: { [weak self] in
+            let search = SearchWindow(controller: controller, cacheDirectory: cacheDirectory)
+            searchWindow = search
+            playerWindow = PlayerWindow(application: search.application, openSearch: { [weak self] in
                 self?.controller?.warmUpSource()
                 self?.searchWindow?.present()
-            }, addToPlaylist: { [weak self] video in
-                self?.searchWindow?.offerAdd(video)
             })
             controller.onChange = { [weak self, weak controller] in
                 self?.searchWindow?.render()

@@ -45,11 +45,10 @@ final class PlayerWindow: NSWindowController {
     private let openSearch: @MainActor () -> Void
     private var opening: Task<Void, Never>?
 
-    init(controller: MaroController, openSearch: @escaping @MainActor () -> Void,
-         addToPlaylist: @escaping @MainActor (VideoSummary) -> Void = { _ in }) {
-        self.controller = controller
+    init(application: ApplicationModel, openSearch: @escaping @MainActor () -> Void) {
+        self.controller = application.controller
         self.openSearch = openSearch
-        presentation = PlayerPresentation(snapshot: controller.snapshot)
+        presentation = application.player
         let panel = PlayerPanel(contentRect: NSRect(x: 0, y: 0, width: 392, height: 180),
             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.title = "Maro · Player"
@@ -62,10 +61,9 @@ final class PlayerWindow: NSWindowController {
         panel.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         super.init(window: panel)
         panel.onHide = { [weak presentation] in presentation?.timelineEpoch += 1 }
-        panel.contentView = NSHostingView(rootView: PlayerCard(presentation: presentation,
+        panel.contentView = NSHostingView(rootView: PlayerCard(presentation: presentation, app: application,
             action: { [weak self] command, id in self?.perform(command, videoID: id) },
             search: { [weak self] in self?.window?.orderOut(nil); self?.openSearch() },
-            addToPlaylist: { [weak self] video in self?.window?.orderOut(nil); addToPlaylist(video) },
             hide: { [weak panel] in panel?.orderOut(nil) },
             setVolume: { [weak self] volume in
                 self?.controller.setVolume(volume)
@@ -171,91 +169,95 @@ final class PlayerPresentation: ObservableObject {
 
 struct PlayerCard: View {
     @ObservedObject var presentation: PlayerPresentation
+    @ObservedObject var app: ApplicationModel
     let action: (CommandName, String?) -> Void
     let search: () -> Void
-    var addToPlaylist: (VideoSummary) -> Void = { _ in }
     let hide: () -> Void
     var setVolume: (Double) -> Void = { _ in }
     var seek: (Double, UUID) -> Void = { _, _ in }
     var resize: (CGSize) -> Void = { _ in }
     @State var favorites = false
     @State private var timelinePreview: Double?
-    private let green = Color(nsColor: MaroAppearance.accent)
-    private let ink = Color(nsColor: MaroAppearance.ink)
     private var snapshot: PlayerSnapshot { presentation.snapshot }
     private var video: VideoSummary? { snapshot.loadedVideo?.video }
     private var playing: Bool { snapshot.playback == .playing || snapshot.playback == .buffering || snapshot.isSelecting }
+    private var loadingAudio: Bool { snapshot.isSelecting || (snapshot.playback == .buffering && snapshot.timeline == nil) }
     private var problem: String? {
         snapshot.sourceNeedsUpdate ? "YouTube source needs an update." :
             presentation.actionError ?? snapshot.error ?? snapshot.persistenceError
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             if favorites { favoritesList }
             else {
-                HStack(alignment: .center, spacing: 16) {
-                    HStack(spacing: 10) {
-                        volumeControl
-                        artwork(video).frame(width: 128, height: 128)
-                            .background(Color.white.opacity(0.05))
-                            .clipShape(RoundedRectangle(cornerRadius: 9))
-                    }
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 6) {
-                            ScrollingTitle(title: video?.title ?? "Choose a video")
-                                .frame(height: 18)
-                            Button { if let video { action(.favoriteToggle, video.id) } } label: {
-                                Image(systemName: snapshot.favorites.contains { $0.id == video?.id } ? "star.fill" : "star")
-                                    .foregroundStyle(green).frame(width: 24, height: 24)
+                HStack(alignment: .center, spacing: 14) {
+                    Group {
+                        if loadingAudio && video == nil {
+                            LoadingSkeleton(label: "Loading track artwork", identifier: "player-artwork-loading", announce: false) {
+                                SkeletonBlock(cornerRadius: 5)
                             }
-                            .buttonStyle(.plain).disabled(video == nil)
-                            .help("Toggle favorite").accessibilityLabel("Toggle favorite")
-                            Button { if let video { addToPlaylist(video) } } label: {
-                                Image(systemName: "text.badge.plus").frame(width: 24, height: 24)
-                            }.buttonStyle(.plain).disabled(video == nil)
-                                .help("Add to playlist").accessibilityLabel("Add to playlist")
+                        } else { artwork(video) }
+                    }.frame(width: 88, height: 88).clipShape(RoundedRectangle(cornerRadius: 5))
+                    VStack(alignment: .leading, spacing: 6) {
+                        if loadingAudio && video == nil {
+                            PlayerTrackDetailsSkeleton().frame(height: 37).padding(.trailing, 20)
+                        } else {
+                            ScrollingTitle(title: video?.title ?? "Choose a video")
+                                .frame(height: 18).padding(.trailing, 20)
+                            Text(video?.creator ?? "Search YouTube to start listening")
+                                .font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
                         }
-                        Text(video?.creator ?? "Search YouTube to start listening")
-                            .font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
-                        progress
-                        transport
                         HStack(spacing: 6) {
-                            Button("Library", action: search).help("Search YouTube or browse playlists")
-                            Button("Favorites (\(snapshot.favorites.count))") { favorites = true }
+                            transport
+                            Spacer(minLength: 0)
+                            AppIconButton(title: "Toggle favorite",
+                                symbol: snapshot.favorites.contains { $0.id == video?.id } ? "heart.fill" : "heart",
+                                enabled: video != nil) {
+                                if let video { action(.favoriteToggle, video.id) }
+                            }
+                            if let video {
+                                SaveDestinationButton(app: app, video: video, rowHovered: true, iconOnly: true)
+                            } else {
+                                AppIconButton(title: "Add to playlist", symbol: "plus", enabled: false) {}
+                            }
                         }
-                        .font(.system(size: 10)).buttonStyle(.bordered).tint(green)
                     }
-                    .frame(width: 224)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                progress
+                HStack(spacing: 8) {
+                    PlayerNavigationButton(title: "Library", symbol: "books.vertical", action: search)
+                        .help("Search YouTube or browse playlists")
+                    PlayerNavigationButton(title: "Favorites (\(snapshot.favorites.count))", symbol: "heart") { favorites = true }
+                    Spacer(minLength: 0)
+                    volumeControl
                 }
             }
-            if snapshot.isSelecting {
-                Text("Preparing audio…").font(.system(size: 11)).foregroundStyle(.secondary)
-            }
             if let problem {
-                Text(problem).font(.system(size: 11)).foregroundStyle(.orange)
+                Text(problem).font(.system(size: 11)).foregroundStyle(AppDesign.Status.warning)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(12).padding(.top, 12).frame(width: 430).fixedSize(horizontal: true, vertical: true)
-        .background(Color(nsColor: MaroAppearance.background))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color(nsColor: MaroAppearance.border), lineWidth: 1))
-        .overlay(alignment: .topLeading) {
+        .padding(16).frame(width: 430).fixedSize(horizontal: true, vertical: true)
+        .foregroundStyle(AppDesign.Text.primary)
+        .background(AppDesign.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .tidalBorder(cornerRadius: 8)
+        .overlay(alignment: .topTrailing) {
             Button(action: hide) {
-                Image(systemName: "minus")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 14, height: 14)
-                    .background(Circle().fill(Color.white.opacity(0.12)))
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(AppDesign.muted)
                     .frame(width: 24, height: 24)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain).help("Hide player")
             .accessibilityLabel("Hide player").accessibilityIdentifier("hide-player")
-            .padding(.leading, 2)
+            .padding(4)
         }
         .preferredColorScheme(.dark)
+        .tint(AppDesign.Accent.primary)
         .background(GeometryReader { geometry in
             Color.clear.onAppear { resize(geometry.size) }
                 .onChange(of: geometry.size) { resize($0) }
@@ -263,20 +265,19 @@ struct PlayerCard: View {
     }
 
     private var volumeControl: some View {
-        VStack(spacing: 2) {
-            PillVolumeSlider(value: snapshot.volume ?? 1, onChange: setVolume)
-                .frame(width: 18, height: 92)
-            Image(systemName: "music.note")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(.secondary).accessibilityHidden(true)
+        HStack(spacing: 8) {
+            Image(systemName: "speaker.wave.2.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(AppDesign.muted).accessibilityHidden(true)
+            Slider(value: Binding(get: { snapshot.volume ?? 1 }, set: { setVolume($0) }), in: 0...1)
+                .frame(width: 78).controlSize(.small)
+                .accessibilityLabel("Playback volume").accessibilityIdentifier("playback-volume")
         }
-        .frame(width: 28, height: 128)
-        .background(Capsule().fill(Color.white.opacity(0.08)))
         .help("Playback volume: \(Int(((snapshot.volume ?? 1) * 100).rounded()))%")
     }
 
     private var transport: some View {
-        HStack(spacing: 22) {
+        HStack(spacing: 8) {
             transportButton("Previous", symbol: "backward.end.fill", command: .previous,
                 enabled: snapshot.canGoPrevious == true && !snapshot.isSelecting && !snapshot.sourceNeedsUpdate)
             transportButton(snapshot.playback == .ended ? "Replay" : playing ? "Pause" : "Play",
@@ -286,28 +287,29 @@ struct PlayerCard: View {
             transportButton("Next", symbol: "forward.end.fill", command: .next,
                 enabled: snapshot.canGoNext == true && !snapshot.isSelecting && !snapshot.sourceNeedsUpdate)
         }
-        .frame(maxWidth: .infinity).frame(height: 36)
-        .background(Capsule().fill(green).frame(height: 26))
     }
 
     private func transportButton(_ name: String, symbol: String, command: CommandName,
                                  enabled: Bool, central: Bool = false) -> some View {
-        Button { action(command, nil) } label: {
-            Image(systemName: symbol).font(.system(size: central ? 16 : 13, weight: .semibold))
-                .foregroundStyle(central ? Color.white : ink)
-                .frame(width: 36, height: 36)
-                .background { if central { Circle().fill(ink.opacity(0.65)) } }
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain).disabled(!enabled).opacity(enabled ? 1 : 0.35)
-        .help(name).accessibilityLabel(name).accessibilityIdentifier(name.lowercased())
+        AppIconButton(title: name, symbol: symbol, enabled: enabled, prominent: central) { action(command, nil) }
+            .accessibilityIdentifier(name.lowercased())
     }
 
-    private var progress: some View {
+    @ViewBuilder private var progress: some View {
+        if loadingAudio {
+            PlayerTimelineSkeleton(timeWidth: 46)
+        } else {
+            timeline
+        }
+    }
+
+    private var timeline: some View {
         let duration = snapshot.timeline?.duration ?? video?.durationSeconds.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
         let raw = timelinePreview ?? snapshot.seekTarget ?? snapshot.loadedVideo?.positionSeconds ?? 0
         let position = raw.isFinite ? max(0, duration.map { min(raw, $0) } ?? raw) : 0
-        return VStack(spacing: 4) {
+        return HStack(spacing: 8) {
+            Text(Self.clock(position)).lineLimit(1).minimumScaleFactor(0.7)
+                .frame(width: 46, alignment: .leading)
             PlaybackTimelineSlider(position: snapshot.seekTarget ?? snapshot.loadedVideo?.positionSeconds ?? 0,
                 timeline: snapshot.timeline, playbackID: snapshot.timelineID,
                 epoch: presentation.timelineEpoch, preview: { timelinePreview = $0 }, commit: seek,
@@ -318,12 +320,9 @@ struct PlayerCard: View {
                 .onChange(of: presentation.timelineEpoch) { _ in timelinePreview = nil }
                 .onChange(of: snapshot.timeline) { if $0 == nil { timelinePreview = nil } }
                 .onDisappear { timelinePreview = nil }
-            HStack {
-                Text(Self.clock(position))
-                Spacer()
-                Text(duration.map(Self.clock) ?? "--:--")
-            }.font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
-        }
+            Text(duration.map(Self.clock) ?? "--:--").lineLimit(1).minimumScaleFactor(0.7)
+                .frame(width: 46, alignment: .trailing)
+        }.font(.system(size: 10, design: .monospaced)).foregroundStyle(AppDesign.muted)
     }
 
     private static func clock(_ value: Double) -> String {
@@ -333,97 +332,65 @@ struct PlayerCard: View {
             : String(format: "%02d:%02d", seconds / 60, seconds % 60)
     }
 
-    @ViewBuilder private func artwork(_ entry: VideoSummary?) -> some View {
-        if let entry, let path = snapshot.localThumbnailPaths?[entry.id], let image = NSImage(contentsOfFile: path) {
-            Image(nsImage: image).resizable().scaledToFit()
-        } else {
-            Image(systemName: "music.note").font(.system(size: 32)).foregroundStyle(.secondary)
-        }
+    private func artwork(_ entry: VideoSummary?) -> some View {
+        LibraryArtwork(localPath: entry.flatMap { snapshot.localThumbnailPaths?[$0.id] }, symbol: "music.note")
     }
 
     private var favoritesList: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Button("Now Playing") { favorites = false }
+                PlayerNavigationButton(title: "Now Playing", symbol: "chevron.left") { favorites = false }
                 Spacer()
-                Button("Search YouTube", action: search)
-            }.buttonStyle(.bordered).tint(green)
+                PlayerNavigationButton(title: "Search YouTube", symbol: "magnifyingglass", action: search)
+            }.padding(.trailing, 16)
             if snapshot.favorites.isEmpty {
-                Text("No favorites yet").foregroundStyle(.secondary).padding(.vertical, 24)
+                Text("No favorites yet").font(.system(size: 13)).foregroundStyle(AppDesign.muted).padding(.vertical, 24)
             } else {
                 ScrollView {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 2) {
                         ForEach(snapshot.favorites, id: \.id) { entry in
-                            HStack(spacing: 8) {
+                            HStack(spacing: 4) {
                                 Button { action(.select, entry.id); favorites = false } label: {
-                                    HStack {
-                                        artwork(entry).frame(width: 40, height: 32)
-                                        VStack(alignment: .leading) {
-                                            Text(entry.title).lineLimit(1)
-                                            Text(entry.creator).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                                    HStack(spacing: 12) {
+                                        artwork(entry).frame(width: 40, height: 40)
+                                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(entry.title).font(.system(size: 12, weight: .medium)).lineLimit(1)
+                                            Text(entry.creator).font(.system(size: 10)).foregroundStyle(AppDesign.muted).lineLimit(1)
                                         }
-                                        Spacer()
-                                    }.contentShape(Rectangle())
+                                        Spacer(minLength: 0)
+                                    }.padding(8).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
                                 }.buttonStyle(.plain).disabled(snapshot.sourceNeedsUpdate)
                                 .contextMenu { Button("Remove favorite") { action(.favoriteRemove, entry.id) } }
-                                Button { action(.favoriteRemove, entry.id) } label: { Image(systemName: "star.fill") }
-                                    .buttonStyle(.plain).foregroundStyle(green).help("Remove favorite")
-                                    .accessibilityLabel("Remove \(entry.title) from favorites")
-                            }
+                                AppIconButton(title: "Remove \(entry.title) from favorites", symbol: "heart.fill") {
+                                    action(.favoriteRemove, entry.id)
+                                }.help("Remove favorite")
+                            }.background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 6))
                         }
                     }
-                }.frame(height: min(320, CGFloat(snapshot.favorites.count) * 44))
+                }.frame(height: min(320, CGFloat(snapshot.favorites.count) * 58))
             }
         }
     }
 }
 
-/// Native slider retains keyboard, pointer and accessibility behavior with custom drawing.
-private struct PillVolumeSlider: NSViewRepresentable {
-    let value: Double
-    let onChange: (Double) -> Void
+private struct PlayerNavigationButton: View {
+    let title: String
+    let symbol: String
+    let action: () -> Void
+    @State private var hovered = false
 
-    func makeCoordinator() -> Coordinator { Coordinator(onChange: onChange) }
-
-    func makeNSView(context: Context) -> NSSlider {
-        let slider = NSSlider(frame: NSRect(x: 0, y: 0, width: 18, height: 92))
-        slider.cell = PillVolumeCell()
-        slider.minValue = 0
-        slider.maxValue = 1
-        slider.isContinuous = true
-        slider.target = context.coordinator
-        slider.action = #selector(Coordinator.changed(_:))
-        slider.setAccessibilityLabel("Playback volume")
-        slider.setAccessibilityIdentifier("playback-volume")
-        return slider
-    }
-
-    func updateNSView(_ slider: NSSlider, context: Context) {
-        context.coordinator.onChange = onChange
-        slider.doubleValue = value
-        slider.setAccessibilityValueDescription("\(Int((value * 100).rounded())) percent")
-    }
-
-    @MainActor final class Coordinator: NSObject {
-        var onChange: (Double) -> Void
-        init(onChange: @escaping (Double) -> Void) { self.onChange = onChange }
-        @objc func changed(_ slider: NSSlider) { onChange(slider.doubleValue) }
-    }
-}
-
-private final class PillVolumeCell: NSSliderCell {
-    override func drawBar(inside rect: NSRect, flipped: Bool) {
-        // Match the track endpoints to the native knob's center travel.
-        let track = rect.insetBy(dx: 0, dy: knobRect(flipped: flipped).height / 2)
-        NSColor.white.withAlphaComponent(0.35).setFill()
-        NSBezierPath(roundedRect: NSRect(x: track.midX - 1, y: track.minY,
-            width: 2, height: track.height), xRadius: 1, yRadius: 1).fill()
-    }
-
-    override func drawKnob(_ knobRect: NSRect) {
-        NSColor(red: 0.77, green: 0.79, blue: 0.86, alpha: 1).setFill()
-        NSBezierPath(ovalIn: NSRect(x: knobRect.midX - 3.5, y: knobRect.midY - 3.5,
-            width: 7, height: 7)).fill()
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(AppDesign.Text.primary)
+                .padding(.horizontal, 10).padding(.vertical, 7)
+                .background(hovered ? AppDesign.Surface.hover : AppDesign.raised)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .tidalBorder(cornerRadius: 6)
+                .contentShape(Rectangle())
+        }.buttonStyle(.plain).onHover { hovered = $0 }.accessibilityLabel(title)
     }
 }
 
@@ -441,8 +408,8 @@ private final class TitleViewport: NSView {
         super.init(frame: frame)
         wantsLayer = true
         layer?.masksToBounds = true
-        label.font = .systemFont(ofSize: 13, weight: .semibold)
-        label.textColor = NSColor(red: 0.77, green: 0.79, blue: 0.86, alpha: 1)
+        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.textColor = NSColor(AppDesign.Text.primary)
         label.wantsLayer = true
         addSubview(label)
     }

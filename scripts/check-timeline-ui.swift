@@ -14,12 +14,17 @@ import SwiftUI
         snapshot.timeline = PlaybackTimeline(duration: 300, ranges: [0...300])
         snapshot.timelineID = UUID()
         let presentation = PlayerPresentation(snapshot: snapshot)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("maro-timeline-fixture-" + UUID().uuidString)
+        let controller = try MaroController(loaded: StateLoadResult(document: StateDocument(loadedVideo: snapshot.loadedVideo), preservedFile: nil, warning: nil),
+            store: StateStore(file: directory.appendingPathComponent("state.json")), engine: PlaybackEngine(),
+            search: { _ in [] }, prepare: { _, _ in throw SourceFailure.noCompatibleAudio })
+        let model = ApplicationModel(controller: controller, library: PlaylistLibrary(controller: controller))
         let window = NSWindow(contentRect: NSRect(x: 300, y: 400, width: 430, height: 200),
             styleMask: [.titled, .closable], backing: .buffered, defer: false)
         window.title = "Maro timeline — silent UI verification"
         window.isReleasedWhenClosed = false
         var commits = 0
-        let view = NSHostingView(rootView: PlayerCard(presentation: presentation,
+        let view = NSHostingView(rootView: PlayerCard(presentation: presentation, app: model,
             action: { _, _ in }, search: {}, hide: { window.orderOut(nil); presentation.timelineEpoch += 1 },
             seek: { seconds, id in
                 guard id == presentation.snapshot.timelineID else { return }

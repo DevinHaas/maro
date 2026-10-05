@@ -67,8 +67,7 @@ import AppKit
                 let library = PlaylistLibrary(controller: controller, api: api)
                 let search = SearchWindow(controller: controller, cacheDirectory: directory, playlistLibrary: library)
                 self.search = search
-                let player = PlayerWindow(controller: controller, openSearch: { [weak search] in search?.present() },
-                    addToPlaylist: { [weak search] video in search?.offerAdd(video) })
+                let player = PlayerWindow(application: search.application, openSearch: { [weak search] in search?.present() })
                 self.player = player
                 controller.onChange = { [weak search, weak player] in search?.render(); player?.render() }
                 await controller.search("piano")
