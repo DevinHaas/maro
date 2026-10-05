@@ -1,0 +1,9 @@
+{
+  "name": "maro-workflows",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.9",
+  "dependencies": {
+    "@devin/laufwerk-workflows": "/Users/devinhasler/projects/laufwerk-workflows"
+  }
+}
