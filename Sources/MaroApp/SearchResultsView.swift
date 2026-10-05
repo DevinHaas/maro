@@ -1,6 +1,16 @@
 import MaroCore
 import SwiftUI
 
+enum SearchTrackColumns {
+    static let gap: CGFloat = 16
+    static let inset: CGFloat = 12
+    static let play: CGFloat = 38
+    static let artwork: CGFloat = 52
+    static let duration: CGFloat = 64
+    static let favorite: CGFloat = 38
+    static let actions: CGFloat = 30
+}
+
 struct SearchResultsView: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject private var player: PlayerPresentation
@@ -20,11 +30,19 @@ struct SearchResultsView: View {
                 if !app.searchState.isSearching && app.searchState.error == nil && app.searchState.results.isEmpty {
                     Text(app.searchState.query.isEmpty ? "Search YouTube to find your next video." : "No videos found. Try another search.").foregroundStyle(AppDesign.muted)
                 }
-                HStack {
-                    Text("TITLE"); Spacer(); Text("DURATION").padding(.trailing, 106)
-                }.font(.system(size: 10, weight: .semibold)).foregroundStyle(AppDesign.muted).padding(.horizontal, 12)
+                HStack(spacing: SearchTrackColumns.gap) {
+                    Color.clear.frame(width: SearchTrackColumns.play)
+                    HStack(spacing: SearchTrackColumns.gap) {
+                        Color.clear.frame(width: SearchTrackColumns.artwork)
+                        Text("TITLE").frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    Text("DURATION").frame(width: SearchTrackColumns.duration, alignment: .trailing)
+                    Color.clear.frame(width: SearchTrackColumns.favorite)
+                    Color.clear.frame(width: SearchTrackColumns.actions)
+                }.font(.system(size: 10, weight: .semibold)).foregroundStyle(AppDesign.muted)
+                    .padding(.horizontal, SearchTrackColumns.inset)
                 Divider().overlay(AppDesign.Border.decorative).accessibilityHidden(true)
-                LazyVStack(spacing: 4) {
+                LazyVStack(spacing: 6) {
                     ForEach(app.searchState.results, id: \.id) { video in
                         SearchVideoRow(app: app, player: player, video: video)
                     }
@@ -46,6 +64,7 @@ struct SearchResultsView: View {
                     }).accessibilityHidden(true)
             }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
         }
+        .subtleScrollbars()
         .coordinateSpace(name: "searchScroll")
         .onPreferenceChange(SearchBottomPreference.self) { y in
                 let visible = y >= 0 && y <= viewport.size.height
@@ -92,7 +111,7 @@ struct FavoritesView: View {
                 }
                 if let error = app.actionError { Text(error).foregroundStyle(AppDesign.Status.error) }
             }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
-        }
+        }.subtleScrollbars()
     }
 }
 
@@ -109,13 +128,13 @@ struct SearchVideoRow: View {
         return seconds >= 3600 ? String(format: "%d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60) : String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: SearchTrackColumns.gap) {
             AppIconButton(title: "Play \(video.title)", symbol: "play.fill", enabled: !player.snapshot.sourceNeedsUpdate,
                           prominent: hovered) { app.play(video) }.opacity(hovered || current || player.snapshot.sourceNeedsUpdate ? 1 : 0.6)
             Button { app.play(video) } label: {
-                HStack(spacing: 12) {
+                HStack(spacing: SearchTrackColumns.gap) {
                     LibraryArtwork(url: video.thumbnailURL, localPath: player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note")
-                        .frame(width: 52, height: 52).clipShape(RoundedRectangle(cornerRadius: 6))
+                        .frame(width: SearchTrackColumns.artwork, height: SearchTrackColumns.artwork).clipShape(RoundedRectangle(cornerRadius: 6))
                         .fixedSize()
                     VStack(alignment: .leading, spacing: 6) {
                         Text(video.title).font(.system(size: 14, weight: .medium)).foregroundStyle(current ? AppDesign.green : AppDesign.Text.primary).lineLimit(1)
@@ -127,16 +146,17 @@ struct SearchVideoRow: View {
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
                 .disabled(player.snapshot.sourceNeedsUpdate).accessibilityLabel("Play \(video.title) by \(video.creator)")
-            Text(duration).font(.system(size: 12)).monospacedDigit().foregroundStyle(AppDesign.muted).frame(width: 60, alignment: .trailing)
+            Text(duration).font(.system(size: 12)).monospacedDigit().foregroundStyle(AppDesign.muted)
+                .lineLimit(1).minimumScaleFactor(0.7).frame(width: SearchTrackColumns.duration, alignment: .trailing)
             AppIconButton(title: saved ? "Remove \(video.title) from Favorites" : "Save \(video.title) to Favorites", symbol: saved ? "heart.fill" : "heart") { app.toggleFavorite(video) }
             Menu {
                 Button("Play") { app.play(video) }.disabled(player.snapshot.sourceNeedsUpdate)
                 Button(saved ? "Remove from Favorites" : "Save to Favorites") { app.toggleFavorite(video) }
                 Button("Add to playlist…") { app.offerAdd(video) }
-            } label: { Text("⋮").font(.system(size: 22, weight: .semibold)).frame(width: 30, height: 38) }
+            } label: { Text("⋮").font(.system(size: 22, weight: .semibold)).frame(width: SearchTrackColumns.actions, height: 38) }
                 .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                 .help("Actions for \(video.title)").accessibilityLabel("Actions for \(video.title)")
-        }.padding(.horizontal, 8).padding(.vertical, 6).frame(maxWidth: .infinity)
+        }.padding(.horizontal, SearchTrackColumns.inset).padding(.vertical, 10).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.Surface.hover : current ? AppDesign.Surface.selected : .clear))
             .onHover { hovered = $0 }
     }

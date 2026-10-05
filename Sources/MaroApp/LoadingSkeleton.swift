@@ -101,7 +101,7 @@ struct TrackListSkeleton: View {
 
     var body: some View {
         LoadingSkeleton(label: label, identifier: identifier) {
-            VStack(spacing: layout == .playlist ? 2 : 4) {
+            VStack(spacing: layout == .playlist ? 2 : 6) {
                 ForEach(0..<count, id: \.self) { index in row(index: index) }
             }
         }
@@ -119,16 +119,18 @@ struct TrackListSkeleton: View {
                 Color.clear.frame(width: PlaylistTrackColumns.handle)
             }.padding(.horizontal, PlaylistTrackColumns.inset).padding(.vertical, 9)
         } else {
-            HStack(spacing: 12) {
-                if layout == .search { Color.clear.frame(width: 38) }
-                SkeletonBlock(cornerRadius: 6).frame(width: layout == .preview ? 48 : 52, height: layout == .preview ? 48 : 52)
+            HStack(spacing: SearchTrackColumns.gap) {
+                if layout == .search { Color.clear.frame(width: SearchTrackColumns.play) }
+                SkeletonBlock(cornerRadius: 6).frame(width: layout == .preview ? 48 : SearchTrackColumns.artwork, height: layout == .preview ? 48 : SearchTrackColumns.artwork)
                 textLines(index: index)
                 if layout == .search {
-                    SkeletonBlock().frame(width: 40, height: 8).frame(width: 60, alignment: .trailing)
-                    Color.clear.frame(width: 38)
-                    Color.clear.frame(width: 30)
+                    SkeletonBlock().frame(width: 40, height: 8).frame(width: SearchTrackColumns.duration, alignment: .trailing)
+                    Color.clear.frame(width: SearchTrackColumns.favorite)
+                    Color.clear.frame(width: SearchTrackColumns.actions)
+                } else {
+                    Color.clear.frame(width: 98)
                 }
-            }.padding(.horizontal, 8).padding(.vertical, layout == .preview ? 8 : 6)
+            }.padding(.horizontal, SearchTrackColumns.inset).padding(.vertical, 10)
         }
     }
 

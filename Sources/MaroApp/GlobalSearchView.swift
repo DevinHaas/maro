@@ -21,7 +21,7 @@ struct GlobalSearchView: View {
     }
     private var preview: some View {
         ScrollView {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Label("Navigate", systemImage: "arrow.up.arrow.down")
                 Spacer()
@@ -44,22 +44,25 @@ struct GlobalSearchView: View {
                 Text(app.globalQuery.isEmpty ? "PICK UP WHERE YOU LEFT OFF" : "VIDEOS")
                     .font(.system(size: 10, weight: .bold)).foregroundStyle(AppDesign.muted).padding(.horizontal, 10).padding(.top, 8)
                 ForEach(Array(app.previewVideos.enumerated()), id: \.element.id) { index, video in
-                    HStack(spacing: 2) {
+                    HStack(spacing: 4) {
                         Button { app.play(video); app.closeSearch() } label: {
-                            HStack(spacing: 12) {
-                                LibraryArtwork(url: video.thumbnailURL, localPath: app.player.snapshot.localThumbnailPaths?[video.id], symbol: "play.fill").frame(width: 48, height: 48)
+                            HStack(spacing: 16) {
+                                LibraryArtwork(url: video.thumbnailURL, localPath: app.player.snapshot.localThumbnailPaths?[video.id], symbol: "play.fill")
+                                    .frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 6)).fixedSize()
                                 VStack(alignment: .leading, spacing: 5) {
                                     Text(video.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
                                     Text(video.creator).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
-                                }
+                                }.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                 Spacer(minLength: 0)
                                 Image(systemName: "play.fill").foregroundStyle(AppDesign.green)
-                            }.padding(8).contentShape(Rectangle())
-                        }.buttonStyle(.plain).focusable().focused($focusedRow, equals: app.previewQueries.count + index)
+                            }.padding(.horizontal, 12).padding(.vertical, 10).contentShape(Rectangle())
+                        }.buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
+                            .focusable().focused($focusedRow, equals: app.previewQueries.count + index)
                             .accessibilityLabel("Play \(video.title) by \(video.creator)")
                         AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }
                         AppIconButton(title: "Add \(video.title) to playlist", symbol: "plus") { app.offerAdd(video) }
-                    }.background(focusedRow == app.previewQueries.count + index ? AppDesign.Surface.selected : Color.clear)
+                    }.padding(.trailing, 8)
+                        .background(focusedRow == app.previewQueries.count + index ? AppDesign.Surface.selected : Color.clear)
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                         .tidalBorder(cornerRadius: 5, focused: focusedRow == app.previewQueries.count + index,
                                      visible: focusedRow == app.previewQueries.count + index)
@@ -81,7 +84,8 @@ struct GlobalSearchView: View {
                 }.buttonStyle(.plain).foregroundStyle(AppDesign.muted)
             }
         }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
-        }.frame(height: min(CGFloat(app.previewQueries.count * 45 + app.previewVideos.count * 64 + (app.previewLoading ? 192 : 0) + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
+        }.frame(height: min(CGFloat(app.previewQueries.count * 47 + app.previewVideos.count * 74 + (app.previewLoading ? 222 : 0) + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
+            .subtleScrollbars()
             .background(AppDesign.raised)
             .clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
             .shadow(color: .black.opacity(0.7), radius: 18, y: 8)

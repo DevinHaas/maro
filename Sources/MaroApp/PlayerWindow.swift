@@ -368,7 +368,7 @@ struct PlayerCard: View {
                             }.background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 6))
                         }
                     }
-                }.frame(height: min(320, CGFloat(snapshot.favorites.count) * 58))
+                }.frame(height: min(320, CGFloat(snapshot.favorites.count) * 58)).subtleScrollbars()
             }
         }
     }

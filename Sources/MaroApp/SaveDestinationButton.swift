@@ -140,7 +140,7 @@ struct SaveDestinationButton: View {
             playlistContent
             if !outcomes.isEmpty {
                 ScrollView { VStack(alignment: .leading, spacing: 6) { ForEach(outcomes, id: \.playlistID) { resultView($0) } } }
-                    .frame(maxHeight: 100)
+                    .frame(maxHeight: 100).subtleScrollbars()
             }
             if library.canRetry {
                 Button("Refresh YouTube library") { library.retryLast() }.disabled(library.busy || saving).font(.system(size: 11))

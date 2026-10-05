@@ -1,11 +1,12 @@
 import AppKit
 import SwiftUI
 
-/// Styles the native scroll views inside the shell without taking space from their content.
+/// Styles native scroll views without taking space from their content.
 /// Keeping native scrollers preserves wheel, keyboard, accessibility, and thumb dragging.
 struct SubtleScrollbars: NSViewRepresentable {
-    let sidebarWidth: CGFloat
-    let sidebarHovered: Bool
+    var sidebarWidth: CGFloat = 0
+    var sidebarHovered = false
+    var sidebarOnly = false
 
     func makeNSView(context: Context) -> ScrollbarStyleAnchor {
         ScrollbarStyleAnchor()
@@ -14,14 +15,25 @@ struct SubtleScrollbars: NSViewRepresentable {
     func updateNSView(_ view: ScrollbarStyleAnchor, context: Context) {
         view.sidebarWidth = sidebarWidth
         view.sidebarHovered = sidebarHovered
+        view.sidebarOnly = sidebarOnly
         view.scheduleUpdate()
+    }
+}
+
+extension View {
+    /// Attach to scrolling surfaces created after the shell, including separate popovers.
+    func subtleScrollbars(sidebarHovered: Bool? = nil) -> some View {
+        background { SubtleScrollbars(sidebarHovered: sidebarHovered ?? false, sidebarOnly: sidebarHovered != nil) }
     }
 }
 
 final class ScrollbarStyleAnchor: NSView {
     var sidebarWidth: CGFloat = 0
     var sidebarHovered = false
+    var sidebarOnly = false
     private var updateScheduled = false
+    private let observedScrollViews = NSHashTable<NSScrollView>.weakObjects()
+    deinit { NotificationCenter.default.removeObserver(self) }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
 
@@ -56,12 +68,13 @@ final class ScrollbarStyleAnchor: NSView {
         if let scrollView = view as? NSScrollView {
             let frame = scrollView.convert(scrollView.bounds, to: root)
             guard shellFrame.contains(NSPoint(x: frame.midX, y: frame.midY)) else { return }
+            observeLayout(of: scrollView)
             // Shell content starts after its 8-point outer inset. Overlay scrollers never
             // reserve a gutter, so the compact artwork remains centered in the full rail.
-            let isSidebar = frame.midX < shellFrame.minX + 8 + sidebarWidth
-            let showScroller = !isSidebar || sidebarHovered
+            let isSidebar = sidebarOnly || (sidebarWidth > 0 && frame.midX < shellFrame.minX + 8 + sidebarWidth)
             if scrollView.scrollerStyle != .overlay { scrollView.scrollerStyle = .overlay }
-            if scrollView.hasVerticalScroller != showScroller { scrollView.hasVerticalScroller = showScroller }
+            // Preserve SwiftUI's selected axes and intentionally hidden indicators.
+            if isSidebar, scrollView.hasVerticalScroller != sidebarHovered { scrollView.hasVerticalScroller = sidebarHovered }
             if scrollView.autohidesScrollers == isSidebar { scrollView.autohidesScrollers = !isSidebar }
             if scrollView.hasVerticalScroller, !(scrollView.verticalScroller is SubtleScroller) {
                 let scroller = SubtleScroller(frame: scrollView.verticalScroller?.frame ?? .zero)
@@ -89,6 +102,20 @@ final class ScrollbarStyleAnchor: NSView {
         }
         for child in view.subviews { styleDescendants(of: child, in: shellFrame, root: root) }
     }
+
+    private func observeLayout(of scrollView: NSScrollView) {
+        guard !observedScrollViews.contains(scrollView) else { return }
+        observedScrollViews.add(scrollView)
+        // SwiftUI can retile native scrollers as filtered or paged content changes.
+        let layoutViews: [NSView?] = [scrollView, scrollView.contentView, scrollView.documentView]
+        for view in layoutViews.compactMap({ $0 }) {
+            view.postsFrameChangedNotifications = true
+            NotificationCenter.default.addObserver(self, selector: #selector(scrollLayoutChanged),
+                name: NSView.frameDidChangeNotification, object: view)
+        }
+    }
+
+    @objc private func scrollLayoutChanged(_ notification: Notification) { scheduleUpdate() }
 }
 
 private final class SubtleScroller: NSScroller {

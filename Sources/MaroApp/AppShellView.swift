@@ -15,11 +15,11 @@ struct AppShellView: View {
                 topBar.frame(height: 64).zIndex(10)
                 HStack(spacing: 8) {
                     if app.libraryCollapsed {
-                        CompactLibraryRail(app: app, library: library).frame(width: 72)
+                        CompactLibraryRail(app: app, library: library, sidebarHovered: libraryHovered).frame(width: 72)
                             .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                             .onHover { libraryHovered = $0 }
                     } else {
-                        LibrarySidebar(app: app, library: library).frame(width: geometry.size.width < 1200 ? 280 : 320)
+                        LibrarySidebar(app: app, library: library, sidebarHovered: libraryHovered).frame(width: geometry.size.width < 1200 ? 280 : 320)
                             .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                             .onHover { libraryHovered = $0 }
                     }
@@ -102,6 +102,7 @@ struct AppShellView: View {
 struct CompactLibraryRail: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject var library: PlaylistLibrary
+    var sidebarHovered = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -123,7 +124,7 @@ struct CompactLibraryRail: View {
                     }
                 }.frame(maxWidth: .infinity, alignment: .center)
                     .padding(.horizontal, 6).padding(.vertical, 4)
-            }
+            }.subtleScrollbars(sidebarHovered: sidebarHovered)
         }.padding(.top, 10).padding(.bottom, 6)
             .accessibilityElement(children: .contain).accessibilityLabel("Your library")
             .accessibilityIdentifier("compact-library-rail")
@@ -158,6 +159,7 @@ private struct CompactLibraryItem: View {
 struct LibrarySidebar: View {
     @ObservedObject var app: ApplicationModel
     @ObservedObject var library: PlaylistLibrary
+    var sidebarHovered = false
     @FocusState private var filterFocused: Bool
     @FocusState private var collapseFocused: Bool
     @State private var isHovered = false
@@ -197,7 +199,7 @@ struct LibrarySidebar: View {
                         Text("Your playlists will appear here. Create one to get started.").font(.system(size: 12)).foregroundStyle(AppDesign.muted).padding(16)
                     }
                 }.padding(.horizontal, 6)
-            }
+            }.subtleScrollbars(sidebarHovered: sidebarHovered)
             VStack(alignment: .leading, spacing: 8) {
                 if !library.connected {
                     Text("YouTube is not connected.").font(.system(size: 13, weight: .semibold))

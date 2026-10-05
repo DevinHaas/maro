@@ -32,6 +32,6 @@ struct PlaylistDestinationList: View {
                         .accessibilityLabel("\(playlist.title), \(savedIDs.contains(playlist.id) ? "already saved" : "select destination")")
                 }
             }
-        }.accessibilityLabel("Available playlists")
+        }.subtleScrollbars().accessibilityLabel("Available playlists")
     }
 }
