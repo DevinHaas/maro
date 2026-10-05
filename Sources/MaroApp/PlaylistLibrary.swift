@@ -14,12 +14,20 @@ enum PlaylistSaveResult: Equatable {
     case savedRefreshUnavailable(String)
 }
 
+struct PlaylistSaveOutcome: Equatable {
+    let playlistID: String
+    let result: PlaylistSaveResult
+}
+
 @MainActor
 final class PlaylistLibrary: ObservableObject {
     @Published var playlists: [YouTubePlaylist] = []
     @Published var items: [YouTubePlaylistItem] = []
     @Published var selected: YouTubePlaylist?
     @Published var busy = false
+    @Published private var loadingTracksPlaylistID: String?
+    private var loadingTracksRevision = UUID()
+    var loadingTracks: Bool { busy && loadingTracksPlaylistID != nil && loadingTracksPlaylistID == selected?.id }
     @Published var connected = false
     @Published var configured = false
     @Published var status = "Connect YouTube to browse your own playlists."
@@ -50,6 +58,9 @@ final class PlaylistLibrary: ObservableObject {
     }
     private var acknowledgedOrders: [String: AcknowledgedOrder] = [:]
     private var unconfirmedPlaylists: Set<String> = []
+    // A confirmed POST is stronger evidence than an immediately lagging playlist read.
+    @Published private var confirmedSavedVideos: [String: Set<String>] = [:]
+    private var confirmedSaveProtection: [String: [String: Date]] = [:]
     private var rejectedMove: (occurrenceID: String, playlistID: String, position: Int, signature: [String])?
     var canReorder: Bool { connected && !busy && selected != nil && unconfirmedPlaylists.isEmpty }
     func canSaveVideo(to playlistID: String) -> Bool {
@@ -57,6 +68,12 @@ final class PlaylistLibrary: ObservableObject {
     }
     @Published private(set) var saveScopeID = UUID()
     var saveAccountScope: String { saveScopeID.uuidString }
+
+    func containsSavedVideo(_ videoID: String, in playlistID: String) -> Bool {
+        confirmedSavedVideos[playlistID, default: []].contains(videoID)
+            || loadedItemsByPlaylist[playlistID, default: []].contains { $0.resourceVideoID == videoID }
+            || (selected?.id == playlistID && items.contains { $0.resourceVideoID == videoID })
+    }
 
     init(controller: MaroController, api: YouTubePlaylists? = nil, now: @escaping () -> Date = Date.init) {
         self.controller = controller
@@ -168,9 +185,11 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func confirmDelete() {
-        guard let selected else { return }
+        guard canReorder, let selected else { return }
+        let scope = saveAccountScope
         let alert = PlaylistDialogs.deletion(title: selected.title)
         guard alert.runModal() == .alertSecondButtonReturn else { return }
+        guard scope == saveAccountScope, canReorder, self.selected?.id == selected.id else { return }
         delete(selected)
     }
 
@@ -185,7 +204,10 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     func rename() {
-        guard let selected, let name = askName(title: "Rename playlist", value: selected.title) else { return }
+        guard canReorder, let selected else { return }
+        let scope = saveAccountScope
+        guard let name = askName(title: "Rename playlist", value: selected.title),
+              scope == saveAccountScope, canReorder, self.selected?.id == selected.id else { return }
         rename(playlistID: selected.id, title: name)
     }
 
@@ -234,22 +256,43 @@ final class PlaylistLibrary: ObservableObject {
     /// Saves one explicit video occurrence to one currently listed account playlist.
     /// The captured account revision prevents stale popovers from writing after a switch.
     func saveVideo(_ video: VideoSummary, to playlistID: String, accountScope: String) async -> PlaylistSaveResult {
+        guard !busy else { return .busy }
+        busy = true
+        defer { busy = false }
+        return await saveVideoWhileReserved(video, to: playlistID, accountScope: accountScope)
+    }
+
+    /// Reserve the shared library for the complete batch; never race another edit between destinations.
+    /// Confirmed failures can be retried independently; ambiguous writes block all subsequent edits.
+    func saveVideo(_ video: VideoSummary, toPlaylists playlistIDs: [String], accountScope: String) async -> [PlaylistSaveOutcome] {
+        var unique = Set<String>()
+        let destinations = playlistIDs.filter { unique.insert($0).inserted }
+        guard !busy else { return destinations.map { PlaylistSaveOutcome(playlistID: $0, result: .busy) } }
+        busy = true
+        defer { busy = false }
+        var outcomes: [PlaylistSaveOutcome] = []
+        for playlistID in destinations {
+            let result = await saveVideoWhileReserved(video, to: playlistID, accountScope: accountScope)
+            outcomes.append(PlaylistSaveOutcome(playlistID: playlistID, result: result))
+        }
+        return outcomes
+    }
+
+    private func saveVideoWhileReserved(_ video: VideoSummary, to playlistID: String, accountScope: String) async -> PlaylistSaveResult {
         guard accountScope == saveAccountScope else { return .unavailable("This YouTube account changed. Reopen the save menu.") }
         guard connected, let api else { return .unavailable("Connect YouTube to save to your playlists.") }
         guard playlists.contains(where: { $0.id == playlistID }) else {
             return .unavailable("This playlist is no longer available. Refresh the list and reopen the save menu.")
         }
-        guard !busy else { return .busy }
         guard unconfirmedPlaylists.isEmpty else {
             return .unavailable("A previous playlist edit has an unconfirmed result. Refresh YouTube before another edit.")
         }
         do { try video.validate() }
         catch { return .unavailable(error.localizedDescription) }
+        guard !containsSavedVideo(video.id, in: playlistID) else { return .alreadyInPlaylist }
 
         let revision = accountRevision
-        busy = true
         canRetry = false
-        defer { busy = false }
         do {
             try await api.add(video, to: playlistID)
         } catch {
@@ -257,6 +300,8 @@ final class PlaylistLibrary: ObservableObject {
                 return .unavailable("The YouTube account changed while saving. Reopen the save menu.")
             }
             if error.localizedDescription.localizedCaseInsensitiveContains("already in this playlist") {
+                confirmedSavedVideos[playlistID, default: []].insert(video.id)
+                confirmedSaveProtection[playlistID, default: [:]][video.id] = now().addingTimeInterval(60)
                 return .alreadyInPlaylist
             }
             if let writeError = error as? YouTubeWriteError, writeError.outcome == .ambiguous {
@@ -272,6 +317,8 @@ final class PlaylistLibrary: ObservableObject {
         guard revision == accountRevision, connected else {
             return .unavailable("The YouTube account changed while saving. Reopen the save menu.")
         }
+        confirmedSavedVideos[playlistID, default: []].insert(video.id)
+        confirmedSaveProtection[playlistID, default: [:]][video.id] = now().addingTimeInterval(60)
 
         // The POST was confirmed. Keep a useful local count even if the subsequent refresh fails.
         if let index = playlists.firstIndex(where: { $0.id == playlistID }) {
@@ -372,6 +419,10 @@ final class PlaylistLibrary: ObservableObject {
     func remove(_ item: YouTubePlaylistItem) {
         guard let api, let playlistID = selected?.id else { return }
         mutate({ try await api.remove(item) }, reconcile: {
+            if let videoID = item.resourceVideoID {
+                self.confirmedSavedVideos[playlistID]?.remove(videoID)
+                self.confirmedSaveProtection[playlistID]?.removeValue(forKey: videoID)
+            }
             if var receipt = self.acknowledgedOrders[playlistID], receipt.items.contains(where: { $0.id == item.id }) {
                 receipt.laggingSignatures.append(receipt.items.map(\.id))
                 receipt.items.removeAll { $0.id == item.id }
@@ -412,12 +463,17 @@ final class PlaylistLibrary: ObservableObject {
 
     private func reload() async throws {
         guard let api else { return }
+        let loadRevision = UUID()
+        loadingTracksRevision = loadRevision
+        loadingTracksPlaylistID = selected?.id
+        defer { if loadingTracksRevision == loadRevision { loadingTracksPlaylistID = nil } }
         let revision = accountRevision
         let fresh = try await api.playlists()
         // Opening another playlist while a read is in flight must not restore the old page.
         while true {
             let requestedID = selected?.id
             let freshSelected = fresh.first { $0.id == requestedID }
+            if loadingTracksRevision == loadRevision { loadingTracksPlaylistID = freshSelected?.id }
             var freshItems: [YouTubePlaylistItem] = []
             if let freshSelected { freshItems = try await api.items(in: freshSelected.id) }
             var recovered: [String: [YouTubePlaylistItem]] = [:]
@@ -497,14 +553,22 @@ final class PlaylistLibrary: ObservableObject {
     }
 
     private func rememberLoaded(_ items: [YouTubePlaylistItem], playlistID: String) {
+        // Accept refreshed membership after the immediate eventual-consistency window.
+        let authoritativeIDs = Set(items.compactMap(\.resourceVideoID))
+        confirmedSavedVideos[playlistID] = confirmedSavedVideos[playlistID, default: []].filter {
+            authoritativeIDs.contains($0) || (confirmedSaveProtection[playlistID]?[$0] ?? .distantPast) > now()
+        }
+        confirmedSaveProtection[playlistID] = confirmedSaveProtection[playlistID, default: [:]].filter { $0.value > now() }
         loadedPlaylistOrder.removeAll { $0 == playlistID }; loadedPlaylistOrder.append(playlistID)
         loadedItemsByPlaylist[playlistID] = Array(items.prefix(50))
         while loadedPlaylistOrder.count > 12 { loadedItemsByPlaylist.removeValue(forKey: loadedPlaylistOrder.removeFirst()) }
     }
 
     private func clearLoadedEvidence() {
+        loadingTracksRevision = UUID(); loadingTracksPlaylistID = nil
         recommendationScope = UUID().uuidString
-        loadedItemsByPlaylist = [:]; loadedPlaylistOrder = []; actionContext = nil
+        loadedItemsByPlaylist = [:]; loadedPlaylistOrder = []; confirmedSavedVideos = [:]; actionContext = nil
+        confirmedSaveProtection = [:]
         invalidateDrag(); acknowledgedOrders = [:]; unconfirmedPlaylists = []; rejectedMove = nil; reorderState = .idle
     }
 
@@ -589,10 +653,10 @@ final class PlaylistLibrary: ObservableObject {
     static func deletion(title: String) -> NSAlert {
         let alert = styledAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Delete “\(title)”?"
-        alert.informativeText = "This permanently deletes the playlist from YouTube. The videos themselves are not deleted."
+        alert.messageText = "Do you really want to remove the playlist?"
+        alert.informativeText = "“\(title)” will be permanently deleted from YouTube. The videos themselves are not deleted."
         alert.addButton(withTitle: "Cancel")
-        alert.addButton(withTitle: "Delete playlist")
+        alert.addButton(withTitle: "Remove playlist")
         // Return must never approve destruction by default.
         alert.buttons[0].keyEquivalent = "\r"
         alert.buttons[1].keyEquivalent = ""

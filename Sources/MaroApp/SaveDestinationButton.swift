@@ -8,73 +8,74 @@ struct SaveDestinationButton: View {
     let video: VideoSummary
     var sourcePlaylistID: String? = nil
     var rowHovered = false
+    var diameter: CGFloat = 34
+    var iconOnly = false
     @State private var presented = false
     @State private var hovered = false
     @State private var saving = false
-    @State private var savingDestinationID: String?
-    @State private var result: PlaylistSaveResult?
+    @State private var selectedIDs: Set<String> = []
+    @State private var query = ""
+    @State private var outcomes: [PlaylistSaveOutcome] = []
+    @State private var destinationTitles: [String: String] = [:]
     @State private var favoriteResult: String?
-    @State private var resultDestinationTitle: String?
     @State private var invocationVideoID: String?
     @State private var invocationScope: String?
     @State private var suppressFocusRestore = false
     @FocusState private var buttonFocused: Bool
 
-    init(app: ApplicationModel, video: VideoSummary, sourcePlaylistID: String? = nil, rowHovered: Bool = false) {
-        self.app = app
-        self.video = video
-        self.sourcePlaylistID = sourcePlaylistID
-        self.rowHovered = rowHovered
-        library = app.library
+    init(app: ApplicationModel, video: VideoSummary, sourcePlaylistID: String? = nil, rowHovered: Bool = false, diameter: CGFloat = 34, iconOnly: Bool = false) {
+        self.app = app; self.video = video; self.sourcePlaylistID = sourcePlaylistID
+        self.rowHovered = rowHovered; self.diameter = diameter; self.iconOnly = iconOnly; library = app.library
     }
 
     private var isFavorite: Bool { app.player.snapshot.favorites.contains { $0.id == video.id } }
     private var canAddFavorite: Bool { isFavorite || app.player.snapshot.favorites.count < 20 }
     private var visible: Bool { rowHovered || hovered || buttonFocused || presented }
     private var destinations: [YouTubePlaylist] {
-        library.playlists.filter { $0.id != sourcePlaylistID }
+        library.playlists.filter { $0.id != sourcePlaylistID }.sorted {
+            let left = isSaved(in: $0.id), right = isSaved(in: $1.id)
+            if left != right { return left }
+            return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+        }
+    }
+    private var filteredDestinations: [YouTubePlaylist] {
+        let term = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return destinations.filter { term.isEmpty || $0.title.localizedStandardContains(term) }
+    }
+    private var pendingIDs: [String] {
+        destinations.filter { selectedIDs.contains($0.id) && !isSaved(in: $0.id) }.map(\.id)
     }
 
     var body: some View {
-        Button {
-            invocationVideoID = video.id
-            invocationScope = library.saveAccountScope
-            if !saving { result = nil; resultDestinationTitle = nil }
-            favoriteResult = nil
-            presented = true
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(buttonFocused ? AppDesign.Text.primary : AppDesign.green)
-                .frame(width: 34, height: 34)
-                .background(visible ? AppDesign.Surface.hover : Color.clear, in: Circle())
-                .overlay(Circle().strokeBorder(buttonFocused ? AppDesign.Border.focus : Color.clear, lineWidth: 1))
-                .contentShape(Circle())
+        Group {
+            if iconOnly {
+                AppIconButton(title: "Save \(video.title)", symbol: "plus", action: presentPicker)
+            } else {
+                Button(action: presentPicker) {
+                    Image(systemName: "plus")
+                        .font(.system(size: diameter < 34 ? 12 : 14, weight: .semibold))
+                        .foregroundStyle(buttonFocused ? AppDesign.Text.primary : AppDesign.Text.secondary)
+                        .frame(width: diameter, height: diameter)
+                        .background(visible ? AppDesign.Surface.panel : Color.clear, in: Circle())
+                        .overlay(Circle().strokeBorder(buttonFocused ? AppDesign.Border.focus : AppDesign.Border.decorative, lineWidth: 1))
+                        .contentShape(Circle())
+                }.buttonStyle(.plain)
+            }
         }
-        .buttonStyle(.plain)
         .focused($buttonFocused)
-        .opacity(visible ? 1 : 0)
-        .accessibilityHidden(false)
-        .accessibilityLabel("Save \(video.title)")
-        .accessibilityHint("Choose Favorites or one of your YouTube playlists")
+        .opacity(visible ? 1 : 0).accessibilityHidden(false)
+        .help("Save \(video.title)").accessibilityLabel("Save \(video.title)")
+        .accessibilityHint("Choose Favorites or select multiple YouTube playlists")
         .onHover { hovered = $0 }
         .popover(isPresented: $presented, arrowEdge: .bottom) {
-            destinationPopover
-                .frame(width: 310)
-                .background(AppDesign.Surface.raised)
-                .preferredColorScheme(.dark)
-                .tint(AppDesign.green)
-                .onExitCommand {
-                    presented = false
-                }
+            destinationPopover.frame(width: 330).background(AppDesign.Surface.raised)
+                .preferredColorScheme(.dark).tint(AppDesign.green)
+                .onExitCommand { presented = false }
         }
         .onChange(of: presented) { open in
             if !open {
-                if suppressFocusRestore {
-                    suppressFocusRestore = false
-                } else {
-                    DispatchQueue.main.async { buttonFocused = true }
-                }
+                if suppressFocusRestore { suppressFocusRestore = false }
+                else { DispatchQueue.main.async { buttonFocused = true } }
             }
         }
         .onChange(of: video.id) { _ in invalidatePopover() }
@@ -83,18 +84,24 @@ struct SaveDestinationButton: View {
         .onChange(of: library.saveScopeID) { _ in invalidatePopover() }
     }
 
+    private func presentPicker() {
+        invocationVideoID = video.id; invocationScope = library.saveAccountScope
+        if !saving { outcomes = []; selectedIDs = []; destinationTitles = [:] }
+        query = ""; favoriteResult = nil; presented = true
+    }
+
     private var destinationPopover: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 LibraryArtwork(url: video.thumbnailURL, localPath: app.player.snapshot.localThumbnailPaths?[video.id], symbol: "music.note")
-                    .frame(width: 38, height: 38)
+                    .frame(width: 38, height: 38).clipShape(RoundedRectangle(cornerRadius: 5))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Save track").font(.system(size: 14, weight: .bold))
+                    Text("Add to playlists").font(.system(size: 14, weight: .bold))
                     Text(video.title).font(.system(size: 11)).foregroundStyle(AppDesign.muted).lineLimit(1)
                 }
                 Spacer(minLength: 0)
                 Button { presented = false } label: { Image(systemName: "xmark").font(.system(size: 11, weight: .semibold)) }
-                    .buttonStyle(.plain).foregroundStyle(AppDesign.muted).accessibilityLabel("Close save menu")
+                    .buttonStyle(.plain).foregroundStyle(AppDesign.muted).help("Close save menu").accessibilityLabel("Close save menu")
             }
 
             Button {
@@ -110,28 +117,46 @@ struct SaveDestinationButton: View {
                     if isFavorite { Image(systemName: "checkmark").foregroundStyle(AppDesign.green) }
                 }.contentShape(Rectangle()).padding(.vertical, 8).padding(.horizontal, 9)
                     .background(AppDesign.Surface.panel, in: RoundedRectangle(cornerRadius: 5))
-            }
-            .buttonStyle(.plain)
-            .disabled(!canAddFavorite)
-            .accessibilityHint(!canAddFavorite ? "Favorites are full. Remove one before adding another." : "")
-            if !canAddFavorite {
-                Text("Favorites are full (20 of 20). Remove one before adding another.")
-                    .font(.system(size: 10)).foregroundStyle(AppDesign.Status.warning)
-            }
-            if let favoriteResult { statusRow(favoriteResult, symbol: "checkmark.circle.fill", color: AppDesign.green) }
+            }.buttonStyle(.plain).disabled(!canAddFavorite)
+                .accessibilityHint(!canAddFavorite ? "Favorites are full. Remove one before adding another." : "")
+            if !canAddFavorite { statusRow("Favorites are full (20 of 20). Remove one before adding another.", symbol: "heart", color: AppDesign.Status.warning) }
+            if let favoriteResult { statusRow(favoriteResult, symbol: "heart", color: AppDesign.green) }
 
             Divider().overlay(AppDesign.Border.decorative)
+            if library.connected {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(AppDesign.muted)
+                    TextField("Find a playlist", text: $query).textFieldStyle(.plain).accessibilityLabel("Find a playlist")
+                }.font(.system(size: 12)).padding(9)
+                    .background(AppDesign.Surface.panel, in: RoundedRectangle(cornerRadius: 5))
+                Button { library.create() } label: { Label("New private playlist…", systemImage: "plus").font(.system(size: 12)) }
+                    .buttonStyle(.plain).disabled(library.busy || saving)
+            }
             HStack {
                 Text("YOUR PLAYLISTS").font(.system(size: 9, weight: .bold)).tracking(1).foregroundStyle(AppDesign.muted)
                 Spacer()
                 if library.stale { Text("May be outdated").font(.system(size: 9)).foregroundStyle(AppDesign.Status.warning) }
             }
             playlistContent
-            if let result { resultView(result) }
-        }
-        .padding(14)
-        .frame(maxHeight: 510)
-        .accessibilityElement(children: .contain)
+            if !outcomes.isEmpty {
+                ScrollView { VStack(alignment: .leading, spacing: 6) { ForEach(outcomes, id: \.playlistID) { resultView($0) } } }
+                    .frame(maxHeight: 100)
+            }
+            if library.canRetry {
+                Button("Refresh YouTube library") { library.retryLast() }.disabled(library.busy || saving).font(.system(size: 11))
+            }
+            if library.connected && !destinations.isEmpty {
+                Divider().overlay(AppDesign.Border.decorative)
+                HStack {
+                    Text("\(pendingIDs.count) selected").font(.system(size: 11)).foregroundStyle(AppDesign.muted)
+                    Spacer()
+                    Button(outcomes.isEmpty ? "Cancel" : "Done") { presented = false }.disabled(saving)
+                    Button(saving ? "Adding…" : "Add") { saveSelected() }.buttonStyle(.borderedProminent)
+                        .disabled(saving || library.busy || pendingIDs.isEmpty)
+                        .accessibilityLabel("Add track to \(pendingIDs.count) selected playlists")
+                }
+            }
+        }.padding(14).frame(maxHeight: 610).accessibilityElement(children: .contain)
     }
 
     @ViewBuilder private var playlistContent: some View {
@@ -143,97 +168,65 @@ struct SaveDestinationButton: View {
                 }.buttonStyle(.borderedProminent).disabled(library.busy)
             }.padding(.vertical, 6)
         } else if library.busy && library.playlists.isEmpty {
-            HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Loading playlists…").font(.system(size: 11)).foregroundStyle(AppDesign.muted) }
-                .padding(.vertical, 8)
-        } else if library.playlists.isEmpty && library.canRetry {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Could not load your YouTube playlists.").font(.system(size: 11)).foregroundStyle(AppDesign.Status.warning)
-                Button("Retry refresh") { library.retryLast() }.disabled(library.busy)
-            }.padding(.vertical, 6)
+            progress("Loading playlists…")
         } else if library.playlists.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(library.stale ? "Your playlist list may be outdated." : "No playlists found for this account.")
-                    .font(.system(size: 11)).foregroundStyle(AppDesign.muted)
-                HStack {
-                    Button("Create private playlist…") { library.create() }.disabled(library.busy)
-                    if library.canRetry { Button("Refresh") { library.retryLast() }.disabled(library.busy) }
-                }
-            }.padding(.vertical, 6)
+            Text(library.canRetry ? "Could not load your YouTube playlists." : "No playlists found for this account.")
+                .font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.vertical, 8)
         } else if destinations.isEmpty {
             Text("This track’s source playlist is excluded.").font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.vertical, 8)
+        } else if filteredDestinations.isEmpty {
+            Text("No playlists match your search.").font(.system(size: 11)).foregroundStyle(AppDesign.muted).padding(.vertical, 8)
         } else {
-            ScrollView {
-                LazyVStack(spacing: 3) {
-                    ForEach(destinations) { playlist in
-                        Button { save(to: playlist) } label: {
-                            HStack(spacing: 9) {
-                                LibraryArtwork(url: playlist.thumbnailURL, symbol: "music.note.list").frame(width: 30, height: 30)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(playlist.title).font(.system(size: 11, weight: .semibold)).lineLimit(1)
-                                    Text("\(playlist.count) videos").font(.system(size: 9)).foregroundStyle(AppDesign.muted)
-                                }
-                                Spacer(minLength: 0)
-                                if saving && savingDestinationID == playlist.id { ProgressView().controlSize(.small) }
-                                else { Image(systemName: "plus").font(.system(size: 10, weight: .semibold)).foregroundStyle(AppDesign.green) }
-                            }.padding(.horizontal, 7).padding(.vertical, 5).contentShape(Rectangle())
-                                .background(AppDesign.Surface.raised, in: RoundedRectangle(cornerRadius: 5))
-                        }.buttonStyle(.plain)
-                            .disabled(saving || !library.canSaveVideo(to: playlist.id))
-                            .accessibilityLabel("Add \(video.title) to \(playlist.title)")
-                    }
-                }
-            }
-            .frame(maxHeight: 280)
-            .accessibilityLabel("Available playlists")
+            PlaylistDestinationList(playlists: filteredDestinations, selectedIDs: $selectedIDs,
+                savedIDs: Set(filteredDestinations.filter { isSaved(in: $0.id) }.map(\.id)),
+                unavailableIDs: Set(filteredDestinations.filter { !library.canSaveVideo(to: $0.id) }.map(\.id)), saving: saving)
+                .frame(maxHeight: 240)
         }
-        if library.busy && !saving { HStack(spacing: 6) { ProgressView().controlSize(.small); Text("Updating YouTube library…").font(.system(size: 10)).foregroundStyle(AppDesign.muted) } }
+        if saving { progress("Adding to selected playlists…") }
+        else if library.busy { progress("Updating YouTube library…") }
     }
 
-    @ViewBuilder private func resultView(_ result: PlaylistSaveResult) -> some View {
-        switch result {
-        case .added:
-            statusRow("Saved to \(resultDestinationTitle ?? "playlist").", symbol: "checkmark.circle.fill", color: AppDesign.green)
-        case .alreadyInPlaylist:
-            statusRow("Already in \(resultDestinationTitle ?? "this playlist").", symbol: "checkmark.circle", color: AppDesign.Status.warning)
-        case let .unavailable(message), let .failed(message):
-            statusRow(message, symbol: "exclamationmark.circle.fill", color: AppDesign.Status.error)
-        case .busy:
-            statusRow("Another YouTube action is in progress. Try again when it finishes.", symbol: "hourglass", color: AppDesign.muted)
-        case let .uncertain(message), let .savedRefreshUnavailable(message):
-            VStack(alignment: .leading, spacing: 6) {
-                statusRow(message, symbol: "exclamationmark.triangle.fill", color: AppDesign.Status.warning)
-                if library.canRetry { Button("Refresh before another edit") { library.retryLast() }.disabled(library.busy) }
-            }
+    private func isSaved(in playlistID: String) -> Bool {
+        library.containsSavedVideo(video.id, in: playlistID)
+            || outcomes.contains { $0.playlistID == playlistID && isConfirmed($0.result) }
+    }
+    private func isConfirmed(_ result: PlaylistSaveResult) -> Bool {
+        switch result { case .added, .alreadyInPlaylist, .savedRefreshUnavailable: return true; default: return false }
+    }
+    private func progress(_ text: String) -> some View {
+        HStack(spacing: 8) { ProgressView().controlSize(.small); Text(text).font(.system(size: 11)).foregroundStyle(AppDesign.muted) }
+    }
+    @ViewBuilder private func resultView(_ outcome: PlaylistSaveOutcome) -> some View {
+        let title = destinationTitles[outcome.playlistID] ?? "Playlist"
+        switch outcome.result {
+        case .added: statusRow("\(title): saved.", symbol: "checkmark.circle.fill", color: AppDesign.green)
+        case .alreadyInPlaylist: statusRow("\(title): already saved.", symbol: "checkmark.circle", color: AppDesign.green)
+        case let .unavailable(message), let .failed(message): statusRow("\(title): \(message)", symbol: "exclamationmark.circle.fill", color: AppDesign.Status.error)
+        case .busy: statusRow("\(title): another YouTube action is in progress.", symbol: "hourglass", color: AppDesign.muted)
+        case let .uncertain(message), let .savedRefreshUnavailable(message): statusRow("\(title): \(message)", symbol: "exclamationmark.triangle.fill", color: AppDesign.Status.warning)
         }
     }
-
     private func statusRow(_ text: String, symbol: String, color: Color) -> some View {
         Label(text, systemImage: symbol).font(.system(size: 10)).foregroundStyle(color)
             .fixedSize(horizontal: false, vertical: true).accessibilityElement(children: .combine)
     }
-
-    private func save(to playlist: YouTubePlaylist) {
-        guard !saving, let videoID = invocationVideoID, videoID == video.id,
-              let scope = invocationScope else { return }
+    private func saveSelected() {
+        guard !saving, let videoID = invocationVideoID, videoID == video.id, let scope = invocationScope, !pendingIDs.isEmpty else { return }
+        let track = video, ids = pendingIDs
+        for playlist in destinations where ids.contains(playlist.id) { destinationTitles[playlist.id] = playlist.title }
         saving = true
-        savingDestinationID = playlist.id
-        result = nil
-        resultDestinationTitle = playlist.title
         Task { @MainActor in
-            let outcome = await library.saveVideo(video, to: playlist.id, accountScope: scope)
-            if invocationVideoID == videoID, invocationScope == scope { result = outcome }
+            let results = await library.saveVideo(track, toPlaylists: ids, accountScope: scope)
+            if invocationVideoID == videoID, invocationScope == scope {
+                outcomes.removeAll { ids.contains($0.playlistID) }
+                outcomes.append(contentsOf: results)
+                for outcome in results where isConfirmed(outcome.result) { selectedIDs.remove(outcome.playlistID) }
+            }
             saving = false
-            savingDestinationID = nil
         }
     }
-
     private func invalidatePopover() {
-        suppressFocusRestore = presented
-        presented = false
-        invocationVideoID = nil
-        invocationScope = nil
-        result = nil
-        favoriteResult = nil
-        resultDestinationTitle = nil
+        suppressFocusRestore = presented; presented = false; invocationVideoID = nil; invocationScope = nil
+        outcomes = []; selectedIDs = []; favoriteResult = nil; destinationTitles = [:]
     }
 }
