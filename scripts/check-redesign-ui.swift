@@ -127,7 +127,8 @@ import Foundation
                     let tidalBaseline = CommandLine.arguments.contains("--tidal-baseline")
                     let improvements = CommandLine.arguments.contains("--improvements")
                     let playlistCleanup = CommandLine.arguments.contains("--playlist-cleanup")
-                    let sizes = improvements || playlistCleanup
+                    let searchSpacing = CommandLine.arguments.contains("--search-spacing")
+                    let sizes = improvements || playlistCleanup || searchSpacing
                         ? [NSSize(width: 760, height: 720), NSSize(width: 1024, height: 768), NSSize(width: 1440, height: 900)]
                         : tidalBaseline
                         ? [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768),
@@ -136,7 +137,8 @@ import Foundation
                         : [NSSize(width: 1440, height: 900), NSSize(width: 1024, height: 768)]
                     for size in sizes {
                         window.setContentSize(size)
-                        let routes = playlistCleanup ? ["playlist", "playlist-rows", "playlist-hovered", "playlist-rail", "playlist-rail-hovered", "playlist-stale"]
+                        let routes = searchSpacing ? ["results", "results-hovered", "preview", "results-filtered", "results-returned"]
+                            : playlistCleanup ? ["playlist", "playlist-rows", "playlist-hovered", "playlist-rail", "playlist-rail-hovered", "playlist-stale"]
                             : improvements ? ["home", "home-rail", "results", "results-rail"] : tidalBaseline
                             ? (size.width < 1024 ? ["home"]
                                : size.width == 1440 || size.width == 1024 ? ["home", "preview", "playlist", "rows", "results"]
@@ -149,6 +151,7 @@ import Foundation
                             library.stale = false
                             model.libraryCollapsed = route.contains("-rail")
                             let destination = route.replacingOccurrences(of: "-rail", with: "").replacingOccurrences(of: "-stale", with: "").replacingOccurrences(of: "-hovered", with: "").replacingOccurrences(of: "-rows", with: "")
+                                .replacingOccurrences(of: "-filtered", with: "").replacingOccurrences(of: "-returned", with: "")
                             switch destination {
                             case "playlist", "rows", "fallback":
                                 if let playlist = route == "fallback" ? library.playlists.last : library.playlists.first {
@@ -172,6 +175,7 @@ import Foundation
                             case "filter": model.showHome(); model.libraryFilter = "no matching collection"
                             default: model.showHome()
                             }
+                            if route.hasSuffix("-filtered") { model.libraryFilter = "Lofi" }
                             if destination == "home" {
                                 for _ in 0..<80 {
                                     if !model.home.isLoading { break }
@@ -183,9 +187,11 @@ import Foundation
                             // rendered content explicitly for repeatable viewport checks.
                             hosting.setFrameSize(size)
                             hosting.layoutSubtreeIfNeeded()
-                            if playlistCleanup {
-                                Self.scrollFixturePlaylist(in: hosting, sidebarWidth: model.libraryCollapsed ? 72 : size.width < 1200 ? 280 : 320,
-                                                           offset: route.hasSuffix("-rows") ? 360 : 0)
+                            if playlistCleanup || searchSpacing {
+                                if playlistCleanup {
+                                    Self.scrollFixturePlaylist(in: hosting, sidebarWidth: model.libraryCollapsed ? 72 : size.width < 1200 ? 280 : 320,
+                                                               offset: route.hasSuffix("-rows") ? 360 : 0)
+                                }
                                 Self.setFixtureSidebarHover(in: hosting, hovered: route.hasSuffix("-hovered"))
                                 try await Task.sleep(for: .milliseconds(80))
                                 hosting.layoutSubtreeIfNeeded()
@@ -197,7 +203,7 @@ import Foundation
                                   }() else { throw CocoaError(.fileWriteUnknown) }
                             let name = "\(route)-\(Int(size.width))x\(Int(size.height)).png"
                             try data.write(to: output.appendingPathComponent(name))
-                            if tidalBaseline || improvements || playlistCleanup {
+                            if tidalBaseline || improvements || playlistCleanup || searchSpacing {
                                 let observations = Self.accessibilityObservations(hosting: hosting, window: window)
                                 let report: [String: Any] = [
                                     "productionRevision": "working-tree", "route": route,
@@ -208,7 +214,7 @@ import Foundation
                                     "accessibility": observations,
                                     "playlistDatedItems": library.items.filter { $0.addedAt != nil }.count,
                                     "nativeScrollers": Self.scrollerObservations(in: hosting, sidebarWidth: model.libraryCollapsed ? 72 : size.width < 1200 ? 280 : 320,
-                                                                                 expectedSidebarHover: playlistCleanup ? route.hasSuffix("-hovered") : nil),
+                                                                                 expectedSidebarHover: playlistCleanup || searchSpacing ? route.hasSuffix("-hovered") : nil),
                                     "limits": "AX frames expose controls and combined text, not every SwiftUI glyph baseline. Source-resolved geometry is separately recorded; no inferred frame is labeled native-measured."
                                 ]
                                 let json = try JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys])
@@ -277,6 +283,12 @@ import Foundation
                 if let expectedSidebarHover {
                     precondition(scroll.scrollerStyle == .overlay, "Scroller must not reserve a gutter")
                     if sidebar { precondition(scroll.hasVerticalScroller == expectedSidebarHover, "Sidebar scroller hover visibility mismatch") }
+                    if scroll.hasVerticalScroller, let scroller = scroll.verticalScroller {
+                        precondition(String(describing: type(of: scroller)).contains("SubtleScroller"), "Visible vertical scrollbars must use the shared style")
+                    }
+                    if scroll.hasHorizontalScroller, let scroller = scroll.horizontalScroller {
+                        precondition(String(describing: type(of: scroller)).contains("SubtleScroller"), "Visible horizontal scrollbars must use the shared style")
+                    }
                 }
                 observations.append(["sidebar": sidebar, "overlay": scroll.scrollerStyle == .overlay,
                     "verticalVisible": scroll.hasVerticalScroller, "autoHides": scroll.autohidesScrollers,

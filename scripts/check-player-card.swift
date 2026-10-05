@@ -42,7 +42,14 @@ struct CardCheck {
                 preparations += 1
                 throw SourceFailure.noCompatibleAudio
             })
-        let model = ApplicationModel(controller: controller, library: PlaylistLibrary(controller: controller))
+        let api = YouTubePlaylists(token: { "isolated-card-fixture" }, send: { _ in
+            throw SourceFailure.noCompatibleAudio
+        })
+        let model = ApplicationModel(controller: controller, library: PlaylistLibrary(controller: controller, api: api))
+        let scrollbarOnly = CommandLine.arguments.contains("--scrollbars-only")
+        let favoriteScrollVideos = try (0..<20).map {
+            try VideoSummary(id: String(format: "favorite%03d", $0), title: "Favorite track \($0 + 1)", creator: "Local fixture")
+        }
         var cardSizes: [String: NSSize] = [:]
         for (name, video, state, selecting, needsUpdate, error) in [
             ("paused", normal, PlaybackState.paused, false, false, Optional<String>.none),
@@ -61,11 +68,13 @@ struct CardCheck {
             ("last-result", normal, .paused, false, false, nil),
             ("outside-results", normal, .paused, false, false, nil),
             ("favorites", normal, .paused, false, false, nil),
+            ("favorites-scroll", normal, .paused, false, false, nil),
             ("error", normal, .paused, false, false, "This video is unavailable. Try another result.")
         ] {
+            if scrollbarOnly && name != "paused" && name != "favorites-scroll" { continue }
             let position = name == "long-duration" ? 16996.829 : name == "maximum-duration" ? 359998 : 128.0
             var snapshot = PlayerSnapshot(loadedVideo: name == "preparing-first-track" ? nil : try LoadedVideo(video: video, positionSeconds: position),
-                favorites: [video], playback: state, isSelecting: selecting, sourceNeedsUpdate: needsUpdate,
+                favorites: name == "favorites-scroll" ? favoriteScrollVideos : [video], playback: state, isSelecting: selecting, sourceNeedsUpdate: needsUpdate,
                 error: error, persistenceError: nil,
                 canGoPrevious: name != "first-result" && name != "outside-results",
                 canGoNext: name != "last-result" && name != "outside-results")
@@ -83,11 +92,11 @@ struct CardCheck {
             let view = NSHostingView(rootView: PlayerCard(presentation: presentation, app: model,
                 action: { _, _ in actions += 1 }, search: { actions += 1 },
                 hide: { actions += 1 },
-                setVolume: { volumeUpdates.append($0) }, favorites: name == "favorites")
+                setVolume: { volumeUpdates.append($0) }, favorites: name.hasPrefix("favorites"))
                 .environment(\.skeletonReduceMotionOverride, name == "preparing-reduced-motion"))
             let size = view.fittingSize
             cardSizes[name] = size
-            precondition(size.width == 430 && size.height >= 90 && size.height <= 230, "Unexpected card dimensions: \(size)")
+            precondition(size.width == 430 && size.height >= 90 && size.height <= (name == "favorites-scroll" ? 420 : 230), "Unexpected card dimensions: \(size)")
             let window = NSWindow(contentRect: NSRect(origin: .zero, size: size),
                 styleMask: [.borderless], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
@@ -105,6 +114,21 @@ struct CardCheck {
             }
             let data = renderPNG()
             try data.write(to: output.appendingPathComponent(name + ".png"))
+            if name == "favorites-scroll" {
+                var scrollCount = 0
+                func checkScrollbars(_ node: NSView) {
+                    if let scroll = node as? NSScrollView {
+                        scrollCount += 1
+                        precondition(scroll.scrollerStyle == .overlay, "Compact Favorites scroller must use overlay style")
+                        if scroll.hasVerticalScroller, let scroller = scroll.verticalScroller {
+                            precondition(String(describing: type(of: scroller)).contains("SubtleScroller"), "Compact Favorites must use the shared native scroller")
+                        }
+                    }
+                    node.subviews.forEach(checkScrollbars)
+                }
+                checkScrollbars(view)
+                precondition(scrollCount > 0, "Compact Favorites scroll view must exist")
+            }
             if selecting {
                 try await Task.sleep(for: .milliseconds(400))
                 let later = renderPNG()
@@ -117,7 +141,7 @@ struct CardCheck {
             }
             precondition(actions == 0, "Rendering must not trigger playback or search")
             precondition(volumeUpdates.isEmpty, "Rendering must not change volume")
-            if name != "favorites" {
+            if !name.hasPrefix("favorites") {
                 func findSlider(_ node: NSView) -> NSSlider? {
                     if let slider = node as? NSSlider, !(slider is TimelineSlider) { return slider }
                     return node.subviews.lazy.compactMap { findSlider($0) }.first
@@ -131,7 +155,7 @@ struct CardCheck {
             print("PASS: \(name) native render \(Int(size.width))×\(Int(size.height)); no actions fired")
             window.close()
         }
-        precondition(cardSizes["paused"] == cardSizes["preparing"], "Preparation must not change player height")
+        if !scrollbarOnly { precondition(cardSizes["paused"] == cardSizes["preparing"], "Preparation must not change player height") }
         let player = PlayerWindow(application: model, openSearch: {})
         func waitForCard() async throws {
             for _ in 0..<100 {
