@@ -32,9 +32,16 @@ import SwiftUI
         if let window, !window.isVisible {
             let mouse = NSEvent.mouseLocation
             if let screen = NSScreen.screens.first(where: { NSMouseInRect(mouse, $0.frame, false) }) ?? NSScreen.main {
-                let available = screen.visibleFrame.size
+                var visible = screen.visibleFrame
+                let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+                    as? [[String: Any]] ?? []
+                if let bottom = Self.topBarBottom(screen: screen.frame, windows: windows,
+                        desktopTop: NSScreen.screens.first?.frame.maxY ?? screen.frame.maxY) {
+                    visible.size.height = max(0, min(visible.maxY, bottom) - visible.minY)
+                }
+                let available = visible.size
                 window.minSize = NSSize(width: min(760, available.width - 16), height: min(560, available.height - 16))
-                window.setFrame(Self.presentationFrame(size: window.frame.size, visible: screen.visibleFrame, anchorX: mouse.x), display: false)
+                window.setFrame(Self.presentationFrame(size: window.frame.size, visible: visible, anchorX: mouse.x), display: false)
             }
         }
         showWindow(nil)
@@ -48,6 +55,23 @@ import SwiftUI
         let width = min(size.width, inset.width), height = min(size.height, inset.height)
         return NSRect(x: max(inset.minX, min(anchorX - width / 2, inset.maxX - width)),
             y: inset.maxY - height, width: width, height: height)
+    }
+    /// Bottom edge of an always-on-top bar (e.g. SketchyBar) across the top of `screen`.
+    /// `visibleFrame` ignores such bars, which would otherwise cover the title bar and block dragging.
+    static func topBarBottom(screen: NSRect, windows: [[String: Any]], desktopTop: CGFloat,
+                             ownPID: Int = Int(ProcessInfo.processInfo.processIdentifier)) -> CGFloat? {
+        windows.compactMap { info -> CGFloat? in
+            guard (info[kCGWindowLayer as String] as? Int ?? 0) > 0,
+                  info[kCGWindowOwnerPID as String] as? Int != ownPID,
+                  let bounds = info[kCGWindowBounds as String] as? NSDictionary,
+                  let cg = CGRect(dictionaryRepresentation: bounds) else { return nil }
+            // Window server uses global top-left coordinates; AppKit uses bottom-left.
+            let rect = NSRect(x: cg.minX, y: desktopTop - cg.maxY, width: cg.width, height: cg.height)
+            // Bars may float a few points below the edge (SketchyBar y_offset), so accept any in the top quarter.
+            guard rect.minY >= screen.maxY - screen.height / 4, rect.minY < screen.maxY,
+                  rect.intersection(screen).width >= screen.width / 2 else { return nil }
+            return rect.minY
+        }.min()
     }
 }
 private final class ApplicationPanel: NSPanel {
