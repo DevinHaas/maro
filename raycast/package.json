@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "maro",
+  "title": "Maro",
+  "description": "Control the Maro music player through maroctl.",
+  "icon": "icon.png",
+  "author": "devin_hasler",
+  "owner": "maro-app",
+  "license": "MIT",
+  "categories": ["Media"],
+  "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "maroctlPath",
+      "title": "maroctl Path",
+      "description": "Path to the installed maroctl wrapper; ~ expands to your home folder.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Applications/Maro Local/bin/maroctl"
+    }
+  ],
+  "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Show the loaded track and control playback.",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorites",
+      "description": "Play or remove a favorite.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Play/Pause",
+      "description": "Toggle playback.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "description": "Play the next track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "description": "Play the previous track.",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^2.7.2",
+    "@raycast/utils": "^2.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.6.4",
+    "@types/react": "19.0.10",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9"
+  }
+}
