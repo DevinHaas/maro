@@ -9,7 +9,7 @@ struct GlobalSearchView: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass").font(.system(size: 19)).foregroundStyle(AppDesign.muted)
-            GlobalSearchField(app: app, geometry: geometry, focused: $fieldFocused).frame(height: 28)
+            GlobalSearchField(app: app, geometry: geometry, focused: $fieldFocused)
             if !app.globalQuery.isEmpty {
                 Button { app.globalQuery = ""; app.focusSearch() } label: { Image(systemName: "xmark") }
                     .buttonStyle(.plain).accessibilityLabel("Clear global search")
@@ -146,14 +146,31 @@ private struct GlobalSearchField: NSViewRepresentable {
             monitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .keyDown]) { [weak self] event in
                 guard let self, let field = self.field, event.window === field.window else { return event }
                 if event.type == .leftMouseDown {
-                    let fieldBounds = field.bounds.insetBy(dx: -55, dy: -12)
+                    let fieldBounds = field.bounds.insetBy(dx: -55, dy: -14)
                     let inField = fieldBounds.contains(field.convert(event.locationInWindow, from: nil))
                     let inPreview = self.geometry.preview.map { $0.bounds.contains($0.convert(event.locationInWindow, from: nil)) } ?? false
                     if inField && !self.app.previewOpen { self.app.focusSearch() }
                     else if self.app.previewOpen && !inField && !inPreview { self.app.closeSearch() }
                     return event
                 }
-                guard self.app.previewOpen else { return event }
+                // ⌘K jumps to search from anywhere in the window, like Spotify.
+                if event.modifierFlags.intersection([.command, .control, .option, .shift]) == .command,
+                   event.charactersIgnoringModifiers?.lowercased() == "k" {
+                    field.window?.makeFirstResponder(field)
+                    field.currentEditor()?.selectAll(nil)
+                    self.focused.wrappedValue = true
+                    self.app.focusSearch()
+                    return nil
+                }
+                // `?` toggles the shortcuts panel unless the user is typing.
+                if event.characters == "?", event.modifierFlags.intersection([.command, .control, .option]).isEmpty,
+                   !(field.window?.firstResponder is NSText) {
+                    self.app.shortcutsOpen.toggle(); return nil
+                }
+                guard self.app.previewOpen else {
+                    if event.keyCode == 53, self.app.shortcutsOpen { self.app.shortcutsOpen = false; return nil }
+                    return event
+                }
                 switch event.keyCode {
                 case 53:
                     self.suppressNextFocus = field.currentEditor() == nil

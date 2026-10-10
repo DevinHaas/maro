@@ -49,7 +49,7 @@ struct SaveDestinationButton: View {
     var body: some View {
         Group {
             if iconOnly {
-                AppIconButton(title: "Save \(video.title)", symbol: "plus", action: presentPicker)
+                AppIconButton(title: "Save \(video.title)", symbol: "plus", vim: false, action: presentPicker)
             } else {
                 Button(action: presentPicker) {
                     Image(systemName: "plus")
@@ -62,6 +62,7 @@ struct SaveDestinationButton: View {
                 }.buttonStyle(.plain)
             }
         }
+        .vimTarget(cornerRadius: diameter / 2, action: presentPicker)
         .focused($buttonFocused)
         .opacity(visible ? 1 : 0).accessibilityHidden(false)
         .help("Save \(video.title)").accessibilityLabel("Save \(video.title)")
@@ -70,7 +71,7 @@ struct SaveDestinationButton: View {
         .popover(isPresented: $presented, arrowEdge: .bottom) {
             destinationPopover.frame(width: 330).background(AppDesign.Surface.raised)
                 .preferredColorScheme(.dark).tint(AppDesign.green)
-                .onExitCommand { presented = false }
+                .onExitCommand { presented = false }.vimPresentation()
         }
         .onChange(of: presented) { open in
             if !open {
@@ -82,6 +83,13 @@ struct SaveDestinationButton: View {
         .onChange(of: sourcePlaylistID) { _ in invalidatePopover() }
         .onChange(of: app.route) { _ in invalidatePopover() }
         .onChange(of: library.saveScopeID) { _ in invalidatePopover() }
+    }
+
+    private func toggleFavorite() {
+        guard canAddFavorite else { return }
+        app.toggleFavorite(video)
+        favoriteResult = app.actionError ?? (app.player.snapshot.favorites.contains { $0.id == video.id }
+            ? "Added to Favorites." : "Removed from Favorites.")
     }
 
     private func presentPicker() {
@@ -101,15 +109,11 @@ struct SaveDestinationButton: View {
                 }
                 Spacer(minLength: 0)
                 Button { presented = false } label: { Image(systemName: "xmark").font(.system(size: 11, weight: .semibold)) }
-                    .buttonStyle(.plain).foregroundStyle(AppDesign.muted).help("Close save menu").accessibilityLabel("Close save menu")
+                    .buttonStyle(.plain).foregroundStyle(AppDesign.muted).vimTarget { presented = false }
+                    .help("Close save menu").accessibilityLabel("Close save menu")
             }
 
-            Button {
-                guard canAddFavorite else { return }
-                app.toggleFavorite(video)
-                favoriteResult = app.actionError ?? (app.player.snapshot.favorites.contains { $0.id == video.id }
-                    ? "Added to Favorites." : "Removed from Favorites.")
-            } label: {
+            Button(action: toggleFavorite) {
                 HStack(spacing: 10) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart").foregroundStyle(AppDesign.green).frame(width: 18)
                     Text(isFavorite ? "Remove from Favorites" : "Add to Favorites").font(.system(size: 12, weight: .semibold))
@@ -117,7 +121,7 @@ struct SaveDestinationButton: View {
                     if isFavorite { Image(systemName: "checkmark").foregroundStyle(AppDesign.green) }
                 }.contentShape(Rectangle()).padding(.vertical, 8).padding(.horizontal, 9)
                     .background(AppDesign.Surface.panel, in: RoundedRectangle(cornerRadius: 5))
-            }.buttonStyle(.plain).disabled(!canAddFavorite)
+            }.buttonStyle(.plain).disabled(!canAddFavorite).vimTarget(enabled: canAddFavorite, action: toggleFavorite)
                 .accessibilityHint(!canAddFavorite ? "Favorites are full. Remove one before adding another." : "")
             if !canAddFavorite { statusRow("Favorites are full (20 of 20). Remove one before adding another.", symbol: "heart", color: AppDesign.Status.warning) }
             if let favoriteResult { statusRow(favoriteResult, symbol: "heart", color: AppDesign.green) }
@@ -130,7 +134,7 @@ struct SaveDestinationButton: View {
                 }.font(.system(size: 12)).padding(9)
                     .background(AppDesign.Surface.panel, in: RoundedRectangle(cornerRadius: 5))
                 Button { library.create() } label: { Label("New private playlist…", systemImage: "plus").font(.system(size: 12)) }
-                    .buttonStyle(.plain).disabled(library.busy || saving)
+                    .buttonStyle(.plain).disabled(library.busy || saving).vimTarget(enabled: !library.busy && !saving) { library.create() }
             }
             HStack {
                 Text("YOUR PLAYLISTS").font(.system(size: 9, weight: .bold)).tracking(1).foregroundStyle(AppDesign.muted)
@@ -151,8 +155,10 @@ struct SaveDestinationButton: View {
                     Text("\(pendingIDs.count) selected").font(.system(size: 11)).foregroundStyle(AppDesign.muted)
                     Spacer()
                     Button(outcomes.isEmpty ? "Cancel" : "Done") { presented = false }.disabled(saving)
+                        .vimTarget(enabled: !saving) { presented = false }
                     Button(saving ? "Adding…" : "Add") { saveSelected() }.buttonStyle(.borderedProminent)
                         .disabled(saving || library.busy || pendingIDs.isEmpty)
+                        .vimTarget(enabled: !saving && !library.busy && !pendingIDs.isEmpty) { saveSelected() }
                         .accessibilityLabel("Add track to \(pendingIDs.count) selected playlists")
                 }
             }

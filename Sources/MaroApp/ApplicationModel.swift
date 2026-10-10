@@ -13,11 +13,13 @@ enum ApplicationRoute: Equatable {
     let library: PlaylistLibrary
     let player: PlayerPresentation
     let home: HomeRecommendations
+    let vim = VimNavigator()
     @Published private(set) var route: ApplicationRoute = .home
     @Published private(set) var history: [ApplicationRoute] = []
     @Published var globalQuery = "" { didSet { if oldValue != globalQuery { updatePreview() } } }
     @Published var libraryFilter = ""
     @Published var libraryCollapsed = false
+    @Published var shortcutsOpen = false
     @Published var searchState: SearchViewState
     @Published var searchFocused = false
     @Published private(set) var previewOpen = false
@@ -44,6 +46,7 @@ enum ApplicationRoute: Equatable {
         player = PlayerPresentation(snapshot: controller.snapshot)
         searchState = controller.searchState
         home = HomeRecommendations(controller: controller, now: recommendationNow)
+        vim.isSuspended = { [weak self] in self?.previewOpen ?? false }
         home.onChange = { [weak self] in
             guard let self else { return }
             self.setSearchSeeds(videos: self.home.sections.flatMap(\.videos), queries: self.home.suggestedQueries)

@@ -59,16 +59,18 @@ private struct PlaylistDetailContent: View {
                                         .frame(width: 62, height: 62)
                                 }.buttonStyle(PlaylistPlayButtonStyle(hovered: playHovered)).disabled(library.items.isEmpty || library.busy)
                                     .opacity(library.items.isEmpty || library.busy ? 0.4 : 1)
+                                    .vimTarget(enabled: !library.items.isEmpty && !library.busy, cornerRadius: 31) { library.play() }
                                     .onHover { playHovered = $0 }.focused($playFocused)
                                     .overlay {
                                         Circle().inset(by: 2).strokeBorder(playFocused ? AppDesign.Border.focus : .clear, lineWidth: 2)
                                             .allowsHitTesting(false).accessibilityHidden(true)
                                     }
                                     .accessibilityLabel("Play \(playlist.title) in saved order")
-                                AppIconButton(title: "Remove playlist \(playlist.title)", symbol: "xmark", enabled: library.canReorder) {
+                                AppIconButton(title: "Remove playlist \(playlist.title)", symbol: "xmark", enabled: library.canReorder, vim: false) {
                                     library.confirmDelete()
                                 }.background(Circle().fill(AppDesign.Surface.raised))
                                     .focusable().focused($focusedControl, equals: "playlist-delete")
+                                    .vimTarget(enabled: library.canReorder, focusable: false, cornerRadius: 19) { library.confirmDelete() }
                                     .accessibilityIdentifier("playlist-delete")
                                     .tidalBorder(cornerRadius: 19, focused: focusedControl == "playlist-delete", visible: focusedControl == "playlist-delete")
                                 Spacer(minLength: 8)
@@ -128,7 +130,7 @@ private struct PlaylistDetailContent: View {
                                 }.frame(maxWidth: .infinity).padding(.vertical, 44)
                             }
                         }.padding(24).background(AppDesign.Surface.panel)
-                    }
+                    }.vimRegion("playlist", scrolls: true)
                 }.safeAreaInset(edge: .bottom, spacing: 0) {
                     if library.reorderState != .idle || library.stale || library.canRetry || !library.connected {
                         HStack(spacing: 12) {
@@ -140,12 +142,13 @@ private struct PlaylistDetailContent: View {
                                 Text(library.status).textSelection(.enabled)
                             }.font(.system(size: 12)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
                             if library.canRetry || library.reorderState == .unconfirmed || library.reorderState == .savedRefreshUnavailable {
-                                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") {
-                                    if library.canRetry { library.retryLast() } else { library.refresh() }
-                                }.disabled(library.busy)
+                                let retry = { if library.canRetry { library.retryLast() } else { library.refresh() } }
+                                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube", action: retry)
+                                    .disabled(library.busy).vimTarget(enabled: !library.busy, action: retry)
                             }
                             if library.configured && (library.stale || library.canRetry || !library.connected) {
                                 Button("Reconnect YouTube") { library.connect() }.disabled(library.busy)
+                                    .vimTarget(enabled: !library.busy) { library.connect() }
                             }
                         }.padding(14).background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0)
                     }
@@ -153,7 +156,7 @@ private struct PlaylistDetailContent: View {
             } else {
                 VStack(spacing: 12) {
                     Text("This playlist is no longer available.").font(.title3.bold())
-                    Button("Back to Home") { app.showHome() }
+                    Button("Back to Home") { app.showHome() }.vimTarget { app.showHome() }
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }.foregroundStyle(AppDesign.Text.primary)
@@ -161,7 +164,7 @@ private struct PlaylistDetailContent: View {
         .onChange(of: library.selected?.id) { _ in searchQuery = "" }
         .sheet(item: $library.actionContext, onDismiss: {
             focusedControl = invokingControl; invokingControl = nil
-        }) { context in PlaylistActionsSheet(context: context, library: library, player: player) }
+        }) { context in PlaylistActionsSheet(context: context, library: library, player: player).vimPresentation() }
     }
 
     private var playlistSearch: some View {
@@ -229,7 +232,7 @@ private struct PlaylistCoverHeader: View {
                 Button(action: rename) {
                     Text(playlist.title).font(.system(size: 54, weight: .heavy)).lineLimit(2).minimumScaleFactor(0.6)
                         .multilineTextAlignment(.leading).contentShape(Rectangle())
-                }.buttonStyle(.plain).disabled(!renameEnabled)
+                }.buttonStyle(.plain).disabled(!renameEnabled).vimTarget(enabled: renameEnabled, action: rename)
                     .help("Rename playlist").accessibilityLabel("Rename playlist \(playlist.title)")
                     .accessibilityIdentifier("playlist-rename-title").accessibilityAddTraits(.isHeader)
                 if let description = playlist.description, !description.isEmpty {
@@ -304,7 +307,7 @@ struct PlaylistTrackRow: View {
                     else if active { Image(systemName: playback == .paused || playback == .ended ? "pause.fill" : "waveform") }
                     else { Text("\(position)").monospacedDigit() }
                 }.frame(width: PlaylistTrackColumns.position, height: 44).contentShape(Rectangle())
-            }.buttonStyle(.plain).disabled(item.video == nil || busy).focused($playFocused)
+            }.buttonStyle(.plain).disabled(item.video == nil || busy).vimTarget(enabled: item.video != nil && !busy, action: play).focused($playFocused)
                 .foregroundStyle(active ? AppDesign.green : AppDesign.muted).accessibilityLabel("Play \(item.title) from position \(position)")
             HStack(spacing: PlaylistTrackColumns.gap) {
                 LibraryArtwork(url: item.video?.thumbnailURL, localPath: localPath, symbol: item.video == nil ? "exclamationmark.triangle" : "music.note")
@@ -330,8 +333,9 @@ struct PlaylistTrackRow: View {
                 } else {
                     Color.clear.frame(width: 34, height: 34).accessibilityHidden(true)
                 }
-                AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, action: actions)
+                AppIconButton(title: "Actions for \(item.title), position \(position)", symbol: "ellipsis", enabled: !busy, vim: false, action: actions)
                     .focusable().focused(focusedControl, equals: item.id)
+                    .vimTarget(enabled: !busy, focusable: false, cornerRadius: 19, action: actions)
             }.frame(width: PlaylistTrackColumns.actions)
             if let reorderLibrary {
                 PlaylistDragHandle(item: item, playlistID: playlistID, localPath: localPath, library: reorderLibrary)

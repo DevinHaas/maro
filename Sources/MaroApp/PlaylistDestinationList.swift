@@ -14,6 +14,7 @@ struct PlaylistDestinationList: View {
         ScrollView {
             LazyVStack(spacing: 3) {
                 ForEach(playlists) { playlist in
+                    let available = !saving && !savedIDs.contains(playlist.id) && !unavailableIDs.contains(playlist.id)
                     Toggle(isOn: Binding(get: { savedIDs.contains(playlist.id) || selectedIDs.contains(playlist.id) }, set: { chosen in
                         if chosen { selectedIDs.insert(playlist.id) } else { selectedIDs.remove(playlist.id) }
                     })) {
@@ -28,10 +29,13 @@ struct PlaylistDestinationList: View {
                             Spacer(minLength: 0)
                         }
                     }.toggleStyle(.checkbox).padding(.horizontal, 7).padding(.vertical, 5)
-                        .disabled(saving || savedIDs.contains(playlist.id) || unavailableIDs.contains(playlist.id))
+                        .disabled(!available)
+                        .vimTarget(enabled: available) {
+                            if selectedIDs.contains(playlist.id) { selectedIDs.remove(playlist.id) } else { selectedIDs.insert(playlist.id) }
+                        }
                         .accessibilityLabel("\(playlist.title), \(savedIDs.contains(playlist.id) ? "already saved" : "select destination")")
                 }
-            }
+            }.vimRegion("destinations", scrolls: true)
         }.subtleScrollbars().accessibilityLabel("Available playlists")
     }
 }

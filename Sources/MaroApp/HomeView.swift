@@ -22,7 +22,7 @@ struct HomeView: View {
                     HStack {
                         Text("Some suggestions paused for search or playback.").font(.system(size: 12)).foregroundStyle(AppDesign.muted)
                         Spacer(minLength: 0)
-                        Button("Resume suggestions") { home.retry() }
+                        Button("Resume suggestions") { home.retry() }.vimTarget { home.retry() }
                     }
                 }
                 if let error = home.error {
@@ -32,7 +32,7 @@ struct HomeView: View {
                             Text(error).font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(3)
                         }
                         Spacer(minLength: 0)
-                        Button("Retry") { home.retry() }.disabled(home.isLoading)
+                        Button("Retry") { home.retry() }.disabled(home.isLoading).vimTarget(enabled: !home.isLoading) { home.retry() }
                     }.padding(16).background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                 }
                 ForEach(home.sections) { section in
@@ -44,7 +44,7 @@ struct HomeView: View {
                             }
                             Spacer()
                             if section.isOutdated { Text("Outdated").font(.system(size: 11)).foregroundStyle(AppDesign.Status.warning) }
-                            Button("Explore") { app.submitSearch(section.query) }.buttonStyle(.plain)
+                            Button("Explore") { app.submitSearch(section.query) }.buttonStyle(.plain).vimTarget { app.submitSearch(section.query) }
                                 .font(.system(size: 12, weight: .semibold)).foregroundStyle(AppDesign.muted)
                                 .accessibilityLabel("Search \(section.query)")
                         }
@@ -52,7 +52,7 @@ struct HomeView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(alignment: .top, spacing: 14) {
                                     ForEach(section.videos, id: \.id) { video in HomeVideoCard(app: app, video: video) }
-                                }.padding(.bottom, 4)
+                                }.padding(.bottom, 4).vimRegion("row-\(section.id)", scrolls: true)
                             }
                         } else if home.isLoading {
                             TrackCardsSkeleton(label: "Loading \(section.title) suggestions")
@@ -62,7 +62,7 @@ struct HomeView: View {
                         }
                     }
                 }
-            }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
+            }.padding(24).frame(maxWidth: .infinity, alignment: .leading).vimRegion("home", scrolls: true)
         }
     }
 
@@ -81,14 +81,15 @@ struct HomeView: View {
                     Text(playlist?.description ?? (playlist == nil ? "Explore \(home.sections.first?.title.lowercased() ?? "jazz") and start listening." : "\(playlist!.count) videos · Saved in your YouTube library"))
                         .font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(3)
                     Spacer(minLength: 0)
-                    Button {
+                    let open = {
                         if let playlist { app.openPlaylist(playlist) }
                         else { app.submitSearch(home.suggestedQueries.first ?? "jazz") }
-                    } label: {
+                    }
+                    Button(action: open) {
                         Text(playlist == nil ? "Explore suggestions" : "Open playlist")
                             .font(.system(size: 13, weight: .bold)).padding(.horizontal, 18).padding(.vertical, 11)
                             .foregroundStyle(AppDesign.Text.onAccent).background(AppDesign.green).clipShape(Capsule())
-                    }.buttonStyle(.plain)
+                    }.buttonStyle(.plain).vimTarget(cornerRadius: 20, action: open)
                 }.padding(24).frame(maxWidth: .infinity, alignment: .leading)
             }.background(LinearGradient(colors: [AppDesign.Surface.raised, AppDesign.surface], startPoint: .top, endPoint: .bottom))
                 .clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
@@ -103,7 +104,7 @@ struct HomeView: View {
                     LibraryArtwork(url: url, favorites: favorites).frame(width: 62, height: 62)
                     Text(title).font(.system(size: 13, weight: .bold)).lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
                 }.contentShape(Rectangle())
-            }.buttonStyle(.plain).accessibilityLabel("Open \(title)")
+            }.buttonStyle(.plain).vimTarget(action: open).accessibilityLabel("Open \(title)")
             AppIconButton(title: "Play \(title) in saved order", symbol: "play.fill", enabled: playEnabled, prominent: true, action: play)
                 .padding(.horizontal, 8)
         }.background(AppDesign.raised).clipShape(RoundedRectangle(cornerRadius: 5))
@@ -130,7 +131,7 @@ private struct HomeVideoCard: View {
                     Text(video.title).font(.system(size: 14, weight: .semibold)).lineLimit(2)
                         .frame(height: 36, alignment: .topLeading).frame(maxWidth: .infinity, alignment: .leading)
                 }.contentShape(Rectangle())
-            }.buttonStyle(.plain).focused($playFocused).accessibilityLabel("Play \(video.title) by \(video.creator)")
+            }.buttonStyle(.plain).vimTarget { app.play(video) }.focused($playFocused).accessibilityLabel("Play \(video.title) by \(video.creator)")
             HStack(spacing: 6) {
                 Text(video.creator.isEmpty ? "Creator unavailable" : video.creator)
                     .font(.system(size: 12)).foregroundStyle(AppDesign.muted).lineLimit(1)

@@ -7,6 +7,8 @@ The searchable library stays beside Home, global search results, Favorites, and
 playlist detail. Search previews support keyboard navigation; playlist rows offer
 playback, focused action sheets, and drag editing saved to YouTube. Bottom playback,
 the compact player, and `maroctl` share the same controller and captured queue.
+Vim navigation (`h` `j` `k` `l` move focus, Return activates) covers the sidebar,
+content, player and dialogs; switch it off with the keyboard button in the top bar.
 
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): artifact inventory, settled
   requirements, eight milestones, acceptance gates, and unattended execution rules.

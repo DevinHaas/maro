@@ -25,6 +25,7 @@ struct SearchResultsView: View {
                 if let error = app.searchState.error {
                     Text(error).foregroundStyle(AppDesign.Status.error)
                     Button("Retry search") { app.retrySearch() }.disabled(player.snapshot.sourceNeedsUpdate)
+                        .vimTarget(enabled: !player.snapshot.sourceNeedsUpdate) { app.retrySearch() }
                 }
                 if let error = app.actionError { Text(error).foregroundStyle(AppDesign.Status.error) }
                 if !app.searchState.isSearching && app.searchState.error == nil && app.searchState.results.isEmpty {
@@ -55,6 +56,7 @@ struct SearchResultsView: View {
                 } else if let error = app.searchState.loadMoreError {
                     Text(error).foregroundStyle(AppDesign.Status.error)
                     Button("Retry loading more") { app.retryMoreResults() }.disabled(player.snapshot.sourceNeedsUpdate)
+                        .vimTarget(enabled: !player.snapshot.sourceNeedsUpdate) { app.retryMoreResults() }
                 } else if !app.searchState.isSearching && !app.searchState.results.isEmpty && !app.searchState.hasMore {
                     Text("All results loaded").font(.caption).foregroundStyle(AppDesign.muted).frame(maxWidth: .infinity)
                 }
@@ -62,7 +64,7 @@ struct SearchResultsView: View {
                     .background(GeometryReader { geometry in
                         Color.clear.preference(key: SearchBottomPreference.self, value: geometry.frame(in: .named("searchScroll")).minY)
                     }).accessibilityHidden(true)
-            }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
+            }.padding(28).frame(maxWidth: .infinity, alignment: .leading).vimRegion("search", scrolls: true)
         }
         .subtleScrollbars()
         .coordinateSpace(name: "searchScroll")
@@ -110,7 +112,7 @@ struct FavoritesView: View {
                     SearchVideoRow(app: app, player: player, video: video)
                 }
                 if let error = app.actionError { Text(error).foregroundStyle(AppDesign.Status.error) }
-            }.padding(28).frame(maxWidth: .infinity, alignment: .leading)
+            }.padding(28).frame(maxWidth: .infinity, alignment: .leading).vimRegion("favorites", scrolls: true)
         }.subtleScrollbars()
     }
 }
@@ -145,7 +147,8 @@ struct SearchVideoRow: View {
                     Spacer(minLength: 0)
                 }.contentShape(Rectangle())
             }.buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
-                .disabled(player.snapshot.sourceNeedsUpdate).accessibilityLabel("Play \(video.title) by \(video.creator)")
+                .disabled(player.snapshot.sourceNeedsUpdate).vimTarget(enabled: !player.snapshot.sourceNeedsUpdate) { app.play(video) }
+                .accessibilityLabel("Play \(video.title) by \(video.creator)")
             Text(duration).font(.system(size: 12)).monospacedDigit().foregroundStyle(AppDesign.muted)
                 .lineLimit(1).minimumScaleFactor(0.7).frame(width: SearchTrackColumns.duration, alignment: .trailing)
             AppIconButton(title: saved ? "Remove \(video.title) from Favorites" : "Save \(video.title) to Favorites", symbol: saved ? "heart.fill" : "heart") { app.toggleFavorite(video) }

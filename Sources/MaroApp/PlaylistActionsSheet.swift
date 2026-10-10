@@ -28,7 +28,8 @@ struct PlaylistActionsSheet: View {
             if let item = context.item { rowActions(item) } else { playlistActions }
             Text(library.status).font(.system(size: 11)).foregroundStyle(AppDesign.muted).fixedSize(horizontal: false, vertical: true)
             HStack {
-                Button("Cancel") { library.dismissActions() }.keyboardShortcut(.cancelAction).focused($cancelFocused)
+                Button("Cancel") { library.dismissActions() }.keyboardShortcut(.cancelAction)
+                    .vimTarget { library.dismissActions() }.focused($cancelFocused)
                 Spacer()
                 if library.busy { ProgressView().controlSize(.small) }
             }
@@ -46,10 +47,12 @@ struct PlaylistActionsSheet: View {
             Button { library.play(occurrenceID: item.id, in: context.playlist.id); library.dismissActions() } label: {
                 Label("Play from here", systemImage: "play.fill").frame(maxWidth: .infinity, alignment: .leading)
             }.buttonStyle(.borderedProminent).foregroundStyle(AppDesign.Text.onAccent).disabled(item.video == nil || library.busy)
+                .vimTarget(enabled: item.video != nil && !library.busy) { library.play(occurrenceID: item.id, in: context.playlist.id); library.dismissActions() }
             if let video = item.video {
                 Button { library.toggleFavorite(video) } label: {
                     Label(isFavorite ? "Remove from Favorites" : "Add to Favorites", systemImage: isFavorite ? "heart.fill" : "heart")
                 }.disabled(!isFavorite && player.snapshot.favorites.count >= 20)
+                    .vimTarget(enabled: isFavorite || player.snapshot.favorites.count < 20) { library.toggleFavorite(video) }
                 Text(player.snapshot.favorites.count >= 20 && !isFavorite
                     ? "Favorites are full (20 of 20). Remove one before adding another."
                     : "\(player.snapshot.favorites.count) of 20 Favorites saved on this Mac.")
@@ -58,6 +61,7 @@ struct PlaylistActionsSheet: View {
                     HStack {
                         Picker("Add to playlist", selection: $destination) { ForEach(destinations) { Text($0.title).tag($0.id) } }
                         Button("Add") { library.add(video, to: destination) }.disabled(destination.isEmpty || library.busy)
+                            .vimTarget(enabled: !destination.isEmpty && !library.busy) { library.add(video, to: destination) }
                     }
                 } else { Text("Create another playlist from the library to add this video there.").font(.system(size: 11)).foregroundStyle(AppDesign.muted) }
             } else { Text("This video is unavailable. It will be skipped during playback; you can still remove this occurrence.").font(.system(size: 12)).foregroundStyle(AppDesign.muted) }
@@ -71,7 +75,9 @@ struct PlaylistActionsSheet: View {
             }
             Button("Remove this occurrence", role: .destructive) {
                 library.remove(occurrenceID: item.id, from: context.playlist.id); library.dismissActions()
-            }.disabled(library.busy)
+            }.disabled(library.busy).vimTarget(enabled: !library.busy) {
+                library.remove(occurrenceID: item.id, from: context.playlist.id); library.dismissActions()
+            }
             Text("Removal changes this playlist only. It does not delete the video from YouTube or change the captured playback queue.")
                 .font(.system(size: 11)).foregroundStyle(AppDesign.muted)
         }
@@ -87,10 +93,14 @@ struct PlaylistActionsSheet: View {
                 Text("Delete “\(context.playlist.title)”? This permanently deletes the playlist from YouTube. The videos themselves are not deleted.").font(.system(size: 12))
                 HStack {
                     Button("Keep playlist") { confirmsDeletion = false; cancelFocused = true }
+                        .vimTarget { confirmsDeletion = false; cancelFocused = true }
                     Spacer()
                     Button("Delete playlist", role: .destructive) { library.delete(context.playlist); library.dismissActions() }.disabled(library.busy)
                 }
-            } else { Button("Delete playlist…", role: .destructive) { confirmsDeletion = true; cancelFocused = true }.disabled(library.busy) }
+            } else {
+                Button("Delete playlist…", role: .destructive) { confirmsDeletion = true; cancelFocused = true }.disabled(library.busy)
+                    .vimTarget(enabled: !library.busy) { confirmsDeletion = true; cancelFocused = true }
+            }
         }
     }
 }

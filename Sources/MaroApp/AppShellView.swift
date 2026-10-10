@@ -12,26 +12,32 @@ struct AppShellView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 8) {
-                topBar.frame(height: 64).zIndex(10)
+                topBar.vimRegion("top").frame(height: 64).zIndex(10)
                 HStack(spacing: 8) {
                     if app.libraryCollapsed {
-                        CompactLibraryRail(app: app, library: library, sidebarHovered: libraryHovered).frame(width: 72)
+                        CompactLibraryRail(app: app, library: library, sidebarHovered: libraryHovered).vimRegion("sidebar").frame(width: 72)
                             .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                             .onHover { libraryHovered = $0 }
                     } else {
-                        LibrarySidebar(app: app, library: library, sidebarHovered: libraryHovered).frame(width: geometry.size.width < 1200 ? 280 : 320)
+                        LibrarySidebar(app: app, library: library, sidebarHovered: libraryHovered).vimRegion("sidebar").frame(width: geometry.size.width < 1200 ? 280 : 320)
                             .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
                             .onHover { libraryHovered = $0 }
                     }
                     ZStack {
                         HomeView(app: app).opacity(app.route == .home ? 1 : 0).allowsHitTesting(app.route == .home).accessibilityHidden(app.route != .home)
+                            .vimEligible(app.route == .home)
                         SearchResultsView(app: app).opacity(app.route == .search ? 1 : 0).allowsHitTesting(app.route == .search).accessibilityHidden(app.route != .search)
+                            .vimEligible(app.route == .search)
                         if app.route == .favorites { FavoritesView(app: app) }
                         if case .playlist = app.route { PlaylistDetailView(app: app) }
-                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }.vimRegion("content").frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
+                    if app.shortcutsOpen {
+                        KeyboardShortcutsPanel(app: app).vimRegion("shortcuts").frame(width: 320)
+                            .background(AppDesign.surface).clipShape(RoundedRectangle(cornerRadius: 8)).tidalBorder(cornerRadius: 8)
+                    }
                 }.frame(maxHeight: .infinity)
-                BottomPlayerView(app: app, presentation: app.player).frame(height: 88)
+                BottomPlayerView(app: app, presentation: app.player).vimRegion("player").frame(height: 88)
             }.padding(.horizontal, 8).padding(.bottom, 4).background(AppDesign.chrome)
                 .foregroundStyle(AppDesign.Text.primary).preferredColorScheme(.dark).tint(AppDesign.green)
                 .background {
@@ -39,8 +45,8 @@ struct AppShellView: View {
                                      sidebarHovered: libraryHovered)
                 }
         }.sheet(isPresented: Binding(get: { library.pendingVideo != nil }, set: { if !$0 { library.pendingVideo = nil } })) {
-            AddToPlaylistSheet(library: library)
-        }
+            AddToPlaylistSheet(library: library).vimPresentation()
+        }.vimNavigation(app.vim)
     }
     private var topBar: some View {
         HStack(spacing: 12) {
@@ -50,6 +56,9 @@ struct AppShellView: View {
             AppIconButton(title: "Home", symbol: "house.fill") { app.showHome() }.background(Circle().fill(AppDesign.raised))
             GlobalSearchView(app: app).frame(maxWidth: 520)
             Spacer(minLength: 0)
+            VimNavigationToggle(navigator: app.vim)
+            AppIconButton(title: "Keyboard shortcuts", symbol: "questionmark") { app.shortcutsOpen.toggle() }
+                .background(Circle().fill(app.shortcutsOpen ? AppDesign.Surface.selected : AppDesign.raised))
             Button { accountPresented.toggle() } label: {
                 Image(systemName: "person.fill")
                     .font(.system(size: 22, weight: .medium))
@@ -60,7 +69,8 @@ struct AppShellView: View {
                     .background(Circle().fill(profileHovered ? AppDesign.Surface.hover : AppDesign.surface))
                     .contentShape(Circle())
             }
-            .buttonStyle(.plain).onHover { profileHovered = $0 }.padding(.trailing, 12)
+            .buttonStyle(.plain).vimTarget(cornerRadius: 24) { accountPresented.toggle() }
+            .onHover { profileHovered = $0 }.padding(.trailing, 12)
             .help("YouTube account").accessibilityLabel("YouTube account")
             .accessibilityIdentifier("account-profile")
             .accessibilityValue(accountPresented ? "Expanded" : "Collapsed")
@@ -75,7 +85,7 @@ struct AppShellView: View {
                         accountAction("Connect YouTube", symbol: "person.crop.circle.badge.checkmark", enabled: library.configured && !library.busy) { library.connect() }
                     }
                 }.padding(8).frame(width: 260).background(AppDesign.surface)
-                    .preferredColorScheme(.dark)
+                    .preferredColorScheme(.dark).vimPresentation()
             }
         }
     }
@@ -95,6 +105,7 @@ struct AppShellView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .contentShape(Rectangle())
         }.buttonStyle(.plain).disabled(!enabled)
+            .vimTarget(enabled: enabled) { accountPresented = false; Task { @MainActor in action() } }
             .onHover { hoveredAccountAction = $0 ? title : nil }
     }
 }
@@ -123,7 +134,7 @@ struct CompactLibraryRail: View {
                             }
                     }
                 }.frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.horizontal, 6).padding(.vertical, 4)
+                    .padding(.horizontal, 6).padding(.vertical, 4).vimRegion("list", scrolls: true)
             }.subtleScrollbars(sidebarHovered: sidebarHovered)
         }.padding(.top, 10).padding(.bottom, 6)
             .accessibilityElement(children: .contain).accessibilityLabel("Your library")
@@ -150,7 +161,7 @@ private struct CompactLibraryItem: View {
                 .background(RoundedRectangle(cornerRadius: 6).fill(selected ? AppDesign.Surface.selected : hovered ? AppDesign.Surface.hover : .clear))
                 .tidalBorder(cornerRadius: 6, interactive: selected, visible: selected || hovered)
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).onHover { hovered = $0 }
+        }.buttonStyle(.plain).vimTarget(action: action).onHover { hovered = $0 }
             .help("\(title)\n\(subtitle)")
             .accessibilityLabel("\(title), \(subtitle)").accessibilityValue(selected ? "Selected" : "")
     }
@@ -198,17 +209,19 @@ struct LibrarySidebar: View {
                     if library.playlists.isEmpty && library.connected && !library.busy && app.libraryFilter.isEmpty {
                         Text("Your playlists will appear here. Create one to get started.").font(.system(size: 12)).foregroundStyle(AppDesign.muted).padding(16)
                     }
-                }.padding(.horizontal, 6)
+                }.padding(.horizontal, 6).vimRegion("list", scrolls: true)
             }.subtleScrollbars(sidebarHovered: sidebarHovered)
             VStack(alignment: .leading, spacing: 8) {
                 if !library.connected {
                     Text("YouTube is not connected.").font(.system(size: 13, weight: .semibold))
                     Text("Reconnect to reload your playlists.").font(.system(size: 11)).foregroundStyle(AppDesign.muted)
-                    Button(library.configured ? "Reconnect YouTube" : "Import Google credentials…") {
-                        if library.configured { library.connect() } else { library.importCredentials() }
-                    }.buttonStyle(.borderedProminent).disabled(library.busy)
-                    if library.signingIn { Button("Cancel sign-in") { library.cancelSignIn() } }
-                    if library.canRetry { Button("Retry connection") { library.retryLast() }.disabled(library.busy) }
+                    let reconnect = { if library.configured { library.connect() } else { library.importCredentials() } }
+                    Button(library.configured ? "Reconnect YouTube" : "Import Google credentials…", action: reconnect)
+                        .buttonStyle(.borderedProminent).disabled(library.busy).vimTarget(enabled: !library.busy, action: reconnect)
+                    if library.signingIn { Button("Cancel sign-in") { library.cancelSignIn() }.vimTarget { library.cancelSignIn() } }
+                    if library.canRetry {
+                        Button("Retry connection") { library.retryLast() }.disabled(library.busy).vimTarget(enabled: !library.busy) { library.retryLast() }
+                    }
                 }
             }.padding(16)
         }
@@ -228,12 +241,24 @@ struct AddToPlaylistSheet: View {
             } else { Text("Connect YouTube from the account menu to add videos to your own playlists.") }
             Text(library.status).font(.caption).foregroundStyle(AppDesign.Text.secondary)
             HStack {
-                Button("Cancel") { library.pendingVideo = nil }.keyboardShortcut(.cancelAction)
+                Button("Cancel") { library.pendingVideo = nil }.keyboardShortcut(.cancelAction).vimTarget { library.pendingVideo = nil }
                 Spacer()
                 Button("Add") { library.addPending() }.buttonStyle(.borderedProminent).foregroundStyle(AppDesign.Text.onAccent)
                     .disabled(!library.connected || library.destination.isEmpty || library.busy).keyboardShortcut(.defaultAction)
+                    .vimTarget(enabled: library.connected && !library.destination.isEmpty && !library.busy) { library.addPending() }
             }
         }.foregroundStyle(AppDesign.Text.primary).padding(24).frame(width: 420)
             .background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0).preferredColorScheme(.dark).tint(AppDesign.Accent.primary)
+    }
+}
+
+/// Switches Vim navigation on or off; the choice persists across launches.
+struct VimNavigationToggle: View {
+    @ObservedObject var navigator: VimNavigator
+    var body: some View {
+        AppIconButton(title: navigator.enabled ? "Turn off Vim navigation" : "Turn on Vim navigation", symbol: "keyboard") {
+            navigator.enabled.toggle()
+        }.background(Circle().fill(navigator.enabled ? AppDesign.Surface.selected : .clear))
+            .accessibilityIdentifier("vim-navigation-toggle").accessibilityValue(navigator.enabled ? "On" : "Off")
     }
 }

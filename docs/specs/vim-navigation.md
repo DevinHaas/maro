@@ -93,3 +93,18 @@ Exact scoring weights and tie-breaking, initial focus when no eligible target is
 The graph-free scan is inexpensive to reverse and adds no architectural lock-in, so a separate ADR is unnecessary at this stage.
 
 The user confirmed the hosted application-window testing seam. Publish this specification to GitHub Issues in DevinHaas/maro with the existing ready-for-agent label.
+
+## Implementation Choices
+
+These fill the gaps listed above. They are implementation defaults, not prior user decisions.
+
+- **Toggle:** a keyboard icon button in the top bar, beside the account button ("Turn on/off Vim navigation", value On/Off). It is on by default and persists in user defaults (`MaroVimNavigation`). When it is off, targets drop out of the Tab order they gained and letters pass through.
+- **Visible focus:** like CSS `:focus-visible`, the highlight shows after h/j/k/l, Tab or Return focus changes and hides after a click. Return activates only a visibly focused target.
+- **Initial focus:** when nothing is visibly focused (first use, after a click, or after the focused target disappeared), the first h/j/k/l focuses the first visible content target in reading order. Hidden focus, such as SwiftUI's automatic focus when the window opens, is ignored.
+- **Scoring:** a candidate must lie beyond the origin's edge in the requested direction. Candidates overlapping the origin across the movement axis win. Among those, the nearest row or column wins (8-point tolerance), then the closest centre. Unaligned candidates are used inside the origin's own region before it scrolls, and anywhere visible as a last resort. Ties break by position, so the result is deterministic.
+- **Regions:** top bar, sidebar (header and scrolling list), content (per route; Home album rows are nested horizontal regions), player and each sheet or popover. Movement widens from the innermost region outwards, scrolling each scroll region by half a viewport until it reaches the region's actual end.
+- **Recovery and dead ends:** if the focused target disappears (content change, route change, lazy row reuse), the next key starts from the initial target. With no destination, focus stays put; there is no wraparound.
+- **Presentations:** an open sheet or popover owns navigation. Closing it resumes the focus held before it opened.
+- **Search preview:** while the global search preview is open, its own arrow/Return/Escape handling owns the keyboard.
+
+Acceptance scenarios live in `scripts/check-vim-navigation.swift` (hosted window, real key events, accessibility focus and rendered highlight).

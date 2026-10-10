@@ -80,6 +80,8 @@ struct AppIconButton: View {
     let symbol: String
     var enabled = true
     var prominent = false
+    /// False when the caller attaches its own navigation target around this button.
+    var vim = true
     let action: () -> Void
     @State private var hovered = false
     var body: some View {
@@ -88,6 +90,7 @@ struct AppIconButton: View {
                 .frame(width: 38, height: 38)
                 .contentShape(Circle())
         }.buttonStyle(TidalIconButtonStyle(prominent: prominent, hovered: hovered, enabled: enabled)).disabled(!enabled)
+            .vimTarget(enabled: enabled && vim, cornerRadius: 19, action: action)
             .onHover { hovered = $0 }.help(title).accessibilityLabel(title)
     }
 }
@@ -150,6 +153,6 @@ struct LibraryRow: View {
                 .background(RoundedRectangle(cornerRadius: 6).fill(selected ? AppDesign.Surface.selected : hovered ? AppDesign.Surface.hover : .clear))
                 .tidalBorder(cornerRadius: 6, interactive: selected, visible: selected || hovered)
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).onHover { hovered = $0 }.accessibilityLabel("\(title), \(subtitle)")
+        }.buttonStyle(.plain).vimTarget(action: action).onHover { hovered = $0 }.accessibilityLabel("\(title), \(subtitle)")
     }
 }
