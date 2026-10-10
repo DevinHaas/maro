@@ -35,7 +35,9 @@ for bounded launch recovery. Existing playback state and favorites remain in
 
 Stop Maro before replacing or removing an installation. Repeating installation
 with identical inputs does nothing. An upgrade moves the verified prior install
-to a sibling backup folder before replacing it. Edited files or changed file
+to a hidden sibling backup folder (`.Maro Local.backup-<id>`, ignored by
+Spotlight, Raycast and LaunchServices) before replacing it; the next successful
+upgrade deletes the backup it supersedes, so at most one remains. Edited files or changed file
 permissions cause an explicit refusal, preserving the installation for review.
 
 ```sh
@@ -45,8 +47,8 @@ python3 scripts/install.py uninstall --prefix "$HOME/Applications/Maro Local"
 
 Rollback restores the previous verified install. Uninstall removes only the
 unchanged managed installation; it preserves backups, state and bar configuration.
-Remove its `source` line when uninstalling, then reload your bar normally. Backup
-folders remain available for manual recovery and are never swept automatically.
+Remove its `source` line when uninstalling, then reload your bar normally. A backup
+left by uninstall, or one that was edited, is never swept automatically.
 Run only one installer operation at a time.
 
 The runnable round-trip check uses temporary folders and two different signed
