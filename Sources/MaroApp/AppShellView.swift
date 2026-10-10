@@ -207,14 +207,27 @@ struct LibrarySidebar: View {
                         Text("No matching playlists").foregroundStyle(AppDesign.muted).padding(20)
                     }
                     if library.playlists.isEmpty && library.connected && !library.busy && app.libraryFilter.isEmpty {
-                        Text("Your playlists will appear here. Create one to get started.").font(.system(size: 12)).foregroundStyle(AppDesign.muted).padding(16)
+                        if library.canRetry {
+                            // A failed load (e.g. an expired Google sign-in) must not read as an empty library.
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(library.status).font(.system(size: 12)).foregroundStyle(AppDesign.Status.error)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                HStack {
+                                    Button("Retry") { library.retryLast() }.vimTarget { library.retryLast() }
+                                    Button("Reconnect YouTube") { library.connect() }.vimTarget { library.connect() }
+                                }
+                            }.padding(16)
+                        } else {
+                            Text("Your playlists will appear here. Create one to get started.").font(.system(size: 12)).foregroundStyle(AppDesign.muted).padding(16)
+                        }
                     }
                 }.padding(.horizontal, 6).vimRegion("list", scrolls: true)
             }.subtleScrollbars(sidebarHovered: sidebarHovered)
             VStack(alignment: .leading, spacing: 8) {
                 if !library.connected {
                     Text("YouTube is not connected.").font(.system(size: 13, weight: .semibold))
-                    Text("Reconnect to reload your playlists.").font(.system(size: 11)).foregroundStyle(AppDesign.muted)
+                    Text(library.status)
+                        .font(.system(size: 11)).foregroundStyle(AppDesign.muted).fixedSize(horizontal: false, vertical: true)
                     let reconnect = { if library.configured { library.connect() } else { library.importCredentials() } }
                     Button(library.configured ? "Reconnect YouTube" : "Import Google credentials…", action: reconnect)
                         .buttonStyle(.borderedProminent).disabled(library.busy).vimTarget(enabled: !library.busy, action: reconnect)

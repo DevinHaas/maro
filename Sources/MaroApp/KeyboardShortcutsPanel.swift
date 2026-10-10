@@ -28,7 +28,7 @@ struct KeyboardShortcutsPanel: View {
             ("Search or play selected", ["Return"]),
             ("Close suggestions", ["Esc"]),
         ]),
-        ("Playback timeline", [
+        ("Playback", [
             ("Seek back 5 seconds", ["←"]),
             ("Seek forward 5 seconds", ["→"]),
         ]),

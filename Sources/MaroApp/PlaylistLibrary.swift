@@ -613,7 +613,11 @@ final class PlaylistLibrary: ObservableObject {
             defer { busy = false; operation = nil }
             do { try await action(); canRetry = false; retry = nil }
             catch is CancellationError { status = "Sign-in cancelled."; retry = nil }
-            catch { stale = !playlists.isEmpty; announce(error.localizedDescription); canRetry = true }
+            catch {
+                stale = !playlists.isEmpty; announce(error.localizedDescription)
+                // An expired sign-in cannot be retried; show the reconnect prompt instead.
+                if let account, !account.isConnected { connected = false } else { canRetry = true }
+            }
         }
     }
 

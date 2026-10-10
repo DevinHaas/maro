@@ -421,6 +421,11 @@ public final class MaroController {
         try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
     }
 
+    /// Relative seek from the newest requested position, so repeated presses accumulate.
+    public func seek(by seconds: Double) {
+        seek(to: (pendingSeek ?? seekTarget ?? engine.positionSeconds) + seconds, timelineID: selectionID)
+    }
+
     /// Coalesces commits while preserving the latest explicit transport intent.
     public func seek(to seconds: Double, timelineID: UUID) {
         guard !isShutDown, !selecting, !needsUpdate,

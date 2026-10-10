@@ -167,6 +167,12 @@ private struct GlobalSearchField: NSViewRepresentable {
                    !(field.window?.firstResponder is NSText) {
                     self.app.shortcutsOpen.toggle(); return nil
                 }
+                // ←/→ seek 5 seconds unless a text field or slider (which handles arrows itself) has focus.
+                if event.keyCode == 123 || event.keyCode == 124, !self.app.previewOpen,
+                   event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
+                   !(field.window?.firstResponder is NSText), !(field.window?.firstResponder is NSSlider) {
+                    self.app.controller.seek(by: event.keyCode == 123 ? -5 : 5); return nil
+                }
                 guard self.app.previewOpen else {
                     if event.keyCode == 53, self.app.shortcutsOpen { self.app.shortcutsOpen = false; return nil }
                     return event

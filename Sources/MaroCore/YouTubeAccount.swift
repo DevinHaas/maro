@@ -101,10 +101,18 @@ public final class YouTubeAccount {
             throw YouTubeAccountError("Connect your YouTube account first.")
         }
         let task = Task { @MainActor in
-            let response = try await self.exchange([
-                "grant_type": "refresh_token", "refresh_token": refresh,
-                "client_id": credentials.clientID, "client_secret": credentials.clientSecret
-            ])
+            let response: [String: Any]
+            do {
+                response = try await self.exchange([
+                    "grant_type": "refresh_token", "refresh_token": refresh,
+                    "client_id": credentials.clientID, "client_secret": credentials.clientSecret
+                ])
+            } catch is InvalidGrant {
+                // Google revoked or expired the refresh token (7 days for OAuth apps in Testing):
+                // only a new sign-in helps, so stop reporting this account as connected.
+                self.credentials?.refreshToken = nil
+                throw YouTubeAccountError("Your YouTube sign-in expired. Reconnect YouTube to load your playlists.")
+            }
             try Task.checkCancellation()
             return try self.accept(response)
         }
@@ -131,11 +139,18 @@ public final class YouTubeAccount {
             "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: safe)!)"
         }.joined(separator: "&").data(using: .utf8)
         let (data, response) = try await URLSession.shared.data(for: request)
+        if (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String == "invalid_grant" {
+            throw InvalidGrant()
+        }
         guard (response as? HTTPURLResponse)?.statusCode == 200,
               let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw YouTubeAccountError("Google could not authorize Maro. Connect again; check your consent settings if this persists.")
         }
         return json
+    }
+
+    private struct InvalidGrant: LocalizedError {
+        var errorDescription: String? { "Google could not authorize Maro. Connect again; check your consent settings if this persists." }
     }
 
     private var keychainQuery: [String: Any] {

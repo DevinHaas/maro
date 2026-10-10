@@ -174,6 +174,10 @@ private actor SearchCallProbe {
     controller.seek(to: 0.4, timelineID: timelineID)
     controller.seek(to: 0.7, timelineID: timelineID)
     #expect(controller.snapshot.seekTarget == 0.7)
+    // Relative seeks accumulate from the pending target, not the lagging playhead.
+    controller.seek(by: -0.3)
+    controller.seek(by: 0.3)
+    #expect(abs((controller.snapshot.seekTarget ?? 0) - 0.7) < 0.001)
     controller.pause()
     while abs((controller.snapshot.loadedVideo?.positionSeconds ?? 0) - 0.7) > 0.05,
           ContinuousClock().now < deadline {
