@@ -45,6 +45,19 @@ def checked_receipt(prefix):
     return saved
 
 
+def checked_backup(prefix, backup):
+    backup = Path(backup)
+    # Hidden sibling: same volume for atomic rename, and LaunchServices/Spotlight skip
+    # dot-prefixed paths, so the backup Maro.app never shows up as a duplicate app.
+    if backup.parent != prefix.parent or not backup.name.startswith("." + prefix.name + ".backup-"):
+        raise ValueError("Invalid backup location")
+    # Backup receipt still identifies its original destination.
+    previous = json.loads((backup / RECEIPT).read_text())
+    if backup.is_symlink() or (backup / RECEIPT).is_symlink() or previous.get("prefix") != str(prefix) or previous.get("files") != inventory(backup):
+        raise ValueError("Backup changed; preserving it")
+    return backup
+
+
 def install(app, prefix):
     app = app.resolve()
     root = Path(__file__).resolve().parents[1]
@@ -85,7 +98,7 @@ def install(app, prefix):
             print("Already installed; unchanged")
             return
         if old:
-            backup = prefix.with_name(prefix.name + ".backup-" + uuid.uuid4().hex)
+            backup = prefix.with_name("." + prefix.name + ".backup-" + uuid.uuid4().hex)
         saved = {"version": 1, "prefix": str(prefix), "files": files,
                  "backup": str(backup) if backup else None}
         (stage / RECEIPT).write_text(json.dumps(saved, indent=2) + "\n")
@@ -97,6 +110,12 @@ def install(app, prefix):
             if backup:
                 backup.rename(prefix)
             raise
+        # Only the newest backup is referenced by a receipt; drop the one it supersedes.
+        if old and old.get("backup"):
+            try:
+                shutil.rmtree(checked_backup(prefix, old["backup"]))
+            except (OSError, ValueError):
+                pass  # Missing, legacy-named or changed backups are left untouched.
         print("Installed: " + str(prefix))
         print("SketchyBar source line: source " + shlex.quote(str(prefix / "sketchybar/maro.sh")))
     finally:
@@ -113,13 +132,7 @@ def remove(prefix, rollback=False):
     if rollback:
         if not backup:
             raise ValueError("No previous installation to restore")
-        backup = Path(backup)
-        if backup.parent != prefix.parent or not backup.name.startswith(prefix.name + ".backup-"):
-            raise ValueError("Invalid backup location")
-        # Backup receipt still identifies its original destination.
-        previous = json.loads((backup / RECEIPT).read_text())
-        if backup.is_symlink() or (backup / RECEIPT).is_symlink() or previous.get("prefix") != str(prefix) or previous.get("files") != inventory(backup):
-            raise ValueError("Backup changed; preserving it")
+        backup = checked_backup(prefix, backup)
     retired = prefix.with_name(".maro-removed-" + uuid.uuid4().hex)
     prefix.rename(retired)
     try:

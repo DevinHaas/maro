@@ -37,9 +37,15 @@ def main():
         wrapper.write_bytes(original)
         run("install", second)
         updated = json.loads((prefix / ".maro-install.json").read_text())
-        assert updated["backup"] and Path(updated["backup"]).is_dir()
+        superseded = Path(updated["backup"])
+        assert superseded.is_dir() and superseded.name.startswith(".")
+        upgraded = (prefix / ".maro-install.json").read_bytes()
+        run("install", first)
+        latest = Path(json.loads((prefix / ".maro-install.json").read_text())["backup"])
+        assert latest.is_dir() and not superseded.exists()
+        assert sorted(p.name for p in root.iterdir() if not p.name.startswith(".")) == [prefix.name, unrelated.name]
         run("rollback")
-        assert (prefix / ".maro-install.json").read_bytes() == receipt
+        assert (prefix / ".maro-install.json").read_bytes() == upgraded
         run("uninstall")
         run("uninstall")
         assert not prefix.exists()
@@ -48,7 +54,7 @@ def main():
         (prefix / "keep.txt").write_text("unmanaged")
         run("install", first, success=False)
         assert (prefix / "keep.txt").read_text() == "unmanaged"
-        print("PASS: install, idempotence, quoted paths, edit protection, upgrade backup, rollback, removal, unrelated preservation")
+        print("PASS: install, idempotence, quoted paths, edit protection, hidden single upgrade backup, rollback, removal, unrelated preservation")
 
 
 if __name__ == "__main__":
