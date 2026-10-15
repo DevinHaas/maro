@@ -54,12 +54,33 @@ extension View {
         }
     }
 
+    /// Pointing-hand cursor over a clickable view, like CSS `cursor: pointer`.
+    func pointingHandCursor(_ enabled: Bool = true) -> some View { modifier(PointingHandCursor(enabled: enabled)) }
+
     func tidalCapsuleBorder(focused: Bool = false, interactive: Bool = false) -> some View {
         overlay {
             Capsule().inset(by: focused ? 2 : 0)
                 .strokeBorder(focused ? AppDesign.Border.focus : interactive ? AppDesign.Border.interactive : AppDesign.Border.decorative, lineWidth: 1)
                 .allowsHitTesting(false).accessibilityHidden(true)
         }
+    }
+}
+
+/// `set()` on every move instead of push/pop: cursor rects can't strand a pushed cursor, and
+/// moving straight between adjacent controls re-asserts whichever one is under the pointer.
+private struct PointingHandCursor: ViewModifier {
+    let enabled: Bool
+    @State private var hovering = false
+    func body(content: Content) -> some View {
+        content.onContinuousHover { phase in
+            switch phase {
+            // Disabled stays silent so an enclosing enabled target still wins.
+            case .active: hovering = true; if enabled { NSCursor.pointingHand.set() }
+            case .ended: hovering = false; NSCursor.arrow.set()
+            }
+        }
+        .onChange(of: enabled) { if !$0 && hovering { NSCursor.arrow.set() } }
+        .onDisappear { if hovering { NSCursor.arrow.set() } }
     }
 }
 

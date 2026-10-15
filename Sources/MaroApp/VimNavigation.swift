@@ -7,10 +7,6 @@ enum VimDirection { case left, down, up, right }
 /// navigation targets, Return activates the focused target. Targets report their current frames;
 /// each movement is a linear scan over them (no persistent graph to invalidate).
 @MainActor final class VimNavigator: ObservableObject {
-    private static let defaultsKey = "MaroVimNavigation"
-    @Published var enabled: Bool {
-        didSet { UserDefaults.standard.set(enabled, forKey: Self.defaultsKey); if !enabled { focused = nil } }
-    }
     /// The target that movement starts from and Return activates.
     @Published fileprivate(set) var focused: UUID?
     /// Like CSS `:focus-visible`: the highlight shows after keyboard focus changes, not after clicks.
@@ -30,8 +26,6 @@ enum VimDirection { case left, down, up, right }
     private var resumeFocus: [String: UUID] = [:]
     private var monitor: Any?
     private var retrying = false
-
-    init() { enabled = UserDefaults.standard.object(forKey: Self.defaultsKey) as? Bool ?? true }
 
     private var scope: String { presentations.last ?? Self.mainScope }
     nonisolated static let mainScope = "main"
@@ -56,7 +50,7 @@ enum VimDirection { case left, down, up, right }
         guard let window = event.window, owns(window) else { return event }
         if event.type != .keyDown { showsFocus = false; return event }
         if event.keyCode == 48 { showsFocus = true; return event } // Tab moves real focus; show it.
-        guard enabled, !isSuspended(),
+        guard !isSuspended(),
               event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
               !(window.firstResponder is NSText) else { return event }
         if event.keyCode == 36 || event.keyCode == 76 {
@@ -239,9 +233,11 @@ extension View {
             .background(VimAnchor(navigator: navigator, key: VimNavigator.key(VimNavigator.mainScope, [])))
     }
     /// A navigation target. Movement focuses it; Return runs `action`, the control's own action.
+    /// Every target is clickable, so it also gets the pointing-hand cursor.
     func vimTarget(enabled: Bool = true, focusable: Bool = true, cornerRadius: CGFloat = 6,
                    action: @escaping () -> Void) -> some View {
         modifier(VimTargetModifier(enabled: enabled, focusable: focusable, cornerRadius: cornerRadius, action: action))
+            .pointingHandCursor(enabled)
     }
     /// A navigation region. Apply inside a `ScrollView` with `scrolls` so movement can scroll it.
     func vimRegion(_ name: String, scrolls: Bool = false) -> some View { modifier(VimRegionModifier(name: name, scrolls: scrolls)) }
@@ -286,7 +282,7 @@ private struct ActiveVimTarget: ViewModifier {
         box.scope = context.scope
         box.region = context.region
         return content
-            .focusable(focusable && eligible && navigator.enabled)
+            .focusable(focusable && eligible)
             .focused($focused)
             .overlay {
                 if navigator.focused == id && navigator.showsFocus {

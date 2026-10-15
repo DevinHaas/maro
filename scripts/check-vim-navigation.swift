@@ -67,7 +67,6 @@ import SwiftUI
         let library = PlaylistLibrary(controller: controller, api: api)
         library.playlists = (0..<30).map { YouTubePlaylist(id: "playlist\($0)", title: "Playlist \($0 + 1)", count: 3) }
         let app = ApplicationModel(controller: controller, library: library)
-        app.vim.enabled = true
         hosting = NSHostingView(rootView: AppShellView(app: app, library: library))
         window = FixtureWindow(contentRect: NSRect(x: 80, y: 80, width: 1100, height: 720),
             styleMask: [.titled, .resizable], backing: .buffered, defer: false)
@@ -215,20 +214,6 @@ import SwiftUI
         try await press("\r", in: sheet); try await settle(500)
         try check(library.pendingVideo == nil && window.attachedSheet == nil, "Return must run Cancel")
 
-        // Vim navigation can be switched off with its own control; letters then do nothing.
-        try await click(nil)
-        _ = try await step("j")
-        for _ in 0..<6 where focusedFrame().minY > 64 { _ = try await step("k") } // Into the top bar…
-        for _ in 0..<6 where focusedLabel() != "Turn off Vim navigation" { _ = try await step("l") } // …then along it.
-        try check(focusedLabel() == "Turn off Vim navigation", "toggle reachable: \(log.suffix(6))")
-        try await press("\r")
-        try check(!app.vim.enabled, "toggle must disable Vim navigation")
-        let disabledFocus = focusedLabel()
-        try await press("j"); try await press("h")
-        try check(focusedLabel() == disabledFocus, "disabled Vim navigation must not move focus")
-        app.vim.enabled = true
-        try await settle()
-
         // Another window keeps its input; the application window's focus does not move.
         _ = try await step("j")
         let held = focusedLabel()
@@ -250,7 +235,6 @@ import SwiftUI
     /// Origin at the top-left; a closer target down-right; the corresponding target straight below.
     @MainActor private static func adversarialAlignment() async throws {
         let navigator = VimNavigator()
-        navigator.enabled = true
         let view = ZStack(alignment: .topLeading) {
             Button("Origin") {}.vimTarget {}.frame(width: 120, height: 40).position(x: 80, y: 40)
             Button("Diagonal") {}.vimTarget {}.frame(width: 120, height: 40).position(x: 210, y: 100)

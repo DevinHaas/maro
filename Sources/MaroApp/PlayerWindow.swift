@@ -252,7 +252,7 @@ struct PlayerCard: View {
                     .frame(width: 24, height: 24)
                     .contentShape(Rectangle())
             }
-            .buttonStyle(.plain).help("Hide player")
+            .buttonStyle(.plain).pointingHandCursor().help("Hide player")
             .accessibilityLabel("Hide player").accessibilityIdentifier("hide-player")
             .padding(4)
         }
@@ -360,7 +360,7 @@ struct PlayerCard: View {
                                         }
                                         Spacer(minLength: 0)
                                     }.padding(8).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                                }.buttonStyle(.plain).disabled(snapshot.sourceNeedsUpdate)
+                                }.buttonStyle(.plain).disabled(snapshot.sourceNeedsUpdate).pointingHandCursor(!snapshot.sourceNeedsUpdate)
                                 .contextMenu { Button("Remove favorite") { action(.favoriteRemove, entry.id) } }
                                 AppIconButton(title: "Remove \(entry.title) from favorites", symbol: "heart.fill") {
                                     action(.favoriteRemove, entry.id)
@@ -390,7 +390,7 @@ private struct PlayerNavigationButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .tidalBorder(cornerRadius: 6)
                 .contentShape(Rectangle())
-        }.buttonStyle(.plain).onHover { hovered = $0 }.accessibilityLabel(title)
+        }.buttonStyle(.plain).pointingHandCursor().onHover { hovered = $0 }.accessibilityLabel(title)
     }
 }
 

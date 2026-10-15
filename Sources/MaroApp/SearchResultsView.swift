@@ -49,7 +49,8 @@ struct SearchResultsView: View {
                     }
                 }
                 if app.searchState.isSearching {
-                    TrackListSkeleton(label: "Loading search results", identifier: "search-results-loading")
+                    // One placeholder per visible row (72pt row + 6pt spacing), so the skeleton fills the pane.
+                    TrackListSkeleton(count: max(4, Int(viewport.size.height / 78) + 1), label: "Loading search results", identifier: "search-results-loading")
                 }
                 if app.searchState.isLoadingMore {
                     TrackListSkeleton(count: 3, label: "Loading more tracks", identifier: "search-more-loading")
@@ -157,7 +158,7 @@ struct SearchVideoRow: View {
                 Button(saved ? "Remove from Favorites" : "Save to Favorites") { app.toggleFavorite(video) }
                 Button("Add to playlist…") { app.offerAdd(video) }
             } label: { Text("⋮").font(.system(size: 22, weight: .semibold)).frame(width: SearchTrackColumns.actions, height: 38) }
-                .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+                .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().pointingHandCursor()
                 .help("Actions for \(video.title)").accessibilityLabel("Actions for \(video.title)")
         }.padding(.horizontal, SearchTrackColumns.inset).padding(.vertical, 10).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.Surface.hover : current ? AppDesign.Surface.selected : .clear))

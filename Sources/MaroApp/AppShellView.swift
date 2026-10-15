@@ -56,7 +56,6 @@ struct AppShellView: View {
             AppIconButton(title: "Home", symbol: "house.fill") { app.showHome() }.background(Circle().fill(AppDesign.raised))
             GlobalSearchView(app: app).frame(maxWidth: 520)
             Spacer(minLength: 0)
-            VimNavigationToggle(navigator: app.vim)
             AppIconButton(title: "Keyboard shortcuts", symbol: "questionmark") { app.shortcutsOpen.toggle() }
                 .background(Circle().fill(app.shortcutsOpen ? AppDesign.Surface.selected : AppDesign.raised))
             Button { accountPresented.toggle() } label: {
@@ -191,7 +190,7 @@ struct LibrarySidebar: View {
                 TextField("Search your library", text: $app.libraryFilter).textFieldStyle(.plain).focused($filterFocused).accessibilityLabel("Filter your library")
                 if !app.libraryFilter.isEmpty {
                     Button { app.libraryFilter = "" } label: { Image(systemName: "xmark.circle.fill") }
-                        .buttonStyle(.plain).accessibilityLabel("Clear library filter")
+                        .buttonStyle(.plain).pointingHandCursor().accessibilityLabel("Clear library filter")
                 }
             }.padding(10).background(AppDesign.raised).clipShape(Capsule()).tidalCapsuleBorder(focused: filterFocused, interactive: true).padding(.horizontal, 12)
             ScrollView {
@@ -250,7 +249,7 @@ struct AddToPlaylistSheet: View {
             Text(library.pendingVideo?.title ?? "").lineLimit(2).foregroundStyle(AppDesign.Text.secondary)
             if library.connected {
                 Picker("Playlist", selection: $library.destination) { ForEach(library.playlists) { Text($0.title).tag($0.id) } }
-                if library.playlists.isEmpty { Button("Create private playlist…") { library.create() } }
+                if library.playlists.isEmpty { Button("Create private playlist…") { library.create() }.pointingHandCursor() }
             } else { Text("Connect YouTube from the account menu to add videos to your own playlists.") }
             Text(library.status).font(.caption).foregroundStyle(AppDesign.Text.secondary)
             HStack {
@@ -262,16 +261,5 @@ struct AddToPlaylistSheet: View {
             }
         }.foregroundStyle(AppDesign.Text.primary).padding(24).frame(width: 420)
             .background(AppDesign.Surface.raised).tidalBorder(cornerRadius: 0).preferredColorScheme(.dark).tint(AppDesign.Accent.primary)
-    }
-}
-
-/// Switches Vim navigation on or off; the choice persists across launches.
-struct VimNavigationToggle: View {
-    @ObservedObject var navigator: VimNavigator
-    var body: some View {
-        AppIconButton(title: navigator.enabled ? "Turn off Vim navigation" : "Turn on Vim navigation", symbol: "keyboard") {
-            navigator.enabled.toggle()
-        }.background(Circle().fill(navigator.enabled ? AppDesign.Surface.selected : .clear))
-            .accessibilityIdentifier("vim-navigation-toggle").accessibilityValue(navigator.enabled ? "On" : "Off")
     }
 }

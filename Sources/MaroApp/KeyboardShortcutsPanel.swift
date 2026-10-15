@@ -64,7 +64,7 @@ struct KeyboardShortcutsPanel: View {
                     .accessibilityLabel("Search keyboard shortcuts")
                 if !query.isEmpty {
                     Button { query = "" } label: { Image(systemName: "xmark.circle.fill") }
-                        .buttonStyle(.plain).accessibilityLabel("Clear shortcut search")
+                        .buttonStyle(.plain).pointingHandCursor().accessibilityLabel("Clear shortcut search")
                 }
             }.padding(10).background(AppDesign.raised).clipShape(Capsule())
                 .tidalCapsuleBorder(focused: queryFocused, interactive: true).padding(.horizontal, 12)

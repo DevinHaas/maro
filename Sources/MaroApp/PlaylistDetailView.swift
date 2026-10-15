@@ -176,7 +176,7 @@ private struct PlaylistDetailContent: View {
             if !searchQuery.isEmpty {
                 Button { searchQuery = "" } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(AppDesign.muted)
-                }.buttonStyle(.plain).accessibilityLabel("Clear playlist search")
+                }.buttonStyle(.plain).pointingHandCursor().accessibilityLabel("Clear playlist search")
             }
         }
         .padding(.horizontal, 10).frame(minWidth: 96, maxWidth: 260, minHeight: 34, maxHeight: 34)

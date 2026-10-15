@@ -69,9 +69,10 @@ struct PlaylistActionsSheet: View {
                 Stepper("Move to position \(position)", value: $position, in: 1...max(1, library.items.count))
                 Button("Move") { library.move(occurrenceID: item.id, in: context.playlist.id, to: position - 1) }
                     .disabled(item.resourceVideoID == nil || !library.canReorder || library.selected?.id != context.playlist.id)
+                    .pointingHandCursor(item.resourceVideoID != nil && library.canReorder && library.selected?.id == context.playlist.id)
             }.disabled(item.resourceVideoID == nil || !library.canReorder)
             if library.canRetry || library.reorderState == .unconfirmed {
-                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") { library.retryLast() }.disabled(library.busy)
+                Button(library.reorderState == .rejected ? "Retry move" : "Refresh YouTube") { library.retryLast() }.disabled(library.busy).pointingHandCursor(!library.busy)
             }
             Button("Remove this occurrence", role: .destructive) {
                 library.remove(occurrenceID: item.id, from: context.playlist.id); library.dismissActions()
@@ -88,6 +89,7 @@ struct PlaylistActionsSheet: View {
             TextField("Playlist name", text: $name).textFieldStyle(.roundedBorder).accessibilityLabel("Playlist name")
             Button("Save name") { library.rename(playlistID: context.playlist.id, title: name); library.dismissActions() }
                 .disabled(library.busy || name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || name.count > 150)
+                .pointingHandCursor(!library.busy && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && name.count <= 150)
             Divider()
             if confirmsDeletion {
                 Text("Delete “\(context.playlist.title)”? This permanently deletes the playlist from YouTube. The videos themselves are not deleted.").font(.system(size: 12))
@@ -96,6 +98,7 @@ struct PlaylistActionsSheet: View {
                         .vimTarget { confirmsDeletion = false; cancelFocused = true }
                     Spacer()
                     Button("Delete playlist", role: .destructive) { library.delete(context.playlist); library.dismissActions() }.disabled(library.busy)
+                        .pointingHandCursor(!library.busy)
                 }
             } else {
                 Button("Delete playlist…", role: .destructive) { confirmsDeletion = true; cancelFocused = true }.disabled(library.busy)

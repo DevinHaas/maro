@@ -147,7 +147,8 @@ struct SaveDestinationButton: View {
                     .frame(maxHeight: 100).subtleScrollbars()
             }
             if library.canRetry {
-                Button("Refresh YouTube library") { library.retryLast() }.disabled(library.busy || saving).font(.system(size: 11))
+                Button("Refresh YouTube library") { library.retryLast() }.disabled(library.busy || saving)
+                    .pointingHandCursor(!library.busy && !saving).font(.system(size: 11))
             }
             if library.connected && !destinations.isEmpty {
                 Divider().overlay(AppDesign.Border.decorative)
@@ -171,7 +172,7 @@ struct SaveDestinationButton: View {
                 Text("Connect YouTube to save to your playlists.").font(.system(size: 11)).foregroundStyle(AppDesign.muted)
                 Button(library.configured ? "Connect YouTube" : "Import Google credentials…") {
                     if library.configured { library.connect() } else { library.importCredentials() }
-                }.buttonStyle(.borderedProminent).disabled(library.busy)
+                }.buttonStyle(.borderedProminent).disabled(library.busy).pointingHandCursor(!library.busy)
             }.padding(.vertical, 6)
         } else if library.busy && library.playlists.isEmpty {
             progress("Loading playlists…")

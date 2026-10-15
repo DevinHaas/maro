@@ -12,7 +12,7 @@ struct GlobalSearchView: View {
             GlobalSearchField(app: app, geometry: geometry, focused: $fieldFocused)
             if !app.globalQuery.isEmpty {
                 Button { app.globalQuery = ""; app.focusSearch() } label: { Image(systemName: "xmark") }
-                    .buttonStyle(.plain).accessibilityLabel("Clear global search")
+                    .buttonStyle(.plain).pointingHandCursor().accessibilityLabel("Clear global search")
             }
         }.padding(.horizontal, 18).frame(height: 44).background(AppDesign.raised).clipShape(Capsule())
             .tidalCapsuleBorder(focused: fieldFocused, interactive: true)
@@ -35,7 +35,7 @@ struct GlobalSearchView: View {
                         Spacer(minLength: 0)
                         Image(systemName: "arrow.up.left").foregroundStyle(AppDesign.muted)
                     }.padding(10).contentShape(Rectangle())
-                }.buttonStyle(.plain).focusable().focused($focusedRow, equals: index)
+                }.buttonStyle(.plain).pointingHandCursor().focusable().focused($focusedRow, equals: index)
                     .background(focusedRow == index ? AppDesign.Surface.selected : Color.clear).clipShape(RoundedRectangle(cornerRadius: 5))
                     .tidalBorder(cornerRadius: 5, focused: focusedRow == index, visible: focusedRow == index)
                     .accessibilityLabel("Search for \(query)")
@@ -56,7 +56,7 @@ struct GlobalSearchView: View {
                                 Spacer(minLength: 0)
                                 Image(systemName: "play.fill").foregroundStyle(AppDesign.green)
                             }.padding(.horizontal, 12).padding(.vertical, 10).contentShape(Rectangle())
-                        }.buttonStyle(.plain).frame(maxWidth: .infinity, alignment: .leading)
+                        }.buttonStyle(.plain).pointingHandCursor().frame(maxWidth: .infinity, alignment: .leading)
                             .focusable().focused($focusedRow, equals: app.previewQueries.count + index)
                             .accessibilityLabel("Play \(video.title) by \(video.creator)")
                         AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }
@@ -73,7 +73,8 @@ struct GlobalSearchView: View {
             }
             if let error = app.previewError {
                 Text(error).font(.caption).foregroundStyle(AppDesign.Status.error).padding(10)
-                Button("Retry search preview") { app.retryPreview() }.disabled(app.player.snapshot.sourceNeedsUpdate).padding(.horizontal, 10)
+                Button("Retry search preview") { app.retryPreview() }.disabled(app.player.snapshot.sourceNeedsUpdate)
+                    .pointingHandCursor(!app.player.snapshot.sourceNeedsUpdate).padding(.horizontal, 10)
             } else if !app.previewLoading && app.previewVideos.isEmpty && app.previewQueries.isEmpty {
                 Text(app.globalQuery.count < 2 ? "Type at least two characters to find videos." : "No matching videos. Try another search.")
                     .font(.caption).foregroundStyle(AppDesign.muted).padding(10)
@@ -81,7 +82,7 @@ struct GlobalSearchView: View {
             if !app.globalQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Button { app.submitSearch() } label: {
                     HStack { Text("See all results for “\(app.globalQuery)”").lineLimit(1); Spacer(); Image(systemName: "arrow.right") }.padding(12)
-                }.buttonStyle(.plain).foregroundStyle(AppDesign.muted)
+                }.buttonStyle(.plain).pointingHandCursor().foregroundStyle(AppDesign.muted)
             }
         }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
         }.frame(height: min(CGFloat(app.previewQueries.count * 47 + app.previewVideos.count * 74 + (app.previewLoading ? 222 : 0) + 120), min(520, max(180, (geometry.field?.window?.contentView?.bounds.height ?? 720) - 180))))
