@@ -29,6 +29,7 @@ struct KeyboardShortcutsPanel: View {
             ("Close suggestions", ["Esc"]),
         ]),
         ("Playback", [
+            ("Play or pause", ["Space"]),
             ("Seek back 5 seconds", ["←"]),
             ("Seek forward 5 seconds", ["→"]),
         ]),

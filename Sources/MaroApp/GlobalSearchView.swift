@@ -174,6 +174,14 @@ private struct GlobalSearchField: NSViewRepresentable {
                    !(field.window?.firstResponder is NSText), !(field.window?.firstResponder is NSSlider) {
                     self.app.controller.seek(by: event.keyCode == 123 ? -5 : 5); return nil
                 }
+                // Space plays/pauses (replays once ended) unless typing, like the player's own button.
+                if event.keyCode == 49, !self.app.previewOpen,
+                   event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty,
+                   !(field.window?.firstResponder is NSText) {
+                    let snapshot = self.app.player.snapshot
+                    if snapshot.loadedVideo != nil { self.app.perform(snapshot.playback == .ended ? .replay : .toggle) }
+                    return nil
+                }
                 guard self.app.previewOpen else {
                     if event.keyCode == 53, self.app.shortcutsOpen { self.app.shortcutsOpen = false; return nil }
                     return event
