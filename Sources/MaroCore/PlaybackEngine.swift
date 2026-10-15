@@ -21,6 +21,8 @@ public final class PreparedPlayback {
         self.player = player
     }
 
+    var isReady: Bool { player?.currentItem?.status == .readyToPlay }
+
     fileprivate func consume() throws -> AVPlayer {
         guard let player else { throw PlaybackFailure.alreadyCommitted }
         self.player = nil

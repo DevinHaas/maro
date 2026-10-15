@@ -57,6 +57,7 @@ struct GlobalSearchView: View {
                                 Image(systemName: "play.fill").foregroundStyle(AppDesign.green)
                             }.padding(.horizontal, 12).padding(.vertical, 10).contentShape(Rectangle())
                         }.buttonStyle(.plain).pointingHandCursor().frame(maxWidth: .infinity, alignment: .leading)
+                            .onHover { app.hoverTrack(video, inside: $0) }
                             .focusable().focused($focusedRow, equals: app.previewQueries.count + index)
                             .accessibilityLabel("Play \(video.title) by \(video.creator)")
                         AppIconButton(title: "Save \(video.title) to Favorites", symbol: "heart") { app.toggleFavorite(video) }

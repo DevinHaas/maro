@@ -162,6 +162,6 @@ struct SearchVideoRow: View {
                 .help("Actions for \(video.title)").accessibilityLabel("Actions for \(video.title)")
         }.padding(.horizontal, SearchTrackColumns.inset).padding(.vertical, 10).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 6).fill(hovered ? AppDesign.Surface.hover : current ? AppDesign.Surface.selected : .clear))
-            .onHover { hovered = $0 }
+            .onHover { hovered = $0; app.hoverTrack(video, inside: $0) }
     }
 }

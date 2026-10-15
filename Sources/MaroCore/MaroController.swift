@@ -48,6 +48,12 @@ public final class MaroController {
     private var sourceLifetime: YouTubeClient?
     private var sourceWarmup: Task<Void, Never>?
     private let prepareVideo: @MainActor (VideoSummary, Double) async throws -> PreparedPlayback
+    /// Speculative preparation from position zero; nil disables warming.
+    private let warmVideo: (@MainActor (VideoSummary) async throws -> PreparedPlayback)?
+    private enum WarmLane { case upcoming, hover }
+    private var warmTasks: [WarmLane: (id: String, task: Task<PreparedPlayback, Error>)] = [:]
+    private var warmPending: [WarmLane: VideoSummary] = [:]
+    private var warmed: [(prepared: PreparedPlayback, at: ContinuousClock.Instant)] = []
     private var state: StateDocument
     private var playback: PlaybackState
     private var wantsPlayback = false
@@ -117,12 +123,20 @@ public final class MaroController {
                             sourceBuild: String = "maro-dev-1/yt-dlp-2026.08.19",
                             artworkCache: ArtworkCache? = nil) async throws -> MaroController {
         let loaded = try await store.load()
+        // A cached source can be revoked or expire early; one fresh resolve follows.
+        @MainActor func prepare(_ video: VideoSummary, _ position: Double, speculative: Bool) async throws -> PreparedPlayback {
+            if let cached = await source.cachedResolution(videoID: video.id) {
+                do { return try await engine.prepare(cached, positionSeconds: position) }
+                catch is CancellationError { throw CancellationError() }
+                catch { await source.forget(videoID: video.id) }
+            }
+            return try await engine.prepare(source.resolve(videoID: video.id, speculative: speculative), positionSeconds: position)
+        }
         let controller = try MaroController(loaded: loaded, store: store, engine: engine, sourceBuild: sourceBuild, artworkCache: artworkCache,
             search: { try await source.search($0) },
             searchPage: { try await source.searchPage($0, continuation: $1) },
-            prepare: { video, position in
-                try await engine.prepare(source.resolve(videoID: video.id), positionSeconds: position)
-            })
+            prepare: { try await prepare($0, $1, speculative: false) },
+            warm: { try await prepare($0, 0, speculative: true) })
         controller.sourceLifetime = source
         return controller
     }
@@ -133,7 +147,8 @@ public final class MaroController {
          searchNow: @escaping () -> ContinuousClock.Instant = { ContinuousClock().now },
          search: @escaping @Sendable (String) async throws -> [VideoSummary],
          searchPage: (@Sendable (String, String?) async throws -> SearchPage)? = nil,
-         prepare: @escaping @MainActor (VideoSummary, Double) async throws -> PreparedPlayback) throws {
+         prepare: @escaping @MainActor (VideoSummary, Double) async throws -> PreparedPlayback,
+         warm: (@MainActor (VideoSummary) async throws -> PreparedPlayback)? = nil) throws {
         try loaded.document.validate()
         guard !sourceBuild.isEmpty, sourceBuild.utf8.count <= 128 else { throw StateError.invalidSourceBuild }
         self.sourceBuild = sourceBuild
@@ -151,6 +166,7 @@ public final class MaroController {
         self.store = store
         self.engine = engine
         prepareVideo = prepare
+        warmVideo = warm
         engine.onEvent = { [weak self] event in self?.handle(event) }
         metadataRequests.onChange = { [weak self] in self?.publish() }
         refreshArtwork()
@@ -384,6 +400,8 @@ public final class MaroController {
                 } catch is CancellationError { throw CancellationError() }
                 catch PlaybackFailure.superseded { throw PlaybackFailure.superseded }
                 catch { prepared = try await prepareVideo(video, position) }
+            } else if !recovering, position == 0, let warm = await takeWarm(video.id) {
+                prepared = warm
             } else {
                 prepared = try await prepareVideo(video, position)
             }
@@ -626,6 +644,7 @@ public final class MaroController {
         queueID = UUID()
         queueTask?.cancel(); queueTask = nil
         sourceWarmup?.cancel()
+        clearWarm()
         await sourceLifetime?.shutdown()
         metadataRequests.clear()
         artworkTask?.cancel()
@@ -650,6 +669,56 @@ public final class MaroController {
         publish()
     }
 
+    /// Speculatively resolve and buffer a likely selection (hover, keyboard focus).
+    /// Latest wins: one warm runs per lane and only the newest request waits behind it.
+    public func warm(_ video: VideoSummary) { warm(video, lane: .hover) }
+
+    private func warmUpcoming() {
+        let upcoming = playlistIndex.map { index in
+            playlistQueue.indices.contains(index + 1) ? playlistQueue[(index + 1)...].lazy.compactMap(\.video).first : nil
+        } ?? neighbor(1)
+        if let upcoming { warm(upcoming, lane: .upcoming) }
+    }
+
+    private func warm(_ video: VideoSummary, lane: WarmLane) {
+        guard let warmVideo, !isShutDown, !needsUpdate, engine.loadedVideo?.id != video.id,
+              !warmTasks.values.contains(where: { $0.id == video.id }),
+              !warmed.contains(where: { $0.prepared.video.id == video.id }) else { return }
+        // Never cancel a running warm: that would kill the prefetch interpreter.
+        guard warmTasks[lane] == nil else { warmPending[lane] = video; return }
+        let task = Task { @MainActor in try await warmVideo(video) }
+        warmTasks[lane] = (video.id, task)
+        Task { @MainActor [weak self] in
+            let result = await task.result
+            guard let self, self.warmTasks[lane]?.task == task else { return }
+            self.warmTasks[lane] = nil
+            if case .success(let prepared) = result {
+                self.warmed.append((prepared, ContinuousClock.now))
+                if self.warmed.count > 2 { self.warmed.removeFirst() }
+            }
+            if let next = self.warmPending.removeValue(forKey: lane) { self.warm(next, lane: lane) }
+        }
+    }
+
+    /// A ready warmed player, or the warm already under way for this video so a click joins it.
+    private func takeWarm(_ id: String) async -> PreparedPlayback? {
+        warmed.removeAll { $0.at.duration(to: .now) > .seconds(30 * 60) || !$0.prepared.isReady }
+        if let index = warmed.firstIndex(where: { $0.prepared.video.id == id }) {
+            return warmed.remove(at: index).prepared
+        }
+        guard let lane = warmTasks.first(where: { $0.value.id == id })?.key, let task = warmTasks[lane]?.task else { return nil }
+        warmTasks[lane] = nil
+        if let next = warmPending.removeValue(forKey: lane) { warm(next, lane: lane) }
+        return try? await task.value
+    }
+
+    private func clearWarm() {
+        warmTasks.values.forEach { $0.task.cancel() }
+        warmTasks = [:]
+        warmPending = [:]
+        warmed = []
+    }
+
     public func warmUpSource() {
         guard !isShutDown, sourceWarmup == nil, let sourceLifetime else { return }
         sourceWarmup = Task { await sourceLifetime.warmUp() }
@@ -671,7 +740,7 @@ public final class MaroController {
         case .started:
             if selecting && (playback == .paused || playback == .ended) {
                 engine.pause()
-            } else if wantsPlayback { playback = .playing } else { engine.pause() }
+            } else if wantsPlayback { playback = .playing; warmUpcoming() } else { engine.pause() }
         case .ended:
             guard seekTask == nil else { return }
             if let id = engine.playbackID, endedPlaybackID == id { return }
@@ -702,6 +771,7 @@ public final class MaroController {
                 let id = selectionID
                 Task { [weak self] in
                     guard let self, self.selectionID == id, !self.isShutDown else { return }
+                    await self.sourceLifetime?.forget(videoID: loaded.video.id)
                     // load owns error reporting and operation cancellation.
                     try? await self.load(loaded.video, position: loaded.positionSeconds, recovering: true)
                 }
@@ -737,6 +807,7 @@ public final class MaroController {
     private func disableSource() {
         cancelTimelineSeek()
         metadataRequests.clear()
+        clearWarm()
         needsUpdate = true
         state.sourceDisabledBuild = sourceBuild
         searchID = UUID()

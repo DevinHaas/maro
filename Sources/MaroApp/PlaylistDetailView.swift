@@ -346,7 +346,7 @@ struct PlaylistTrackRow: View {
         }.padding(.horizontal, PlaylistTrackColumns.inset).padding(.vertical, 9)
             .background(RoundedRectangle(cornerRadius: 5).fill(hovered || playFocused || focusedControl.wrappedValue == item.id ? AppDesign.Surface.hover : active ? AppDesign.Surface.selected : .clear))
             .tidalBorder(cornerRadius: 5, focused: playFocused || focusedControl.wrappedValue == item.id, visible: playFocused || focusedControl.wrappedValue == item.id)
-            .onHover { hovered = $0 }
+            .onHover { hovered = $0; app.hoverTrack(item.video, inside: $0) }
     }
 }
 

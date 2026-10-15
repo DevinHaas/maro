@@ -141,6 +141,6 @@ private struct HomeVideoCard: View {
         }.padding(10).frame(width: 196, alignment: .leading)
             .background(hovered ? AppDesign.Surface.hover : Color.clear).clipShape(RoundedRectangle(cornerRadius: 8))
             .tidalBorder(cornerRadius: 8)
-            .onHover { hovered = $0 }
+            .onHover { hovered = $0; app.hoverTrack(video, inside: $0) }
     }
 }

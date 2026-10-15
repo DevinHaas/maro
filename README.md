@@ -27,7 +27,14 @@ and retain all twenty for Load 5 more and navigation. Home separately caches bou
 discovery candidates for thirty minutes. New lookups still depend on
 YouTube, and cached playback is not an offline-download guarantee.
 
-Search and stream resolution share one lazily initialized, bundled Python/yt-dlp
+Hovering a track for 200ms (or arrow-focusing it in search) and starting a track
+both warm a likely next selection: a second, speculative worker resolves it and a
+muted player buffers it, so the click or playlist Next commits in about 50ms.
+Resolved sources stay in memory until shortly before their signed expiry; a
+rejected cached source is dropped and resolved again. See the
+[prefetch measurements](.scratch/maro-player-polish/assets/prefetch-findings.md).
+
+Search and explicit stream resolution share one lazily initialized, bundled Python/yt-dlp
 worker until Maro quits. Opening the player or search warms it without fetching
 media. Requests use private pipes and fresh extraction options; repeated cache
 misses reuse the interpreter. A selection can cancel an obsolete search, and

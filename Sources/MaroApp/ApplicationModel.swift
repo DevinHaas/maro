@@ -142,6 +142,8 @@ enum ApplicationRoute: Equatable {
         let count = previewQueries.count + previewVideos.count
         guard count > 0 else { return }
         previewFocusedIndex = min(max((previewFocusedIndex ?? (direction > 0 ? -1 : count)) + direction, 0), count - 1)
+        let videoIndex = (previewFocusedIndex ?? 0) - previewQueries.count
+        if previewVideos.indices.contains(videoIndex) { hoverTrack(previewVideos[videoIndex]) }
     }
     func activateFocusedPreview() {
         guard let index = previewFocusedIndex else { return }
@@ -196,6 +198,21 @@ enum ApplicationRoute: Equatable {
     func retryMoreResults() {
         Task { await controller.loadMoreResults(retry: true); render() }
     }
+    private var warmTask: Task<Void, Never>?
+    private var warmVideoID: String?
+    /// A short dwell separates intent from the pointer sweeping across rows.
+    func hoverTrack(_ video: VideoSummary?, inside: Bool = true) {
+        guard let video else { return }
+        if !inside { if warmVideoID == video.id { warmTask?.cancel(); warmVideoID = nil }; return }
+        warmTask?.cancel()
+        warmVideoID = video.id
+        warmTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled, let self else { return }
+            controller.warm(video)
+        }
+    }
+
     func play(_ video: VideoSummary) {
         selectionTask?.cancel(); actionError = nil
         selectionTask = Task {

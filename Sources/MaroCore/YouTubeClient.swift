@@ -44,13 +44,19 @@ public struct YouTubeClient: Sendable {
     public let executable: URL
     public let nodeExecutable: URL
     private let worker: ExtractorWorker
+    /// Speculative resolutions run in a second interpreter so they never queue
+    /// ahead of, or get killed by, an explicit selection or search.
+    private let prefetchWorker: ExtractorWorker
+    private let resolutions = ResolutionCache()
 
     public init(executable: URL, nodeExecutable: URL) {
         self.executable = executable
         self.nodeExecutable = nodeExecutable
         let directory = executable.deletingLastPathComponent()
-        worker = ExtractorWorker(executable: directory.appendingPathComponent("python/bin/python3"),
-            arguments: ["-I", "-B", directory.appendingPathComponent("maro-extractor.py").path, nodeExecutable.path])
+        let python = directory.appendingPathComponent("python/bin/python3")
+        let arguments = ["-I", "-B", directory.appendingPathComponent("maro-extractor.py").path, nodeExecutable.path]
+        worker = ExtractorWorker(executable: python, arguments: arguments)
+        prefetchWorker = ExtractorWorker(executable: python, arguments: arguments)
     }
 
     public func search(_ query: String) async throws -> [VideoSummary] {
@@ -67,16 +73,28 @@ public struct YouTubeClient: Sendable {
         return try YouTubeSource.decodeSearchPage(await invoke("search", value: String(decoding: request, as: UTF8.self)))
     }
 
-    public func resolve(videoID: String) async throws -> ResolvedAudio {
+    /// Always fetches fresh signed sources and remembers them for `cachedResolution`.
+    public func resolve(videoID: String, speculative: Bool = false) async throws -> ResolvedAudio {
         _ = try YouTubeSource.resolveArguments(videoID: videoID, nodeExecutable: nodeExecutable)
-        return try YouTubeSource.decodeResolution(await invoke("resolve", value: videoID), expectedVideoID: videoID)
+        let audio = try YouTubeSource.decodeResolution(
+            await invoke("resolve", value: videoID, on: speculative ? prefetchWorker : worker), expectedVideoID: videoID)
+        await resolutions.store(audio)
+        return audio
     }
+
+    public func cachedResolution(videoID: String) async -> ResolvedAudio? { await resolutions.lookup(videoID) }
+
+    /// Drop a source that AVFoundation rejected so the next attempt re-resolves.
+    public func forget(videoID: String) async { await resolutions.remove(videoID) }
 
     public func warmUp() async { _ = try? await invoke("ping", value: "") }
 
-    public func shutdown() async { await worker.shutdown() }
+    public func shutdown() async {
+        await worker.shutdown()
+        await prefetchWorker.shutdown()
+    }
 
-    private func invoke(_ operation: String, value: String) async throws -> Data {
+    private func invoke(_ operation: String, value: String, on worker: ExtractorWorker? = nil) async throws -> Data {
         let directory = executable.deletingLastPathComponent()
         guard executable.isFileURL, nodeExecutable.isFileURL,
               FileManager.default.isExecutableFile(atPath: executable.path),
@@ -84,7 +102,7 @@ public struct YouTubeClient: Sendable {
               FileManager.default.isReadableFile(atPath: directory.appendingPathComponent("maro-extractor.py").path) else {
             throw ExtractorFailure.dependencyMissing
         }
-        let data = try await worker.request(operation, value: value)
+        let data = try await (worker ?? self.worker).request(operation, value: value)
         guard let envelope = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SourceFailure.malformedResponse
         }
@@ -96,5 +114,47 @@ public struct YouTubeClient: Sendable {
             throw SourceFailure.malformedResponse
         }
         return try JSONSerialization.data(withJSONObject: result)
+    }
+}
+
+/// In-memory only: signed URLs are bound to the requesting IP and expire, so they
+/// are never persisted. Failed playback from a cached entry evicts it (`forget`).
+actor ResolutionCache {
+    static let capacity = 50
+    private var entries: [String: (audio: ResolvedAudio, expires: Date)] = [:]
+    private let now: @Sendable () -> Date
+
+    init(now: @escaping @Sendable () -> Date = Date.init) { self.now = now }
+
+    func lookup(_ videoID: String) -> ResolvedAudio? {
+        guard let entry = entries[videoID] else { return nil }
+        guard entry.expires > now() else { entries[videoID] = nil; return nil }
+        return entry.audio
+    }
+
+    func store(_ audio: ResolvedAudio) {
+        let current = now()
+        entries = entries.filter { $0.value.expires > current }
+        // ponytail: O(n) eviction of the soonest-expiring entry; n is capped at 50.
+        if entries.count >= Self.capacity, let oldest = entries.min(by: { $0.value.expires < $1.value.expires })?.key {
+            entries[oldest] = nil
+        }
+        entries[audio.video.id] = (audio, Self.expiry(of: audio, now: current))
+    }
+
+    func remove(_ videoID: String) { entries[videoID] = nil }
+
+    /// Googlevideo signs `expire` (unix seconds) into a query item or, for HLS
+    /// manifests, a path segment. Keep a margin so playback never starts on a dying URL.
+    static func expiry(of audio: ResolvedAudio, now: Date) -> Date {
+        let stamps = audio.candidates.compactMap { candidate -> TimeInterval? in
+            let components = URLComponents(url: candidate.url, resolvingAgainstBaseURL: false)
+            if let value = components?.queryItems?.first(where: { $0.name == "expire" })?.value { return TimeInterval(value) }
+            let path = candidate.url.pathComponents
+            guard let index = path.firstIndex(of: "expire"), path.indices.contains(index + 1) else { return nil }
+            return TimeInterval(path[index + 1])
+        }
+        guard let earliest = stamps.min() else { return now.addingTimeInterval(15 * 60) }
+        return min(Date(timeIntervalSince1970: earliest - 10 * 60), now.addingTimeInterval(2 * 60 * 60))
     }
 }
